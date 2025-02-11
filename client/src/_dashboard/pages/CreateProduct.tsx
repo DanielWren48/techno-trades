@@ -4,6 +4,7 @@ import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/acco
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import NewProductCreateDetails from '../components/new-product-form';
 import { NewProductSchemaType } from '../schemas/product';
+import SetProductDiscountForm from '../components/product-discount-form';
 
 export default function DashboardAccount() {
   const [activeTabs, setActiveTabs] = useState<string[]>(["details"]);
@@ -18,7 +19,7 @@ export default function DashboardAccount() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Accordion type="multiple" defaultValue={["details"]} value={activeTabs} onValueChange={setActiveTabs}>
+          <Accordion type="multiple" defaultValue={["details", "discount"]} value={activeTabs} onValueChange={setActiveTabs}>
             <AccordionItem value="details" className='border-none'>
               <AccordionContent className='flex flex-col gap-6'>
                 <NewProductCreateDetails
@@ -27,6 +28,17 @@ export default function DashboardAccount() {
                 />
               </AccordionContent>
             </AccordionItem>
+
+            <AccordionItem value="discount" className='border-none'>
+              <AccordionContent className='px-1'>
+                <SetProductDiscountForm
+                  productData={productData!}
+                  setProductData={setProductData}
+                  setActiveTabs={setActiveTabs}
+                />
+              </AccordionContent>
+            </AccordionItem>
+
           </Accordion>
         </CardContent>
       </Card>

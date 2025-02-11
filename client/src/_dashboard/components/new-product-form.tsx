@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { categories } from "@/components/tables/products-table/filters";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -28,6 +29,7 @@ export default function NewProductCreateDetails({ setProductData, setActiveTabs 
 
     const handleSubmit = async (data: NewProductSchemaType) => {
         setProductData(data)
+        setActiveTabs(["discount"])
     };
 
     return (
@@ -137,6 +139,8 @@ export default function NewProductCreateDetails({ setProductData, setActiveTabs 
                             )}
                         />
                     </div>
+
+                    <Button type="submit" variant={"default"}>Continue</Button>
                 </form>
             </Form>
         </>
