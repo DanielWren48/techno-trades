@@ -9,6 +9,7 @@ import MarkdownEditor from '../components/MarkdownEditor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarkdownDisplay from '../components/MarkdownDisplay';
 import { PS5_TEMPLATE } from '../components/mdx-item-example';
+import ProductImageUpload from '../components/product-image-upload';
 
 export default function DashboardAccount() {
   const [activeTabs, setActiveTabs] = useState<string[]>(["details"]);
@@ -24,7 +25,7 @@ export default function DashboardAccount() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Accordion type="multiple" defaultValue={["details", "discount", "description"]} value={activeTabs} onValueChange={setActiveTabs}>
+          <Accordion type="multiple" defaultValue={["details", "discount", "description", "images"]} value={activeTabs} onValueChange={setActiveTabs}>
             <AccordionItem value="details" className='border-none'>
               <AccordionContent className='flex flex-col gap-6 px-1'>
                 <NewProductCreateDetails
@@ -67,6 +68,15 @@ export default function DashboardAccount() {
               </AccordionContent>
             </AccordionItem>
 
+            <AccordionItem value="images" className='border-none'>
+              <AccordionContent className='px-1'>
+                <ProductImageUpload
+                  productData={productData!}
+                  setProductData={setProductData}
+                  setActiveTabs={setActiveTabs}
+                />
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
         </CardContent>
         <CardFooter>

@@ -36,7 +36,7 @@ export default function MarkdownEditor({ markdown, setMarkdown, productData, set
 
     function handleSubmit() {
         setProductData({ ...productData, description: markdown });
-        setActiveTabs(["submit"]);
+        setActiveTabs(["images"]);
     };
 
     return (
