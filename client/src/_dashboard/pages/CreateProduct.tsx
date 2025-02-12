@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Shell } from "@/components/dashboard/shell";
 import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import NewProductCreateDetails from '../components/new-product-form';
 import { NewProductSchemaType } from '../schemas/product';
 import SetProductDiscountForm from '../components/product-discount-form';
@@ -21,7 +21,7 @@ export default function DashboardAccount() {
         <CardContent>
           <Accordion type="multiple" defaultValue={["details", "discount"]} value={activeTabs} onValueChange={setActiveTabs}>
             <AccordionItem value="details" className='border-none'>
-              <AccordionContent className='flex flex-col gap-6'>
+              <AccordionContent className='flex flex-col gap-6 px-1'>
                 <NewProductCreateDetails
                   setProductData={setProductData}
                   setActiveTabs={setActiveTabs}
@@ -41,6 +41,9 @@ export default function DashboardAccount() {
 
           </Accordion>
         </CardContent>
+        <CardFooter>
+          {JSON.stringify(productData)}
+        </CardFooter>
       </Card>
     </Shell >
   );
