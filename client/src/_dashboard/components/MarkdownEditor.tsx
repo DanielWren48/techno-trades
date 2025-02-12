@@ -23,22 +23,20 @@ import {
 } from '@mdxeditor/editor';
 import '@mdxeditor/editor/style.css';
 import { NewProductSchemaType } from '../schemas/product';
-import { useState } from 'react';
-import { PS5_TEMPLATE } from './mdx-item-example';
 
 interface MarkdownEditorProps {
+    markdown: string
+    setMarkdown: React.Dispatch<React.SetStateAction<string>>
     productData: NewProductSchemaType
     setActiveTabs: React.Dispatch<React.SetStateAction<string[]>>
     setProductData: React.Dispatch<React.SetStateAction<NewProductSchemaType | undefined>>
 }
 
-export default function MarkdownEditor({ productData, setActiveTabs, setProductData }: MarkdownEditorProps) {
-
-    const [markdown, setMarkdown] = useState<string>(PS5_TEMPLATE);
+export default function MarkdownEditor({ markdown, setMarkdown, productData, setActiveTabs, setProductData }: MarkdownEditorProps) {
 
     function handleSubmit() {
         setProductData({ ...productData, description: markdown });
-        setActiveTabs([""]);
+        setActiveTabs(["submit"]);
     };
 
     return (
