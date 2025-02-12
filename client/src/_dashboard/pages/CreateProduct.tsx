@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import NewProductCreateDetails from '../components/new-product-form';
 import { NewProductSchemaType } from '../schemas/product';
 import SetProductDiscountForm from '../components/product-discount-form';
+import MarkdownEditor from '../components/MarkdownEditor';
 
 export default function DashboardAccount() {
   const [activeTabs, setActiveTabs] = useState<string[]>(["details"]);
@@ -19,7 +20,7 @@ export default function DashboardAccount() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Accordion type="multiple" defaultValue={["details", "discount"]} value={activeTabs} onValueChange={setActiveTabs}>
+          <Accordion type="multiple" defaultValue={["details", "discount", "description"]} value={activeTabs} onValueChange={setActiveTabs}>
             <AccordionItem value="details" className='border-none'>
               <AccordionContent className='flex flex-col gap-6 px-1'>
                 <NewProductCreateDetails
@@ -32,6 +33,16 @@ export default function DashboardAccount() {
             <AccordionItem value="discount" className='border-none'>
               <AccordionContent className='px-1'>
                 <SetProductDiscountForm
+                  productData={productData!}
+                  setProductData={setProductData}
+                  setActiveTabs={setActiveTabs}
+                />
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="description" className='border-none'>
+              <AccordionContent className='px-1'>
+                <MarkdownEditor
                   productData={productData!}
                   setProductData={setProductData}
                   setActiveTabs={setActiveTabs}

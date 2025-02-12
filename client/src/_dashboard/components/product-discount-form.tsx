@@ -37,7 +37,7 @@ export default function SetProductDiscountForm({ productData, setProductData, se
 
     const handleSubmit = (data: NewProductSchemaType) => {
         setProductData(data);
-        setActiveTabs(["details", "discount"])
+        setActiveTabs(["description"])
     };
 
     useEffect(() => {
