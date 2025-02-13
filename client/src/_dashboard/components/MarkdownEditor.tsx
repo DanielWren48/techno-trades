@@ -28,15 +28,15 @@ interface MarkdownEditorProps {
     markdown: string
     setMarkdown: React.Dispatch<React.SetStateAction<string>>
     productData: NewProductSchemaType
-    setActiveTabs: React.Dispatch<React.SetStateAction<string[]>>
+    handleTabChange: (value: string) => void
     setProductData: React.Dispatch<React.SetStateAction<NewProductSchemaType | undefined>>
 }
 
-export default function MarkdownEditor({ markdown, setMarkdown, productData, setActiveTabs, setProductData }: MarkdownEditorProps) {
+export default function MarkdownEditor({ markdown, setMarkdown, productData, handleTabChange, setProductData }: MarkdownEditorProps) {
 
     function handleSubmit() {
         setProductData({ ...productData, description: markdown });
-        setActiveTabs(["images"]);
+        handleTabChange("images");
     };
 
     return (

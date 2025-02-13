@@ -13,11 +13,11 @@ import { Progress } from '@/components/ui/progress';
 
 interface ProductImageUploadProps {
     productData: NewProductSchemaType
-    setActiveTabs: React.Dispatch<React.SetStateAction<string[]>>
+    handleTabChange: (value: string) => void
     setProductData: React.Dispatch<React.SetStateAction<NewProductSchemaType | undefined>>
 }
 
-export default function ProductImageUpload({ productData, setActiveTabs, setProductData }: ProductImageUploadProps) {
+export default function ProductImageUpload({ productData, handleTabChange, setProductData }: ProductImageUploadProps) {
     const [files, setFiles] = useState<FileWithPath[]>([]);
     const [fileUrls, setFileUrls] = useState<string[]>([]);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -60,7 +60,7 @@ export default function ProductImageUpload({ productData, setActiveTabs, setProd
         }));
 
         setProductData({ ...productData, image: productImages });
-        setActiveTabs(["confirm"]);
+        handleTabChange("overview");
         setFiles([]);
         setFileUrls([]);
     };

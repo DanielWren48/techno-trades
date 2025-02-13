@@ -12,7 +12,7 @@ import { newProductSchema, NewProductSchemaType } from "../schemas/product";
 
 interface SetProductDiscountFormProps {
     productData: NewProductSchemaType;
-    setActiveTabs: React.Dispatch<React.SetStateAction<string[]>>;
+    handleTabChange: (value: string) => void
     setProductData: React.Dispatch<React.SetStateAction<NewProductSchemaType | undefined>>;
 }
 
@@ -28,16 +28,16 @@ interface DiscountOptionProps {
     originalPrice: number;
 }
 
-export default function SetProductDiscountForm({ productData, setProductData, setActiveTabs }: SetProductDiscountFormProps) {
+export default function SetProductDiscountForm({ productData, setProductData, handleTabChange }: SetProductDiscountFormProps) {
     const [discountPercentage, setDiscountPercentage] = useState<number>(0);
     const form = useForm<NewProductSchemaType>({
         resolver: zodResolver(newProductSchema),
-        values: { ...productData },
+        defaultValues: { ...productData },
     });
 
     const handleSubmit = (data: NewProductSchemaType) => {
         setProductData(data);
-        setActiveTabs(["description"])
+        handleTabChange("description")
     };
 
     useEffect(() => {

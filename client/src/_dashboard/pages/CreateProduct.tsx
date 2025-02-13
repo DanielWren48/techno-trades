@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Shell } from "@/components/dashboard/shell";
 import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,27 +10,44 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarkdownDisplay from '../components/MarkdownDisplay';
 import { PS5_TEMPLATE } from '../components/mdx-item-example';
 import ProductImageUpload from '../components/product-image-upload';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function DashboardAccount() {
-  const [activeTabs, setActiveTabs] = useState<string[]>(["details"]);
+  const [activeTab, setActiveTab] = useState<string>("details");
   const [productData, setProductData] = useState<NewProductSchemaType | undefined>();
   const [markdown, setMarkdown] = useState<string>(PS5_TEMPLATE);
+
+  const location = useLocation();
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam && ["details", "discount", "description", "images", "overview"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location.search]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/dashboard/new-product?tab=${value}`);
+  };
 
   return (
     <Shell variant={'default'} className='max-w-5xl'>
       <Card>
-        <CardHeader className="flex gap-6 p-5">
+        <CardHeader className="flex gap-6 p-5 px-9">
           <CardTitle className="flex justify-center">
             Create a new product!
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Accordion type="multiple" defaultValue={["details", "discount", "description", "images"]} value={activeTabs} onValueChange={setActiveTabs}>
+          <Accordion type="single" value={activeTab} onValueChange={handleTabChange}>
             <AccordionItem value="details" className='border-none'>
               <AccordionContent className='flex flex-col gap-6 px-1'>
                 <NewProductCreateDetails
                   setProductData={setProductData}
-                  setActiveTabs={setActiveTabs}
+                  handleTabChange={handleTabChange}
                 />
               </AccordionContent>
             </AccordionItem>
@@ -40,7 +57,7 @@ export default function DashboardAccount() {
                 <SetProductDiscountForm
                   productData={productData!}
                   setProductData={setProductData}
-                  setActiveTabs={setActiveTabs}
+                  handleTabChange={handleTabChange}
                 />
               </AccordionContent>
             </AccordionItem>
@@ -58,7 +75,7 @@ export default function DashboardAccount() {
                       setMarkdown={setMarkdown}
                       productData={productData!}
                       setProductData={setProductData}
-                      setActiveTabs={setActiveTabs}
+                      handleTabChange={handleTabChange}
                     />
                   </TabsContent>
                   <TabsContent value="preview">
@@ -73,7 +90,7 @@ export default function DashboardAccount() {
                 <ProductImageUpload
                   productData={productData!}
                   setProductData={setProductData}
-                  setActiveTabs={setActiveTabs}
+                  handleTabChange={handleTabChange}
                 />
               </AccordionContent>
             </AccordionItem>

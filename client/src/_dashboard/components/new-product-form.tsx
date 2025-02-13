@@ -8,11 +8,11 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { newProductSchema, NewProductSchemaType } from "../schemas/product";
 
 interface NewProductProps {
-    setActiveTabs: React.Dispatch<React.SetStateAction<string[]>>
+    handleTabChange: (value: string) => void
     setProductData: React.Dispatch<React.SetStateAction<NewProductSchemaType | undefined>>
 }
 
-export default function NewProductCreateDetails({ setProductData, setActiveTabs }: NewProductProps) {
+export default function NewProductCreateDetails({ setProductData, handleTabChange }: NewProductProps) {
 
     const form = useForm<NewProductSchemaType>({
         resolver: zodResolver(newProductSchema),
@@ -29,7 +29,7 @@ export default function NewProductCreateDetails({ setProductData, setActiveTabs 
 
     const handleSubmit = async (data: NewProductSchemaType) => {
         setProductData(data)
-        setActiveTabs(["discount"])
+        handleTabChange("discount")
     };
 
     return (
