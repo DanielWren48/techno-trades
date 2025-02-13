@@ -11,6 +11,7 @@ import MarkdownDisplay from '../components/MarkdownDisplay';
 import { PS5_TEMPLATE } from '../components/mdx-item-example';
 import ProductImageUpload from '../components/product-image-upload';
 import ProductOverview from '../components/product-overview';
+import Steps from '../components/product-create-steps';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function DashboardAccount() {
@@ -41,6 +42,7 @@ export default function DashboardAccount() {
           <CardTitle className="flex justify-center">
             Create a new product!
           </CardTitle>
+          <CardHeader><Steps /></CardHeader>
         </CardHeader>
         <CardContent>
           <Accordion type="single" value={activeTab} onValueChange={handleTabChange}>

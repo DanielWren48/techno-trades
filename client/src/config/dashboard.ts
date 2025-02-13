@@ -95,7 +95,7 @@ export const dashboardConfig: DashboardConfig = {
       title: "Create Product",
       label: "",
       for: "admin",
-      href: "/dashboard/new-product",
+      href: "/dashboard/new-product?tab=details",
       icon: "add",
       variant: "default",
       items: [],
