@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarkdownDisplay from '../components/MarkdownDisplay';
 import { PS5_TEMPLATE } from '../components/mdx-item-example';
 import ProductImageUpload from '../components/product-image-upload';
+import ProductOverview from '../components/product-overview';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function DashboardAccount() {
@@ -92,6 +93,12 @@ export default function DashboardAccount() {
                   setProductData={setProductData}
                   handleTabChange={handleTabChange}
                 />
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="overview" className='border-none'>
+              <AccordionContent className='px-1'>
+                <ProductOverview productData={productData!} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
