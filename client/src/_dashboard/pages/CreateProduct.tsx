@@ -100,7 +100,11 @@ export default function DashboardAccount() {
 
             <AccordionItem value="overview" className='border-none'>
               <AccordionContent className='px-1'>
-                <ProductOverview productData={productData!} />
+                <ProductOverview
+                  productData={productData!}
+                  setProductData={setProductData}
+                  handleTabChange={handleTabChange}
+                />
               </AccordionContent>
             </AccordionItem>
           </Accordion>

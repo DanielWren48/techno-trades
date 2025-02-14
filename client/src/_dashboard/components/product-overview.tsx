@@ -5,26 +5,46 @@ import { Tag, Box, Inbox, Package, Loader2 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useCreateProduct } from '@/lib/react-query/queries/product-queries';
 import { useUserContext } from '@/context/AuthContext';
+import { useCreateNewProduct } from '@/api/products/queries';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface ProductImageUploadProps {
   productData: NewProductSchemaType
+  handleTabChange: (value: string) => void
+  setProductData: React.Dispatch<React.SetStateAction<NewProductSchemaType | undefined>>
 }
 
-export default function ProductOverview({ productData }: ProductImageUploadProps) {
+export default function ProductOverview({ productData, handleTabChange, setProductData }: ProductImageUploadProps) {
+  const navigate = useNavigate();
   const { user } = useUserContext();
-  const { mutateAsync: createProduct, isPending: isLoadingCreate } = useCreateProduct();
+  const { mutateAsync: createProduct, isPending: isLoadingCreate } = useCreateNewProduct();
   const { name, brand, category, description, price, countInStock, discountedPrice, isDiscounted, image } = productData
 
   async function handleSubmit() {
 
-    const newProduct = await createProduct({
+    const response = await createProduct({
       ...productData,
       userId: user._id,
     });
 
-    console.log({ newProduct })
+    if (response && response.status === "success") {
+      toast.success(response.message, {
+        action: {
+          label: 'View Product',
+          onClick: () => navigate(`/products/${response.data?.slug}`)
+        },
+        duration: 5000,
+      })
+
+      handleTabChange("details");
+      setProductData(undefined);
+    } else if (response.status === "failure" && response.data) {
+      toast.error(response.message)
+    } else {
+      toast.error('An Error occured while creating product! Please try again.')
+    }
   };
 
   return (

@@ -10,6 +10,7 @@ import { useDropzone } from "@uploadthing/react/hooks";
 import { generateClientDropzoneAccept } from "uploadthing/client";
 import { convertFileToUrl } from "@/lib/utils";
 import { Progress } from '@/components/ui/progress';
+import { toast } from 'sonner';
 
 interface ProductImageUploadProps {
     productData: NewProductSchemaType
@@ -30,9 +31,21 @@ export default function ProductImageUpload({ productData, handleTabChange, setPr
     }, [files]);
 
     const { startUpload, isUploading, permittedFileInfo, } = useUploadThing("videoAndImage", {
-        onClientUploadComplete: (data) => { console.log(data) },
-        onUploadError: (error: Error) => { console.log(error) },
-        onUploadBegin: (fileName: string) => { console.log("upload started for ", fileName) },
+        onClientUploadComplete: () => {
+            toast.success("Uploaded images successfully!", {
+                id: "uploading",
+            });
+        },
+        onUploadError: (error: Error) => {
+            toast.error(error.message, {
+                id: "uploading",
+            });
+        },
+        onUploadBegin: () => {
+            toast.loading("Uploading images...", {
+                id: "uploading",
+            });
+        },
         onUploadProgress: (progress: number) => setUploadProgress(progress),
     });
 
