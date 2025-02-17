@@ -1,4 +1,21 @@
-import { Product } from "@/types";
+import { Product, ProductCategory } from "@/types";
+
+export interface ProductQueryParams {
+    name?: string;
+    limit?: number;
+}
+
+export interface ProductFilterBody {
+    hideOutOfStock?: boolean;
+    prices?: {
+        min: number;
+        max: number;
+    };
+    brands?: string[];
+    categories?: ProductCategory[];
+    ratings?: number;
+    name?: string;
+}
 
 export interface BaseShopResponse<T> {
     status: 'success' | 'failure';
