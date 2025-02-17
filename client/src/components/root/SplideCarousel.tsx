@@ -2,18 +2,15 @@
 import { Splide, SplideSlide, SplideTrack } from "@splidejs/react-splide";
 import { calculateDiscountPercentage, cn, formatPrice } from "@/lib/utils";
 import { AutoScroll } from "@splidejs/splide-extension-auto-scroll";
-import { useGetProducts } from "@/lib/react-query/queries/product-queries";
 import "@splidejs/splide/dist/css/splide.min.css";
 import { buttonVariants } from "../ui/button";
 import { Link } from "react-router-dom";
 import { Product } from "@/types";
+import { useGetProducts } from "@/api/products/queries";
 
 const SplideCarousel = () => {
     const { data, isPending: isProductLoading } = useGetProducts();
-
-    const filteredProducts =
-        data &&
-        data.data.products.filter((product: Product) => product.isDiscounted === true);
+    const products = data?.data?.items
 
     return (
         <Splide
@@ -52,7 +49,7 @@ const SplideCarousel = () => {
         >
             <div className="p-10">
                 <SplideTrack>
-                    {!isProductLoading && filteredProducts.map((product: Product) => (
+                    {!isProductLoading && products && products.map((product: Product) => (
                         <SplideSlide key={product._id} className="splide__slide relative bg-white dark:bg-dark-4 border-2 rounded-xl font-jost">
                             <span className="absolute top-0 left-0 px-6 py-3 rounded-tl-xl rounded-br-xl bg-purple-100 text-lg font-bold text-purple-800 ring-1 ring-inset ring-purple-600/30">
                                 {calculateDiscountPercentage({ normalPrice: product.price, discountedPrice: product.discountedPrice })}%

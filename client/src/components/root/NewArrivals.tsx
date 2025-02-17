@@ -1,39 +1,13 @@
-import { Product } from "@/types";
 import { Link } from "react-router-dom";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import { useGetProducts } from "@/api/products/queries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 
 const NewArrivals: FC = () => {
-  const [newProducts, setNewProducts] = useState<Product[]>([]);
-  const { data: products, isLoading: allProductsLoading } = useGetProducts();
+  const { data, isLoading: allProductsLoading } = useGetProducts({ limit: 3 });
 
-  useEffect(() => {
-    if (!allProductsLoading && products) {
-
-      const { data, code, status, message } = products
-      if (status === "success" && data && data?.items) {
-        const sortedProducts = data.items.sort(
-          (a: Product, b: Product) => {
-            const dateA = a.createdAt ? new Date(a.createdAt) : null;
-            const dateB = b.createdAt ? new Date(b.createdAt) : null;
-            if (dateA && dateB) {
-              return dateB.getTime() - dateA.getTime();
-            } else if (dateA) {
-              return -1;
-            } else if (dateB) {
-              return 1;
-            }
-            return 0;
-          }
-        );
-        const productsInSameCategory = sortedProducts.slice(0, 3);
-        setNewProducts(productsInSameCategory);
-      }
-
-    }
-  }, [allProductsLoading, products]);
+  const products = data?.data?.items
 
   return (
     <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8 bg-[#F3F3F3] dark:bg-dark-4 transform transition duration-700 ease-in-out rounded-xl">
@@ -42,7 +16,7 @@ const NewArrivals: FC = () => {
 
         <div className="mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0">
           {allProductsLoading && [...Array(3)].map((_, index) => renderProductGridLoader(index))}
-          {!allProductsLoading && products && newProducts.map((product) => (
+          {!allProductsLoading && products && products.map((product) => (
             <Link to={`/products/${product.slug}`} key={product._id}>
               <div className="group relative">
                 <div className="transform group-hover:-translate-y-3 transition-transform duration-700 ease-out">

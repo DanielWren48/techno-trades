@@ -6,32 +6,27 @@ import { Link } from "react-router-dom";
 import { useBrandFilter } from "@/hooks/store";
 import { Shell } from "@/components/dashboard/shell";
 import { buttonVariants } from "@/components/ui/button";
-import { useGetProducts } from "@/lib/react-query/queries/product-queries";
+import { useGetProducts } from "@/api/products/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const PopularBrands = () => {
-    const { data } = useGetProducts();
+    const { data, isLoading } = useGetProducts();
     const { toggleBrand, removeAllBrands } = useBrandFilter();
 
-    const letters: string[] = Array.from(
-        new Set(
-            data?.data.products?.map((product: Product) => first(product.brand))
-            // .sort()
-        )
-    );
-
     const brands = useMemo(() => {
-        return letters.map((letter) => {
+        if (isLoading) return
+        const products = data?.data?.items
+        return Array.from(new Set(products!.map((product: Product) => first(product.brand)))).map((letter) => {
             const uniqueBrands: string[] = Array.from(
                 new Set(
-                    data?.data.products
+                    products
                         ?.filter((product: Product) => first(product.brand) === letter)
                         .map((product: Product) => product.brand)
                 )
             );
             return { letter, uniqueBrands };
         });
-    }, [data?.data.products, letters]);
+    }, [isLoading]);
 
     const sortedBrands = sortBy(brands, ["letter"]);
 
