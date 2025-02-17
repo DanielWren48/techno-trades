@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { paginateRecords } from "../utils/paginators";
 import { CustomResponse } from "../config/utils";
-import { getProducts, updateProductDiscount, updateProductStock } from "../managers/products";
+import { getFilteredProducts, getProducts, ProductFilterBody, updateProductDiscount, updateProductStock } from "../managers/products";
 import { ErrorCode, NotFoundError, RequestError } from "../config/handlers";
 import { Product } from "../models/products";
 import { authMiddleware } from "../middlewares/auth";
@@ -12,13 +12,23 @@ const shopRouter = Router();
 
 shopRouter.get('/products', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const nameFilter = req.query.name as string | null
-        const products = await getProducts(nameFilter)
+        const products = await getProducts()
         const data = await paginateRecords(req, products)
         const productsData = { ...data }
         return res.status(200).json(CustomResponse.success('Products Fetched Successfully', productsData))
     } catch (error) {
         next(error)
+    }
+});
+
+shopRouter.post('/products/filter', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const filters: ProductFilterBody = req.body;
+        const products = await getFilteredProducts(filters);
+        const data = await paginateRecords(req, products);
+        return res.status(200).json(CustomResponse.success('Products Fetched Successfully', data))
+    } catch (error) {
+        next(error);
     }
 });
 
@@ -88,7 +98,7 @@ shopRouter.post('/', authMiddleware, validationMiddleware(ProductCreateSchema), 
             throw new RequestError("Error creating product", 400, ErrorCode.SERVER_ERROR)
         }
 
-        return res.status(200).json(CustomResponse.success('Products Created Successfully', newProduct, ProductSchema))
+        return res.status(200).json(CustomResponse.success('Products Created Successfully', newProduct))
     } catch (error) {
         next(error)
     }

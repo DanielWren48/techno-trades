@@ -2,7 +2,7 @@ import mongoose, { PipelineStage, Types } from "mongoose";
 import { IProduct, Product } from "../models/products";
 import { ErrorCode, RequestError } from "../config/handlers";
 
-const getProducts = async (nameFilter: string | null = null) => {
+const getProducts = async () => {
     try {
         const aggregateData: PipelineStage[] = [
             // Add reviewsCount and avgRating
@@ -82,9 +82,6 @@ const getProducts = async (nameFilter: string | null = null) => {
             // Sort by createdAt descending
             { $sort: { createdAt: -1 } }
         ];
-        if (nameFilter) {
-            aggregateData.push({ $match: { name: { $regex: nameFilter, $options: "i" } } })
-        }
         const products = await Product.aggregate(aggregateData)
         return products;
     } catch (err) {
@@ -92,6 +89,92 @@ const getProducts = async (nameFilter: string | null = null) => {
         throw err;
     }
 }
+
+interface ProductFilterBody {
+    hideOutOfStock?: boolean;
+    prices?: {
+        min: number;
+        max: number;
+    };
+    brands?: string[];
+    categories?: string[];
+    ratings?: number;
+    name?: string;
+    sortPrice?: 'asc' | 'desc';
+}
+
+// productFilters.ts
+const getFilteredProducts = async (filters: ProductFilterBody) => {
+    try {
+        const aggregateData: PipelineStage[] = [
+            // Apply filters
+            {
+                $match: {
+                    $and: [
+                        // Name search
+                        filters.name
+                            ? { name: { $regex: filters.name, $options: 'i' } }
+                            : {},
+
+                        // Categories filter
+                        filters.categories && filters.categories.length > 0
+                            ? { category: { $in: filters.categories } }
+                            : {},
+
+                        // Brands filter
+                        filters.brands && filters.brands.length > 0
+                            ? { brand: { $in: filters.brands } }
+                            : {},
+
+                        // Stock filter
+                        filters.hideOutOfStock
+                            ? { countInStock: { $gt: 0 } }
+                            : {},
+
+                        // Price range filter
+                        filters.prices
+                            ? {
+                                $or: [
+                                    // Regular price
+                                    {
+                                        price: {
+                                            $gte: filters.prices.min,
+                                            $lte: filters.prices.max
+                                        }
+                                    },
+                                    // Discounted price
+                                    {
+                                        isDiscounted: true,
+                                        discountedPrice: {
+                                            $gte: filters.prices.min,
+                                            $lte: filters.prices.max
+                                        }
+                                    }
+                                ]
+                            }
+                            : {},
+
+                        // Rating filter
+                        filters.ratings
+                            ? { avgRating: { $gte: filters.ratings } }
+                            : {},
+                    ].filter(filter => Object.keys(filter).length > 0) // Remove empty filters
+                }
+            },
+            // Sorting
+            {
+                $sort: filters.sortPrice
+                    ? { price: filters.sortPrice === 'asc' ? 1 : -1 }
+                    : { createdAt: -1 }  // Default sort by newest
+            }
+        ];
+
+        return await Product.aggregate(aggregateData);
+    } catch (err) {
+        console.error('Error in getFilteredProducts:', err);
+        throw err;
+    }
+};
 
 const updateProductDiscount = async (
     productId: string,
@@ -227,4 +310,4 @@ const updateMultipleProductStocks = async (updates: ProductStockUpdate[], userId
     }
 };
 
-export { getProducts, updateProductDiscount, updateProductStock, updateMultipleProductStocks }
+export { getProducts, updateProductDiscount, updateProductStock, updateMultipleProductStocks, getFilteredProducts, ProductFilterBody }
