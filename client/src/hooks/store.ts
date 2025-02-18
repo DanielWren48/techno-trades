@@ -25,16 +25,22 @@ interface StockFilteringState {
     toggleHideOutOfStock: () => void;
 }
 
-export interface PriceFilterState {
+interface PriceFilterState {
     min: number;
     max: number;
     debouncedMin: number;
     debouncedMax: number;
+    productPriceRange: {
+        min: number;
+        max: number;
+    };
+    isInitialized: boolean; // Add flag to track initial setup
 }
 
 interface PriceFilterActions {
     setPriceRange: (min: number, max: number) => void;
     setDebouncedPriceRange: (min: number, max: number) => void;
+    initializePriceRange: (min: number, max: number) => void;
     resetPriceRange: () => void;
 }
 
@@ -43,6 +49,11 @@ const initialState: PriceFilterState = {
     max: 1200,
     debouncedMin: 0,
     debouncedMax: 1200,
+    productPriceRange: {
+        min: 0,
+        max: 1200
+    },
+    isInitialized: false
 };
 
 export interface PriceRange {
@@ -128,7 +139,7 @@ export const usePriceFilter = create<PriceFilterState & PriceFilterActions>((set
     ...initialState,
 
     setPriceRange: (min: number, max: number) =>
-        set(() => ({
+        set((state) => ({
             min,
             max,
         })),
@@ -139,8 +150,29 @@ export const usePriceFilter = create<PriceFilterState & PriceFilterActions>((set
             debouncedMax: max,
         })),
 
-    resetPriceRange: () => set(initialState),
-}))
+    initializePriceRange: (min: number, max: number) =>
+        set((state) => {
+            if (!state.isInitialized) {
+                return {
+                    productPriceRange: { min, max },
+                    min,
+                    max,
+                    debouncedMin: min,
+                    debouncedMax: max,
+                    isInitialized: true
+                };
+            }
+            return state;
+        }),
+
+    resetPriceRange: () =>
+        set((state) => ({
+            min: state.productPriceRange.min,
+            max: state.productPriceRange.max,
+            debouncedMin: state.productPriceRange.min,
+            debouncedMax: state.productPriceRange.max,
+        })),
+}));
 
 export const useRatingFilterStore = create<RatingFilterStoreState>((set) => ({
     selectedRatings: [],
