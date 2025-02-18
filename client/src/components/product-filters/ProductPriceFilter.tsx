@@ -1,54 +1,44 @@
-import { Label } from "../ui/label";
-import { Checkbox } from "../ui/checkbox";
-import { priceRanges } from "@/constants/idnex";
-import { usePriceFilterStore } from "@/hooks/store";
+import { useEffect } from 'react';
+import { Slider } from "@/components/ui/slider";
+import { useDebounce } from 'use-debounce';
+import { usePriceFilter } from '@/hooks/store';
 
-interface PriceFilterProps {
-  min: number;
-  max: number;
-  onChange: (selectedRange: { min: number; max: number } | null) => void;
-  isChecked: boolean;
-}
+const ProductPriceFilter = () => {
+  const { min, max, setPriceRange, setDebouncedPriceRange } = usePriceFilter();
 
-const PriceFilter: React.FC<PriceFilterProps> = ({ min, max, onChange, isChecked }) => {
-  const handleCheckboxChange = () => {
-    const newRange = isChecked ? null : { min, max };
-    onChange(newRange);
+  const [debouncedMin] = useDebounce(min, 1000);
+  const [debouncedMax] = useDebounce(max, 1000);
+
+  useEffect(() => {
+    setDebouncedPriceRange(debouncedMin, debouncedMax);
+  }, [debouncedMin, debouncedMax, setDebouncedPriceRange]);
+
+  const handlePriceChange = (values: number[]) => {
+    setPriceRange(values[0], values[1]);
   };
 
   return (
-    <div className="flex flex-row mx-0 my-1 justify-start items-center">
-      <Checkbox id="price" className="mr-1" onCheckedChange={handleCheckboxChange} checked={isChecked} />
-      <Label htmlFor="price" className="font-jost text-base ml-2 dark:text-light-2 transform transition duration-500 ease-in-out">{`£${min} to £${max}`}</Label>
-    </div>
-  );
-};
-
-const ProductPriceFilter: React.FC = () => {
-  const { selectedRanges, addSelectedRange, removeSelectedRange } = usePriceFilterStore();
-
-  selectedRanges.length > 0 && console.log(selectedRanges[0].min + " - " + selectedRanges[selectedRanges.length - 1].max);
-
-  const handlePriceFilterChange = (newRange: { min: number; max: number } | null, min: number, max: number) => {
-    if (newRange) {
-      addSelectedRange(newRange);
-    } else {
-      removeSelectedRange(min, max);
-    }
-  };
-
-  return (
-    <>
-      {priceRanges.map(({ min, max }, idx) => (
-        <PriceFilter
-          key={idx}
-          min={min}
-          max={max}
-          onChange={(newRange) => handlePriceFilterChange(newRange, min, max)}
-          isChecked={selectedRanges.some((range) => range.min === min && range.max === max)}
+    <div className="space-y-4 py-3 px-1">
+      <div className="mb-6">
+        <Slider
+          value={[min, max]}
+          max={1200}
+          step={10}
+          onValueChange={handlePriceChange}
         />
-      ))}
-    </>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <div className="text-sm">
+          <span className="font-medium">Min: </span>
+          <span className="text-muted-foreground">${min}</span>
+        </div>
+        <div className="text-sm">
+          <span className="font-medium">Max: </span>
+          <span className="text-muted-foreground">${max}</span>
+        </div>
+      </div>
+    </div>
   );
 };
 

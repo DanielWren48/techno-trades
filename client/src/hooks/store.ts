@@ -25,6 +25,26 @@ interface StockFilteringState {
     toggleHideOutOfStock: () => void;
 }
 
+export interface PriceFilterState {
+    min: number;
+    max: number;
+    debouncedMin: number;
+    debouncedMax: number;
+}
+
+interface PriceFilterActions {
+    setPriceRange: (min: number, max: number) => void;
+    setDebouncedPriceRange: (min: number, max: number) => void;
+    resetPriceRange: () => void;
+}
+
+const initialState: PriceFilterState = {
+    min: 0,
+    max: 1200,
+    debouncedMin: 0,
+    debouncedMax: 1200,
+};
+
 export interface PriceRange {
     min: number;
     max: number;
@@ -103,6 +123,24 @@ export const usePriceFilterStore = create<PriceFilterStoreState>((set) => ({
         })),
     removeAllRanges: () => set(() => ({ selectedRanges: [] })),
 }));
+
+export const usePriceFilter = create<PriceFilterState & PriceFilterActions>((set) => ({
+    ...initialState,
+
+    setPriceRange: (min: number, max: number) =>
+        set(() => ({
+            min,
+            max,
+        })),
+
+    setDebouncedPriceRange: (min: number, max: number) =>
+        set(() => ({
+            debouncedMin: min,
+            debouncedMax: max,
+        })),
+
+    resetPriceRange: () => set(initialState),
+}))
 
 export const useRatingFilterStore = create<RatingFilterStoreState>((set) => ({
     selectedRatings: [],
