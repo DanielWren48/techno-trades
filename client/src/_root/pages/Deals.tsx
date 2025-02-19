@@ -1,16 +1,18 @@
-import { Product } from "@/types";
 import { GridProductList } from "@/components/shared";
 import { ProductLoader } from "@/components/product-filters";
-import { useGetProducts } from "@/lib/react-query/queries/product-queries";
+import { useFilterProducts } from "@/api/products/queries";
 
 const Deals = () => {
-  const { data, isPending: isProductLoading } = useGetProducts();
+  const { data, isPending: isProductLoading } = useFilterProducts(
+    {
+      filters: { discounted: true },
+      params: { limit: 999 }
+    }
+  );
 
-  const filteredProducts =
-    data &&
-    data.data.products.filter(
-      (product: Product) => product.isDiscounted === true
-    );
+  if (data && data.data && data.data.itemsCount < 0) {
+    return <div> No products found </div>;
+  }
 
   return (
     <div className="flex flex-col flex-1 items-center">
@@ -19,7 +21,7 @@ const Deals = () => {
           {isProductLoading ? (
             <ProductLoader displayType="grid" />
           ) : (
-            <GridProductList products={filteredProducts} />
+            <GridProductList products={data?.data?.items!} />
           )}
         </div>
       </div>

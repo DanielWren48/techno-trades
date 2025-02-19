@@ -13,7 +13,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import ProductReviewForm from "@/components/root/ProductReviewForm";
 import MarkdownDisplay from "@/_dashboard/components/MarkdownDisplay";
 import { AddToCartButton, AddToFavoritesButton } from "@/components/shared";
-import { useFilterProducts, useGetProductBySlug } from "@/api/products/queries";
+import { useFilterProducts, useGetProductBySlug, useGetSimimarProducts } from "@/api/products/queries";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { calculateDiscountPercentage, cn, formatPrice, isProductAddedWithinNDays, ratingStyle } from "@/lib/utils";
 
@@ -29,9 +29,10 @@ export default function ProductDetailPage() {
   const product = productData?.data;
 
   // Second query - get products of the same category
-  const { data: similarProductsData, isLoading: similarProductsLoading } = useFilterProducts(
+  const { data: similarProductsData, isLoading: similarProductsLoading } = useGetSimimarProducts(
     {
       params: { limit: 4 },
+      //@ts-expect-error
       filters: { categories: [product?.category] },
       currentProductId: product?._id
     }

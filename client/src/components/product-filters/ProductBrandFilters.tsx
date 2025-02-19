@@ -2,12 +2,13 @@ import { Product } from "@/types";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
 import { useBrandFilter } from "@/hooks/store";
-import { useGetProducts } from "@/lib/react-query/queries/product-queries";
+import { useGetProducts } from "@/api/products/queries";
 
 const ProductBrandFilter: React.FC = () => {
   const { data } = useGetProducts();
+  const products = data?.data?.items
   const { selectedBrands, toggleBrand } = useBrandFilter();
-  const uniqueBrands: string[] = Array.from(new Set(data?.data.products?.map((product: Product) => product.brand).sort() || []));
+  const uniqueBrands: string[] = Array.from(new Set(products?.map((product: Product) => product.brand).sort() || []));
 
   return (
     <>

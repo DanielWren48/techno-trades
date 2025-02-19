@@ -8,12 +8,24 @@ enum QUERY_KEYS {
     GET_PRODUCTS = "getProducts",
     GET_PRODUCT_BY_SLUG = "getProductBySlug",
     FILTER_PRODUCTS = "getFilteredProducts",
+    GET_SIMILAR_PRODUCTS = "getSimilarProducts",
 }
 
 export const useGetProducts = (params?: ProductQueryParams) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_PRODUCTS, params],
         queryFn: () => authApi.products(params),
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false
+    });
+};
+
+export const useSearchProduct = ({ filters }: { filters?: ProductFilterBody }) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_SIMILAR_PRODUCTS, filters],
+        queryFn: () => authApi.filterProducts({ filters }),
+        enabled: !!filters?.name,
     });
 };
 
@@ -25,12 +37,12 @@ export const useGetProductBySlug = (slug: string) => {
     });
 };
 
-export const useFilterProducts = (
+export const useGetSimimarProducts = (
     { params, filters, currentProductId }:
         { params?: ProductQueryParams, filters?: ProductFilterBody, currentProductId: string | undefined, }
 ) => {
     return useQuery({
-        queryKey: [QUERY_KEYS.FILTER_PRODUCTS, { params, filters }],
+        queryKey: [QUERY_KEYS.GET_SIMILAR_PRODUCTS, { params, filters }],
         queryFn: () => authApi.filterProducts({ params, filters }),
         enabled: !!currentProductId,
         select: (data) => ({

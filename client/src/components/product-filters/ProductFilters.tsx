@@ -2,7 +2,7 @@ import { Separator } from "../ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { AppliedFilters, HideOutOfStock, ProductBrandFilters, ProductCategoryFilter, ProductPriceFilter, ProductRatingFilter } from ".";
 
-const ProductFilters: React.FC = () => {
+export default function ProductFilters() {
   return (
     <div className="bg-background dark:bg-dark-4 h-full rounded-2xl shadow-xl transform transition duration-500 ease-in-out">
       <h1 className="text-left text-2xl font-semibold py-4 px-8 text-dark-4 dark:text-white/80">
@@ -49,5 +49,3 @@ const ProductFilters: React.FC = () => {
     </div>
   );
 };
-
-export default ProductFilters;

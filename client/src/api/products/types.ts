@@ -3,10 +3,12 @@ import { Product, ProductCategory } from "@/types";
 export interface ProductQueryParams {
     name?: string;
     limit?: number;
+    page?: string;
 }
 
 export interface ProductFilterBody {
     hideOutOfStock?: boolean;
+    discounted?: boolean;
     prices?: {
         min: number;
         max: number;
