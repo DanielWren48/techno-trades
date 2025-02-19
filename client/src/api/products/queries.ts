@@ -56,6 +56,13 @@ export const useGetSimimarProducts = (
     });
 };
 
+export const useFilterProducts = ({ params, filters }: { params?: ProductQueryParams, filters?: ProductFilterBody }) => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.FILTER_PRODUCTS, { params, filters }],
+        queryFn: () => authApi.filterProducts({ params, filters }),
+    });
+};
+
 export const useCreateNewProduct = () => {
     return useMutation<BaseShopResponse<Product>, BaseShopResponse<ErrorResponse>, INewProduct>({
         mutationFn: authApi.createProduct,
