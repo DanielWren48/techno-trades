@@ -92,6 +92,7 @@ const getProducts = async () => {
 
 interface ProductFilterBody {
     hideOutOfStock?: boolean;
+    discounted?: boolean;
     prices?: {
         min: number;
         max: number;
@@ -103,46 +104,68 @@ interface ProductFilterBody {
     sortPrice?: 'asc' | 'desc';
 }
 
-// productFilters.ts
-const getFilteredProducts = async (filters: ProductFilterBody) => {
+const hasActiveFilters = (filters: Partial<ProductFilterBody> | undefined): boolean => {
+    if (!filters) return false;
+
+    return Boolean(
+        filters.hideOutOfStock ||
+        filters.discounted ||
+        filters.name ||
+        (filters.prices?.min || filters.prices?.max) ||
+        (filters.categories && filters.categories.length > 0) ||
+        (filters.brands && filters.brands.length > 0) ||
+        filters.ratings ||
+        filters.sortPrice
+    );
+};
+
+const getFilteredProducts = async (filters: ProductFilterBody | undefined) => {
     try {
-        const aggregateData: PipelineStage[] = [
-            // Apply filters
+        // If no active filters, return all products with base stages
+        if (!hasActiveFilters(filters)) {
+            return await Product.aggregate([{ $sort: { createdAt: -1 } }]);
+        }
+
+        // If we have filters, add the filter stages
+        const filterStages: PipelineStage[] = [
             {
                 $match: {
                     $and: [
-                        // Name search
-                        filters.name
+                        // Text search
+                        filters?.name
                             ? { name: { $regex: filters.name, $options: 'i' } }
                             : {},
 
                         // Categories filter
-                        filters.categories && filters.categories.length > 0
+                        filters?.categories && filters.categories.length > 0
                             ? { category: { $in: filters.categories } }
                             : {},
 
                         // Brands filter
-                        filters.brands && filters.brands.length > 0
+                        filters?.brands && filters.brands.length > 0
                             ? { brand: { $in: filters.brands } }
                             : {},
 
                         // Stock filter
-                        filters.hideOutOfStock
+                        filters?.hideOutOfStock
                             ? { countInStock: { $gt: 0 } }
                             : {},
 
+                        // Stock filter
+                        filters?.discounted
+                            ? { isDiscounted: true }
+                            : {},
+
                         // Price range filter
-                        filters.prices
+                        filters?.prices
                             ? {
                                 $or: [
-                                    // Regular price
                                     {
                                         price: {
                                             $gte: filters.prices.min,
                                             $lte: filters.prices.max
                                         }
                                     },
-                                    // Discounted price
                                     {
                                         isDiscounted: true,
                                         discountedPrice: {
@@ -155,7 +178,7 @@ const getFilteredProducts = async (filters: ProductFilterBody) => {
                             : {},
 
                         // Rating filter
-                        filters.ratings
+                        filters?.ratings
                             ? { avgRating: { $gte: filters.ratings } }
                             : {},
                     ].filter(filter => Object.keys(filter).length > 0) // Remove empty filters
@@ -163,13 +186,13 @@ const getFilteredProducts = async (filters: ProductFilterBody) => {
             },
             // Sorting
             {
-                $sort: filters.sortPrice
+                $sort: filters?.sortPrice
                     ? { price: filters.sortPrice === 'asc' ? 1 : -1 }
-                    : { createdAt: -1 }  // Default sort by newest
+                    : { createdAt: -1 }
             }
         ];
 
-        return await Product.aggregate(aggregateData);
+        return await Product.aggregate([...filterStages]);
     } catch (err) {
         console.error('Error in getFilteredProducts:', err);
         throw err;

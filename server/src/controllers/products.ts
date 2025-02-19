@@ -23,7 +23,8 @@ shopRouter.get('/products', async (req: Request, res: Response, next: NextFuncti
 
 shopRouter.post('/products/filter', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const filters: ProductFilterBody = req.body;
+        // Handle empty body or undefined filters
+        const filters = Object.keys(req.body).length > 0 ? req.body : undefined;
         const products = await getFilteredProducts(filters);
         const data = await paginateRecords(req, products);
         return res.status(200).json(CustomResponse.success('Products Fetched Successfully', data))
