@@ -1,5 +1,4 @@
 import React from 'react'
-import { NewProductSchemaType } from '../schemas/product'
 import { ProductImage } from "@/types";
 import { useCallback, useState } from "react";
 import { useUploadThing } from "@/uploadthing";
@@ -11,6 +10,7 @@ import { generateClientDropzoneAccept } from "uploadthing/client";
 import { convertFileToUrl } from "@/lib/utils";
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
+import { NewProductSchemaType } from '@/_dashboard/schemas/product';
 
 interface ProductImageUploadProps {
     productData: NewProductSchemaType

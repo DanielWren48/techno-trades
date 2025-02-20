@@ -1,4 +1,3 @@
-import { NewProductSchemaType } from '../schemas/product'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tag, Box, Inbox, Package, Loader2 } from 'lucide-react';
@@ -9,6 +8,7 @@ import { useUserContext } from '@/context/AuthContext';
 import { useCreateNewProduct } from '@/api/products/queries';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { NewProductSchemaType } from '@/_dashboard/schemas/product';
 
 interface ProductImageUploadProps {
   productData: NewProductSchemaType

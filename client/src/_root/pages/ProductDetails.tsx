@@ -11,7 +11,7 @@ import ReviewsSection from "@/components/root/ReviewsSection";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ProductReviewForm from "@/components/root/ProductReviewForm";
-import MarkdownDisplay from "@/_dashboard/components/MarkdownDisplay";
+import MarkdownDisplay from "@/_dashboard/components/product/MarkdownDisplay";
 import { AddToCartButton, AddToFavoritesButton } from "@/components/shared";
 import { useFilterProducts, useGetProductBySlug, useGetSimimarProducts } from "@/api/products/queries";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"

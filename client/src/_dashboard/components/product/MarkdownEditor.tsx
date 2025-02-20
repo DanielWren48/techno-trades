@@ -1,3 +1,4 @@
+import { NewProductSchemaType } from '@/_dashboard/schemas/product';
 import { Button } from '@/components/ui/button';
 import {
     MDXEditor,
@@ -22,7 +23,6 @@ import {
     tablePlugin,
 } from '@mdxeditor/editor';
 import '@mdxeditor/editor/style.css';
-import { NewProductSchemaType } from '../schemas/product';
 
 interface MarkdownEditorProps {
     markdown: string

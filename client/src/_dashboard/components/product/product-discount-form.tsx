@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { newProductSchema, NewProductSchemaType } from "../schemas/product";
+import { newProductSchema, NewProductSchemaType } from "@/_dashboard/schemas/product";
 
 interface SetProductDiscountFormProps {
     productData: NewProductSchemaType;

@@ -2,17 +2,10 @@ import { useEffect, useState } from 'react';
 import { Shell } from "@/components/dashboard/shell";
 import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import NewProductCreateDetails from '../components/new-product-form';
 import { NewProductSchemaType } from '../schemas/product';
-import SetProductDiscountForm from '../components/product-discount-form';
-import MarkdownEditor from '../components/MarkdownEditor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MarkdownDisplay from '../components/MarkdownDisplay';
-import { PS5_TEMPLATE } from '../components/mdx-item-example';
-import ProductImageUpload from '../components/product-image-upload';
-import ProductOverview from '../components/product-overview';
-import Steps from '../components/product-create-steps';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { PS5_TEMPLATE, MarkdownDisplay, MarkdownEditor, NewProductForm, ProductCreateSteps, ProductDiscountForm, ProductImageUpload, ProductOverview } from '../components';
 
 export default function DashboardAccount() {
   const [activeTab, setActiveTab] = useState<string>("details");
@@ -42,13 +35,13 @@ export default function DashboardAccount() {
           <CardTitle className="flex justify-center">
             Create a new product!
           </CardTitle>
-          <CardHeader><Steps /></CardHeader>
+          <CardHeader><ProductCreateSteps /></CardHeader>
         </CardHeader>
         <CardContent>
           <Accordion type="single" value={activeTab} onValueChange={handleTabChange}>
             <AccordionItem value="details" className='border-none'>
               <AccordionContent className='flex flex-col gap-6 px-1'>
-                <NewProductCreateDetails
+                <NewProductForm
                   setProductData={setProductData}
                   handleTabChange={handleTabChange}
                 />
@@ -57,7 +50,7 @@ export default function DashboardAccount() {
 
             <AccordionItem value="discount" className='border-none'>
               <AccordionContent className='px-1'>
-                <SetProductDiscountForm
+                <ProductDiscountForm
                   productData={productData!}
                   setProductData={setProductData}
                   handleTabChange={handleTabChange}

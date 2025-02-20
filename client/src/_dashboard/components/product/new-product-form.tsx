@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { categories } from "@/components/tables/products-table/filters";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { newProductSchema, NewProductSchemaType } from "../schemas/product";
+import { newProductSchema, NewProductSchemaType } from "@/_dashboard/schemas/product";
 
 interface NewProductProps {
     handleTabChange: (value: string) => void
