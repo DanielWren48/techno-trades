@@ -16,7 +16,9 @@ export interface IUser {
     firstName: string;
     lastName: string;
     email: string;
-    avatar: string | null;
+    avatar: string | undefined;
+    isActive: boolean;
+    isEmailVerified: boolean;
     authType: AUTH_TYPE;
     accountType: ACCOUNT_TYPE;
     createdAt?: Date;

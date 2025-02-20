@@ -1,10 +1,12 @@
+import { ACCOUNT_TYPE } from "@/types";
+
 export const userRoles = [
   {
-    value: "user",
-    label: "User",
+    value: "Buyer",
+    label: "Buyer",
   },
   {
-    value: "admin",
-    label: "Admin",
+    value: "Staff",
+    label: "Staff",
   },
 ];

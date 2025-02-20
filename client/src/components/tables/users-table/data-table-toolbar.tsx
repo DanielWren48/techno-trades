@@ -26,10 +26,10 @@ export function DataTableToolbar<TData>({
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("role") && (
+        {table.getColumn("accountType") && (
           <DataTableFacetedFilter
-            column={table.getColumn("role")}
-            title="Roles"
+            column={table.getColumn("accountType")}
+            title="Account"
             options={userRoles}
           />
         )}
