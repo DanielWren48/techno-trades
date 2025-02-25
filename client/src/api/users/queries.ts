@@ -1,12 +1,12 @@
 import { usersApi } from './requests';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { INITIAL_USER, useUserContext } from '@/context/AuthContext';
 import {
     BaseUserResponse,
     ErrorResponse,
-    IUserResponse,
+    UpdateUserProfile,
 } from './types';
-import { ACCOUNT_TYPE } from '@/types';
+import { useUserContext } from '@/context/AuthContext';
+import { IUser } from '@/types';
 
 export enum QUERY_KEYS {
     //users keys
@@ -20,5 +20,27 @@ export const useGetAllUsers = () => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_ALL_USER],
         queryFn: () => usersApi.getAllUsers(),
+    });
+};
+
+
+// React Mutation Hooks
+export const useUpdateUserProfile = () => {
+    const queryClient = useQueryClient();
+    const { setUser } = useUserContext();
+
+    return useMutation<BaseUserResponse<IUser>, BaseUserResponse<ErrorResponse>, UpdateUserProfile>({
+        mutationFn: usersApi.updateUserDetails,
+        onSuccess: (response) => {
+            if (response.status === 'success' && response.data) {
+                const user = response.data
+                setUser(user);
+                // Invalidate and refetch user session
+                queryClient.invalidateQueries({ queryKey: ['user-session'] });
+            }
+        },
+        onError: (error) => {
+            console.error('Validation error:', error);
+        }
     });
 };

@@ -15,3 +15,9 @@ export interface ErrorResponse {
     code: string;
     data?: Record<string, string>;
 }
+
+export interface UpdateUserProfile {
+    firstName: string | undefined;
+    lastName: string | undefined;
+    avatar: string | undefined;
+}
