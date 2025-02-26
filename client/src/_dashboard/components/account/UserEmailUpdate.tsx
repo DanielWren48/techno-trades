@@ -73,11 +73,9 @@ export default function UpdateUserEmail() {
             email: value.newEmail,
             otp: +value.otp,
         })
-        const { data, status, message, code } = response
+        const { data, status, message } = response
         if (data && status === "success") {
             toast.success(message);
-        } else if (status === "failure" && code === "invalid_otp") {
-            toast.error(message);
         } else {
             toast.error(message);
         }
