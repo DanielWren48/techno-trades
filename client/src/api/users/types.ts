@@ -21,3 +21,8 @@ export interface UpdateUserProfile {
     lastName: string | undefined;
     avatar: string | undefined;
 }
+
+export interface UpdateUserEmail {
+    email: string;
+    otp: number;
+}
