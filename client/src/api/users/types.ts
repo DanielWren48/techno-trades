@@ -26,3 +26,9 @@ export interface UpdateUserEmail {
     email: string;
     otp: number;
 }
+
+export interface UpdateUserPassword {
+    passwordCurrent: string;
+    password: string;
+    passwordConfirm: string;
+}

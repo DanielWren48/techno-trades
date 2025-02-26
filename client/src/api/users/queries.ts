@@ -4,6 +4,7 @@ import {
     BaseUserResponse,
     ErrorResponse,
     UpdateUserEmail,
+    UpdateUserPassword,
     UpdateUserProfile,
 } from './types';
 import { useUserContext } from '@/context/AuthContext';
@@ -62,6 +63,26 @@ export const useUpdateUserEmail = () => {
 
     return useMutation<BaseUserResponse<IUser>, BaseUserResponse<ErrorResponse>, UpdateUserEmail>({
         mutationFn: usersApi.updateUserEmail,
+        onSuccess: (response) => {
+            if (response.status === 'success' && response.data) {
+                const user = response.data
+                setUser(user);
+                // Invalidate and refetch user session
+                queryClient.invalidateQueries({ queryKey: ['user-session'] });
+            }
+        },
+        onError: (error) => {
+            console.error('Validation error:', error);
+        }
+    });
+};
+
+export const useUpdateUserPassword = () => {
+    const queryClient = useQueryClient();
+    const { setUser } = useUserContext();
+
+    return useMutation<BaseUserResponse<IUser>, BaseUserResponse<ErrorResponse>, UpdateUserPassword>({
+        mutationFn: usersApi.updateUserPassword,
         onSuccess: (response) => {
             if (response.status === 'success' && response.data) {
                 const user = response.data

@@ -13,3 +13,15 @@ export const emailUpdateSchema = z.object({
     otp: z.string().min(6, { message: "Your one-time password must be 6 characters." })
 });
 export type EmailUpdateSchemaType = z.infer<typeof emailUpdateSchema>
+
+export const passwordUpdateSchema = z.object({
+    passwordCurrent: z.string().min(8, { message: "Password must be at least 8 characters." }),
+    password: z.string().min(8, { message: "Password must be at least 8 characters." }),
+    passwordConfirm: z.string().min(8, { message: "Password must be at least 8 characters." })
+}).refine((data) => {
+    return data.password === data.passwordConfirm;
+}, {
+    message: "Password do not match",
+    path: ["newPasswordConfirm"]
+});
+export type PasswordUpdateSchemaType = z.infer<typeof passwordUpdateSchema>

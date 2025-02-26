@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { BaseUserResponse, IUserResponse, UpdateUserEmail, UpdateUserProfile } from './types';
+import { BaseUserResponse, IUserResponse, UpdateUserEmail, UpdateUserPassword, UpdateUserProfile } from './types';
 import { IUser } from '@/types';
 
 // API client setup
@@ -38,6 +38,11 @@ export const usersApi = {
     },
     updateUserEmail: async (data: UpdateUserEmail): Promise<BaseUserResponse<IUser>> => {
         const response = await api.patch<BaseUserResponse<IUser>>('/update-my-email', data);
+        console.log(response)
+        return response.data;
+    },
+    updateUserPassword: async (data: UpdateUserPassword): Promise<BaseUserResponse<IUser>> => {
+        const response = await api.patch<BaseUserResponse<IUser>>('/update-my-password', data);
         console.log(response)
         return response.data;
     }
