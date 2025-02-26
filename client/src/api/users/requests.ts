@@ -78,5 +78,14 @@ export const usersApi = {
         } catch (error) {
             return handleAuthError(error) as BaseUserResponse<IUser>;
         }
+    },
+    closeUserAccount: async (): Promise<BaseUserResponse<null>> => {
+        try {
+            const response = await api.delete<BaseUserResponse<null>>('/deactivate-me');
+            console.log(response)
+            return response.data;
+        } catch (error) {
+            return handleAuthError(error) as BaseUserResponse<null>;
+        }
     }
 }

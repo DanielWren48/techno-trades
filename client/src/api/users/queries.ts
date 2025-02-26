@@ -7,7 +7,7 @@ import {
     UpdateUserPassword,
     UpdateUserProfile,
 } from './types';
-import { useUserContext } from '@/context/AuthContext';
+import { INITIAL_USER, useUserContext } from '@/context/AuthContext';
 import { IUser } from '@/types';
 
 export enum QUERY_KEYS {
@@ -96,3 +96,20 @@ export const useUpdateUserPassword = () => {
         }
     });
 };
+
+export const useCloseUserAccount = () => {
+    const { setUser, setIsAuthenticated } = useUserContext();
+
+    return useMutation<BaseUserResponse<null>, BaseUserResponse<ErrorResponse>>({
+        mutationFn: usersApi.closeUserAccount,
+        onSuccess: (response) => {
+            if (response.status === 'success') {
+                setIsAuthenticated(false);
+                setUser(INITIAL_USER);
+            }
+        },
+        onError: (error) => {
+            console.error('Validation error:', error);
+        }
+    });
+}
