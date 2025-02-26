@@ -1,58 +1,43 @@
-import { useState, useEffect } from "react";
-import LastSignIn from "../forms/LastSignIn";
-import CloseAccount from "../forms/CloseAccount";
-import UpdateProfile from "../forms/UpdateProfile";
-import ResetPassword from "../forms/ResetPassword";
 import { Shell } from "@/components/dashboard/shell";
-import { useUserContext } from "@/context/AuthContext";
 import { Header } from "@/components/dashboard/header";
-import UpdateUserEmail from "../forms/UpdateUserEmail";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { UserProfileUpdate, UserEmailUpdate, UserPasswordUpdate, UserAccountClose } from '../components/index'
 
 export default function DashboardAccount() {
-  const location = useLocation();
-  const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<string>('account');
-  const { user } = useUserContext();
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const tabParam = params.get('tab');
-    if (tabParam && ['account', 'password', 'address'].includes(tabParam)) {
-      setActiveTab(tabParam);
-    }
-  }, [location.search]);
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    navigate(`/dashboard/account/${user._id}?tab=${value}`);
-  };
   return (
     <Shell>
       <Header
         title="Account"
         description="Manage your personal and account deatils."
         size="default"
+        className="bg-accent rounded-lg px-8 py-3"
       />
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList>
-          <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="password">Password</TabsTrigger>
-          <TabsTrigger disabled value="address">Address</TabsTrigger>
-        </TabsList>
-        <TabsContent value="account">
-          <LastSignIn />
-          <UpdateProfile />
-          <UpdateUserEmail />
-          <CloseAccount />
-        </TabsContent>
-        <TabsContent value="password">
-          <ResetPassword />
-        </TabsContent>
-        <TabsContent value="address">
-        </TabsContent>
-      </Tabs>
+      <Accordion type="multiple" defaultValue={["profile, email", "password", "close"]}>
+        <AccordionItem className="bg-accent rounded-lg mb-2" value="profile">
+          <AccordionTrigger>Profile Update</AccordionTrigger>
+          <AccordionContent className="px-1">
+            <UserProfileUpdate />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem className="bg-accent rounded-lg mb-2" value="email">
+          <AccordionTrigger>Email Update</AccordionTrigger>
+          <AccordionContent className="px-1">
+            <UserEmailUpdate />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem className="bg-accent rounded-lg mb-2" value="password">
+          <AccordionTrigger>Password Update</AccordionTrigger>
+          <AccordionContent className="px-1">
+            <UserPasswordUpdate />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem className="bg-accent rounded-lg mb-2" value="close">
+          <AccordionTrigger>Close Account</AccordionTrigger>
+          <AccordionContent>
+            <UserAccountClose />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </Shell>
   );
 }
