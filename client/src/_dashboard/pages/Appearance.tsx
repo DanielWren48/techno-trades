@@ -1,7 +1,7 @@
 import { Shell } from "@/components/dashboard/shell";
 import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/dashboard/header";
-import { AppearanceForm } from "../forms/appearance-form";
+import { AppearanceForm } from "../components";
 
 export default function DashboardAppearance() {
   return (
