@@ -12,7 +12,7 @@ export default function DashboardAccount() {
         size="default"
         className="bg-accent rounded-lg px-8 py-3"
       />
-      <Accordion type="multiple" defaultValue={["profile, email", "password", "close"]}>
+      <Accordion type="multiple" defaultValue={["profile", "email", "password", "close"]}>
         <AccordionItem className="bg-accent rounded-lg mb-2" value="profile">
           <AccordionTrigger>Profile Update</AccordionTrigger>
           <AccordionContent className="px-1">

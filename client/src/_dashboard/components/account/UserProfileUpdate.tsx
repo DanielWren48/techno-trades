@@ -151,7 +151,7 @@ export default function UpdateProfile() {
                 />
 
                 {isUploading && <Progress value={uploadProgress} />}
-                <Button type="submit" disabled={isUploading || isPending}>
+                <Button type="submit" disabled={isUploading || isPending} className="max-w-xs">
                     {(isUploading || isPending) ? (
                         <>
                             <Loader2 className="animate-spin h-5 w-5 mr-3" />

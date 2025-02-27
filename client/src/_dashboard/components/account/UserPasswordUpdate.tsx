@@ -1,21 +1,13 @@
 import { toast } from "sonner";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { useCallback, useState } from "react";
-import { convertFileToUrl } from "@/lib/utils";
-import { useUploadThing } from "@/uploadthing";
 import { Button } from "@/components/ui/button";
-import { FileWithPath } from "@uploadthing/react";
-import { Progress } from "@/components/ui/progress"
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useUserContext } from "@/context/AuthContext";
-import { useDropzone } from "@uploadthing/react/hooks";
-import { useUpdateUserPassword, useUpdateUserProfile } from "@/api/users/queries";
-import { generateClientDropzoneAccept } from "uploadthing/client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUpdateUserPassword } from "@/api/users/queries";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { passwordUpdateSchema, PasswordUpdateSchemaType } from "@/_dashboard/schemas/account";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 export default function UpdateUserPassword() {
 
@@ -45,9 +37,10 @@ export default function UpdateUserPassword() {
 
     const handleUpdate = async (value: PasswordUpdateSchemaType) => {
         const response = await updatePassword(value)
-        const { data, status, message } = response
-        if (data && status === "success") {
+        const { status, message } = response
+        if (status === "success") {
             toast.success(message);
+            form.reset()
         } else {
             toast.error(message);
         }
@@ -143,7 +136,7 @@ export default function UpdateUserPassword() {
                     )}
                 />
 
-                <Button type="submit" disabled={isPending}>
+                <Button type="submit" disabled={isPending} className="max-w-xs">
                     {isPending ? (
                         <>
                             <Loader2 className="animate-spin h-5 w-5 mr-3" />

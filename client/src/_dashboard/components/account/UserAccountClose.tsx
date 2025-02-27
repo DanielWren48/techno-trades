@@ -25,7 +25,7 @@ export default function UserCloseAccount() {
                     <DialogTrigger asChild onClick={handleEditClick}>
                         <Button
                             type="button"
-                            className="h-12 px-5 text-light-1 flex gap-2 bg-red-500 hover:bg-red-900"
+                            variant={"destructive"}
                         >
                             Deactivate My Account
                         </Button>

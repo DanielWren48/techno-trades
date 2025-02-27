@@ -9,8 +9,14 @@ export function cn(...inputs: ClassValue[]) {
 
 export const convertFileToUrl = (file: File) => URL.createObjectURL(file);
 
-export function formatDate(input: string | number, formatType: 'long' | 'short' | 'year-month' = 'long'): string {
-  const date = new Date(input);
+export function formatDate(input: string | number | Date, formatType: 'long' | 'short' | 'year-month' = 'long'): string {
+  
+  let date: Date; 
+  if(input instanceof Date){
+    date = input;
+  }else{
+    date = new Date(input);
+  }
 
   let options: Intl.DateTimeFormatOptions;
 
@@ -26,8 +32,7 @@ export function formatDate(input: string | number, formatType: 'long' | 'short' 
       break;
     case 'short':
       options = {
-        year: "numeric",
-        month: "long",
+        month: "short",
         day: "numeric",
       };
       break;

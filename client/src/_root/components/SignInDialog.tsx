@@ -2,6 +2,7 @@ import { Link } from "react-router-dom"
 import { Fragment, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { GoogleLoginButton, SigninForm } from "@/_auth/components"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 
 export default function SignInDialog() {
@@ -20,7 +21,11 @@ export default function SignInDialog() {
                         Welcome back!
                     </DialogTitle>
                 </DialogHeader>
-                <SigninForm showPasswordReset={false} returnAs={"form"} setOpen={setOpen} />
+                <Card className="w-full border-none bg-none shadow-none">
+                    <CardContent className="p-0">
+                        <SigninForm showPasswordReset={false} setOpen={setOpen} />
+                    </CardContent>
+                </Card>
                 <Fragment>
                     <div className="flex items-center justify-between my-2">
                         <span className="w-[45%] border-b dark:border-gray-600"></span>

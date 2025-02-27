@@ -69,6 +69,7 @@ export default function UpdateUserEmail() {
     };
 
     const handleUpdate = async (value: EmailUpdateSchemaType) => {
+        console.log({ value })
         const response = await updateUserEmail({
             email: value.newEmail,
             otp: +value.otp,
@@ -76,6 +77,9 @@ export default function UpdateUserEmail() {
         const { data, status, message } = response
         if (data && status === "success") {
             toast.success(message);
+            form.reset()
+            setShowOTPField(false);
+            form.setValue("currentEmail", data.email)
         } else {
             toast.error(message);
         }
@@ -131,7 +135,7 @@ export default function UpdateUserEmail() {
                                 <FormControl>
                                     <InputOTP
                                         autoFocus
-                                        maxLength={8}
+                                        maxLength={6}
                                         pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
                                         render={({ slots }) => (
                                             <>
@@ -142,7 +146,7 @@ export default function UpdateUserEmail() {
                                                 </InputOTPGroup>
                                                 <InputOTPDash />
                                                 <InputOTPGroup>
-                                                    {slots.slice(5).map((slot, index) => (
+                                                    {slots.slice(3).map((slot, index) => (
                                                         <InputOTPSlot key={index + 5} {...slot} className="h-12 w-12" />
                                                     ))}
                                                 </InputOTPGroup>
@@ -177,12 +181,12 @@ export default function UpdateUserEmail() {
                     />
                 </div>
 
-                {!showOTPField && <Button type="button" onClick={requestValidationCode}>
+                {!showOTPField && <Button type="button" className="max-w-xs" onClick={requestValidationCode}>
                     Request Validation Code
                 </Button>
                 }
 
-                {showOTPField && <Button type="submit" disabled={false}>
+                {showOTPField && <Button type="submit" className="max-w-xs" disabled={false}>
                     {false ? (
                         <>
                             <Loader2 className="animate-spin h-5 w-5 mr-3" />

@@ -1,4 +1,4 @@
-import { ProductImage } from "@/types";
+import { ACCOUNT_TYPE, AUTH_TYPE, ProductImage } from "@/types";
 import * as z from "zod";
 
 // ============================================================
@@ -44,7 +44,7 @@ export const ProductCreateValidation = z.object({
 });
 
 export const productTableSchema = z.object({
-    _id: z.string(),
+    _id: z.string().optional(),
     name: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     brand: z.string(),
     image: z.custom<ProductImage[]>(),
@@ -52,7 +52,7 @@ export const productTableSchema = z.object({
     description: z.string().max(5000, { message: "Maximum 5000 characters for the description" }),
     price: z.coerce.number().min(0, { message: "Price must be a non-negative number" }),
     countInStock: z.coerce.number().min(0, { message: "Stock must be a non-negative number" }),
-    discountedPrice: z.coerce.number().optional().or(z.literal(0)),
+    discountedPrice: z.coerce.number().min(0).optional(),
     isDiscounted: z.boolean(),
 })
 
@@ -76,10 +76,11 @@ export const usersTableSchema = z.object({
     firstName: z.string(),
     lastName: z.string(),
     email: z.string().email(),
-    role: z.string(),
-    photo: z.string().optional().or(z.literal("")),
-    createdAt: z.string(),
-    updatedAt: z.string(),
+    avatar: z.string().optional(),
+    authType: z.custom<AUTH_TYPE>(),
+    accountType: z.custom<ACCOUNT_TYPE>(),
+    createdAt: z.date().optional(),
+    updatedAt: z.date().optional(),
 })
 export type UserType = z.infer<typeof usersTableSchema>
 
