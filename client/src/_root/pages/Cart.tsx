@@ -12,7 +12,7 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components
 
 const Cart = () => {
   const { items } = useCart();
-  const { isAuthenticated } = useUserContext();
+  const { isAuthenticated, user } = useUserContext();
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const cartTotal = items.reduce((total, { product, quantity }) => total + (product.isDiscounted ? product.discountedPrice! : product.price) * quantity, 0);
 
@@ -23,6 +23,33 @@ const Cart = () => {
   return (
     <div className="flex flex-col flex-1 min-h-screen items-center">
       <div className="w-full px-2.5 md:px-10 my-20 max-w-screen-xl">
+
+        {!user.isEmailVerified &&
+          <div className="p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800" role="alert">
+            <div className="flex items-center">
+              <Icons.info />
+              <span className="sr-only">Info</span>
+              <h3 className="text-lg font-medium ml-2">Your email is not verified!</h3>
+            </div>
+            <div className="mt-2 mb-4 text-sm">
+              Please click the button bellow to verifiy your email address & come back after to finish your purchase.
+            </div>
+            <div className="flex">
+              <Link
+                className={cn(
+                  buttonVariants({
+                    className: "bg-blue-800",
+                    size: "lg",
+                  }),
+                )}
+                to={`/dashboard/account/${user._id}`}
+              >
+                Verify
+              </Link>
+            </div>
+          </div>
+        }
+
         <h1 className="text-xl font-bold tracking-tight text-dark-4 dark:text-white/90 sm:text-3xl text-center mb-5">
           Your Cart ({items.length}) items
         </h1>
@@ -94,7 +121,7 @@ const Cart = () => {
                   <span>Shipping</span>
                 </div>
                 <div className="text-sm font-medium text-dark-4 dark:text-white/90">
-                <span>Calculated at Checkout</span>
+                  <span>Calculated at Checkout</span>
                 </div>
               </div>
 
@@ -121,7 +148,7 @@ const Cart = () => {
                       size: "lg",
                     }),
                   )}
-                  to="/checkout"
+                  to={user.isEmailVerified ? "/checkout" : `/dashboard/account/${user._id}`}
                 >
                   <Icons.visa className="w-16 bg-light-2 rounded-md p-1.5 mr-2" />
                   Checkout

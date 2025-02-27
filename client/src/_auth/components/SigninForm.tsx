@@ -33,12 +33,17 @@ export default function SignInForm({ showPasswordReset = true, setOpen, triggerE
 
   const handleSignin = async (user: SignInSchemaType) => {
     // await new Promise((resolve) => setTimeout(resolve, 3000));
-    const { message, status } = await signInAccount(user);
+    const { message, status, data } = await signInAccount(user);
     if (status === "failure") {
       triggerErrorAnimation && triggerErrorAnimation()
       setError(message)
     } else if (status === "success") {
-      setOpen ? setOpen(false) : navigate("/");
+      setOpen && setOpen(false)
+      if (!data?.user.isEmailVerified) {
+        navigate(`/dashboard/account/${data?.user._id}`)
+      } else {
+        navigate("/")
+      }
     }
   }
 

@@ -18,7 +18,7 @@ import { AccountUpdateSchemaType, accountUpdateSchema } from "@/_dashboard/schem
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 export default function UpdateProfile() {
-    const { user, checkAuthUser } = useUserContext();
+    const { user } = useUserContext();
     const [file, setFile] = useState<FileWithPath[]>([]);
     const [fileUrl, setFileUrl] = useState<string | undefined>(user.avatar);
     const [uploadProgress, setUploadProgress] = useState<number>(0);

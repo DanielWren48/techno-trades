@@ -31,10 +31,20 @@ export const useRegisterUser = () => {
 };
 
 export const useVerifyAccountUser = () => {
+    const queryClient = useQueryClient();
+    const { setUser } = useUserContext();
+
     return useMutation<AuthResponse<IUserResponse>, AuthResponse<ErrorResponse>, VerifyAccountData>({
         mutationFn: authApi.verifyAccount,
         onSuccess: (response) => {
-            console.log({ response });
+            console.log("success")
+            if (response.status === 'success' && response.data) {
+                const user = response.data
+                console.log(user)
+                setUser(user);
+                // Invalidate and refetch user session
+                queryClient.invalidateQueries({ queryKey: ['user-session'] });
+            }
         },
         onError: (error) => {
             console.error('Validation error:', error);
