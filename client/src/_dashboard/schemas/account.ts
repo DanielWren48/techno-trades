@@ -25,3 +25,9 @@ export const passwordUpdateSchema = z.object({
     path: ["newPasswordConfirm"]
 });
 export type PasswordUpdateSchemaType = z.infer<typeof passwordUpdateSchema>
+
+export const verifyAccountScheme = z.object({
+    email: z.string().email(),
+    otp: z.string().min(6, { message: "Your one-time password must be 6 characters." })
+});
+export type VerifyAccountSchemeType = z.infer<typeof verifyAccountScheme>

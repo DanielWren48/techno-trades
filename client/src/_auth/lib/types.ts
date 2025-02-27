@@ -49,7 +49,7 @@ export interface GoogleLoginData {
 
 export interface VerifyAccountData {
     email: string;
-    otp: string;
+    otp: number;
 }
 
 export interface EmailData {
