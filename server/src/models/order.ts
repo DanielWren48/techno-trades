@@ -109,16 +109,16 @@ const OrderSchema = new Schema<IOrder>({
     timestamps: true
 })
 
-export const OrderModel = model<IOrder>('Order', OrderSchema);
+export const Order = model<IOrder>('Order', OrderSchema);
 
-export const GetOrders = () => OrderModel.find().populate({
+export const GetOrders = () => Order.find().populate({
     path: 'user',
     model: 'User',
 });
 
-export const GetOrderById = (id: any) => OrderModel.findById({ id })
+export const GetOrderById = (id: any) => Order.findById({ id })
 
-export const GetOrdersBySessionId = (sessionId: string) => OrderModel.findOne({
+export const GetOrdersBySessionId = (sessionId: string) => Order.findOne({
     'paymentIntentDetails.sessionId': sessionId
 }).populate({
     path: 'user',
@@ -130,7 +130,7 @@ export const GetOrdersBySessionId = (sessionId: string) => OrderModel.findOne({
 
 export const GetCurrUserOrders = async function (userId: Types.ObjectId) {
     try {
-        const orders = await OrderModel.find({ user: userId }).populate({
+        const orders = await Order.find({ user: userId }).populate({
             path: 'products.product',
             model: 'Product',
         })
@@ -143,7 +143,7 @@ export const GetCurrUserOrders = async function (userId: Types.ObjectId) {
 
 export const UpdateOrderShippingStatusById = async (orderId: string, status: string) => {
     try {
-        return await OrderModel.findByIdAndUpdate(
+        return await Order.findByIdAndUpdate(
             orderId,
             { $set: { deliveryStatus: status } },
             { new: true }

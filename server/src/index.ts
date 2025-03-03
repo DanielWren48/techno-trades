@@ -6,11 +6,8 @@ import http from 'http';
 import cookieParser from "cookie-parser";
 import compression from "compression";
 import cors from 'cors';
-import productRoutes from "./routes/productRoutes";
-import stripe from "./routes/stripe";
 import helmet from "helmet";
 import mongoSanitize from 'express-mongo-sanitize'
-import orderRouter from "./routes/orderRouter";
 import path from 'path'
 import { corsOptions, helmetOptions } from "./config/site";
 import env from './config/config';
@@ -20,6 +17,8 @@ import { AppError } from "./config/handlers";
 import authRouter from "./controllers/auth";
 import userRouter from "./controllers/user";
 import shopRouter from "./controllers/products";
+import orderRouter from "./controllers/order";
+import stripeRouter from "./controllers/stripe";
 
 connectDB()
 
@@ -41,13 +40,12 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 const server = http.createServer(app)
 
-app.use("/api/stripe", stripe);
+app.use("/api/v1/stripe", stripeRouter);
 app.use(express.json())
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/shop", shopRouter)
-app.use('/api/users', userRouter)
-app.use('/api/orders', orderRouter)
-app.use('/api/products', productRoutes)
+app.use('/api/v1/users', userRouter)
+app.use('/api/v1/orders', orderRouter)
 app.use("/api/uploadthing", createUploadthingExpressHandler({ router: uploadRouter }));
 
 app.use(handleError)
