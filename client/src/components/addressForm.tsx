@@ -25,8 +25,8 @@ import { Checkbox } from "./ui/checkbox"
 
 const counties = [
     {
-        value: "united-kingdom",
-        label: "United Kingdom",
+        value: 'GB',
+        label: 'United Kingdom',
     }
 ];
 
@@ -44,9 +44,14 @@ const shippingAddressFormSchema = z.object({
     same_as_billing: z.boolean().default(true).optional(),
 })
 
-type ShippingAddressFormSchema = z.infer<typeof shippingAddressFormSchema>
+export type ShippingAddressFormSchema = z.infer<typeof shippingAddressFormSchema>
 
-export default function AddressForm() {
+
+interface ShippingFormProps {
+    setShippingAddress: React.Dispatch<React.SetStateAction<ShippingAddressFormSchema | undefined>>
+}
+
+export default function AddressForm({ setShippingAddress }: ShippingFormProps) {
     const form = useForm<ShippingAddressFormSchema>({
         resolver: zodResolver(shippingAddressFormSchema),
         defaultValues: {
@@ -56,6 +61,7 @@ export default function AddressForm() {
 
     function onSubmit(data: ShippingAddressFormSchema) {
         toast.info("Address Submited")
+        setShippingAddress(data)
     }
 
     return (
@@ -191,6 +197,7 @@ export default function AddressForm() {
                                         <Checkbox
                                             checked={field.value}
                                             onCheckedChange={field.onChange}
+                                            disabled
                                         />
                                     </FormControl>
                                     <div className="space-y-1 leading-none">
