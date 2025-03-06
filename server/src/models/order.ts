@@ -15,6 +15,15 @@ interface OrderShippingAddress {
     state: string;
 }
 
+export type ShippingType = 'free' | 'express';
+
+export interface ShippingOption {
+    type: ShippingType;
+    price: number;
+    minDeliveryDays: number;
+    maxDeliveryDays: number;
+}
+
 interface OrderShippingCost {
     amount_subtotal: number;
     amount_tax: number;
@@ -60,7 +69,7 @@ interface Order {
     subtotal: number;
     total: number;
     shippingAddress: OrderShippingAddress;
-    shippingCost: OrderShippingCost;
+    shippingOption: ShippingOption;
     deliveryStatus: string;
     paymentStatus: string;
     orderNumber: string;
@@ -96,12 +105,7 @@ const OrderSchema = new Schema<IOrder>({
     subtotal: { type: Number, required: true },
     total: { type: Number, required: true },
     shippingAddress: { type: Object, required: true },
-    shippingCost: {
-        amount_subtotal: { type: Number },
-        amount_tax: { type: Number },
-        amount_total: { type: Number },
-        shipping_rate: { type: String },
-    },
+    shippingOption: { type: Object, required: true },
     deliveryStatus: { type: String, default: "pending" },
     paymentStatus: { type: String, required: true },
     orderNumber: { type: String, required: true, unique: true },

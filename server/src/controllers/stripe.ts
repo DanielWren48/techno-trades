@@ -7,11 +7,14 @@ import { ErrorCode, RequestError } from "../config/handlers";
 import { CustomResponse } from "../config/utils";
 import ENV from "../config/config";
 import { handleStripeEvent } from "../managers/orders";
+import { IShippingAddress } from "../models/users";
+import { User } from '../models/users';
+import { ShippingOption } from "../models/order";
 
 const stripeRouter = Router();
 const stripe = new Stripe(ENV.STRIPE_SECRET_KEY);
 
-interface OrderItem {
+export interface OrderItem {
     productId: string;
     quantity: number;
 }
@@ -129,11 +132,28 @@ stripeRouter.post("/create-checkout-session", express.json(), asyncHandler(async
 }));
 
 stripeRouter.post("/create-payment-intent", express.json(), authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-    const user = req.user
-    const { userId, order } = req.body as { userId: string; order: OrderItem[] };
+    let user = req.user
+    const { userId, order, shippingAddress, selectedShippingOption } = req.body as {
+        userId: string;
+        order: OrderItem[];
+        shippingAddress: IShippingAddress & { save_address: boolean };
+        selectedShippingOption: ShippingOption
+    };
 
     if (!user || user._id.toString() !== userId) {
         throw new RequestError("Invalid User", 401, ErrorCode.INVALID_OWNER);
+    }
+
+    if (shippingAddress === undefined) {
+        throw new RequestError("Invalid Shpping Address", 401, ErrorCode.NON_EXISTENT);
+    }
+
+    if (shippingAddress.save_address) {
+        const updatedUser = await User.findByIdAndUpdate(user._id, { $set: { shippingAddress } }, { new: true });
+        if (!updatedUser) {
+            throw new RequestError("User not found", 404, ErrorCode.NON_EXISTENT);
+        }
+        user = updatedUser
     }
 
     let amount = 0;
@@ -158,12 +178,12 @@ stripeRouter.post("/create-payment-intent", express.json(), authMiddleware, asyn
     }
 
     const customer = await stripe.customers.create({
-        name: user.firstName + " " + user.lastName,
+        name: [user.firstName, user.firstName].join(' '),
         email: user.email,
         metadata: {
             userId: user._id.toString(),
             cart: JSON.stringify(order)
-        }
+        },
     })
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -174,8 +194,21 @@ stripeRouter.post("/create-payment-intent", express.json(), authMiddleware, asyn
         metadata: {
             userId: user._id.toString(),
             cart: JSON.stringify(order),
+            shipping_option: JSON.stringify(selectedShippingOption),
             amount: amount,
-        }
+            amount_total: amount + selectedShippingOption.price,
+        },
+        shipping: {
+            address: {
+                line1: shippingAddress.line1,
+                line2: shippingAddress.line2,
+                city: shippingAddress.city,
+                state: shippingAddress.state,
+                postal_code: shippingAddress.postal_code,
+                country: shippingAddress.country,
+            },
+            name: [user.firstName, user.firstName].join(' '),
+        },
     });
 
     res.send({ clientSecret: paymentIntent.client_secret });

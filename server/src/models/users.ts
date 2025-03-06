@@ -1,4 +1,5 @@
 import { Query, Schema, Types, model } from 'mongoose';
+import Stripe from 'stripe';
 
 enum AUTH_TYPE {
     PASSWORD = "Password",
@@ -15,6 +16,8 @@ interface IToken {
     refresh: string;
 }
 
+interface IShippingAddress extends Stripe.ShippingAddressParam { }
+
 interface IUser {
     _id: Types.ObjectId;
     firstName: string;
@@ -29,6 +32,7 @@ interface IUser {
     tokens: IToken[];
     otp: number | null;
     otpExpiry: Date;
+    shippingAddress: IShippingAddress;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -51,6 +55,9 @@ const UserSchema = new Schema<IUser>({
     ],
     otp: { type: Number, null: true, blank: true },
     otpExpiry: { type: Date, null: true, blank: true },
+    shippingAddress: [
+        { type: Object, default: null, required: false }
+    ],
 }, { timestamps: true });
 
 
@@ -61,4 +68,4 @@ UserSchema.pre(/^find/, function (this: Query<IUser[], IUser>, next) {
 
 // Create the User model
 const User = model<IUser>('User', UserSchema);
-export { User, IUser, ACCOUNT_TYPE, AUTH_TYPE };
+export { User, IUser, IShippingAddress, ACCOUNT_TYPE, AUTH_TYPE };
