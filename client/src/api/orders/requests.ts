@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import axios, { AxiosError } from 'axios';
 import { Order } from '@/types/order';
-import { BaseUserResponse, ErrorResponse, IOrdersResponse, NewOrder, UpdateShippingStatus } from './types';
+import { BaseUserResponse, ErrorResponse, IOrderResponse, IOrdersResponse, NewOrder, UpdateShippingStatus } from './types';
 
 // API client setup
 const api = axios.create({
@@ -44,12 +44,12 @@ export const ordersApi = {
             return handleAuthError(error) as BaseUserResponse<IOrdersResponse>;
         }
     },
-    getOrdersBySessionId: async (sessionId: string): Promise<BaseUserResponse<Order>> => {
+    getOrdersBySessionId: async (sessionId: string): Promise<BaseUserResponse<IOrderResponse>> => {
         try {
-            const response = await api.get<BaseUserResponse<Order>>(`/${sessionId}`);
+            const response = await api.get<BaseUserResponse<IOrderResponse>>(`/${sessionId}`);
             return response.data;
         } catch (error) {
-            return handleAuthError(error) as BaseUserResponse<Order>;
+            return handleAuthError(error) as BaseUserResponse<IOrderResponse>;
         }
     },
     getMyOrders: async (): Promise<BaseUserResponse<IOrdersResponse>> => {

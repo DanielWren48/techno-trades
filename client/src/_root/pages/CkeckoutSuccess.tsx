@@ -1,18 +1,14 @@
-import { useEffect } from "react";
-import { useCart } from "@/hooks/useCart";
 import { useLocation } from "react-router-dom";
 import { OrderInvoice } from "@/components/shared";
-import { useGetOrderBySessionId } from "@/lib/react-query/queries/order-queries";
+import { useGetOrderBySessionId } from "@/api/orders/queries";
 
 const CkeckoutSuccess: React.FC = () => {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
-  const sessionId = params.get('session_id');
+  const paymentIntent = params.get('payment_intent');
 
-  const { clearCart } = useCart();
-  const { data: order, isLoading: orderLoading, isError: orderError } = useGetOrderBySessionId(sessionId!);
-
-  useEffect(() => { clearCart() }, [order, clearCart]);
+  const { data, isLoading: orderLoading, isError: orderError } = useGetOrderBySessionId(paymentIntent);
+  const order = data?.data?.order
 
   if (orderLoading) {
     return <div>Loading...</div>;

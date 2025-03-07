@@ -16,6 +16,10 @@ export interface IOrdersResponse {
     orders: Order[];
 }
 
+export interface IOrderResponse {
+    order: Order;
+}
+
 export interface NewOrder {
     order: { productId: string; quantity: number }[];
     userId: string;
