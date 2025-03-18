@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { AlertTriangleIcon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useSendPasswordResetOtp } from "../lib/queries";
+import { useSendPasswordResetOtp } from "@/api/auth/queries";
 import { userEmailSchema, UserEmailSchemaType } from "../schemas";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 

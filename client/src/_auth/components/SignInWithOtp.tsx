@@ -1,4 +1,4 @@
-import { useSignInWithOtp } from "../lib/queries";
+import { useSignInWithOtp } from "@/api/auth/queries";
 import {
     Form,
     FormControl,

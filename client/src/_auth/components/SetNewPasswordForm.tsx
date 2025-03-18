@@ -19,7 +19,7 @@ import { Fragment, useEffect, useState } from "react";
 import { REGEXP_ONLY_DIGITS } from "input-otp"
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useSetNewPassword } from "../lib/queries";
+import { useSetNewPassword } from "@/api/auth/queries";
 import { useNavigate } from "react-router-dom";
 import { passwordReset, PasswordResetType, UserEmailSchemaType } from "../schemas";
 import { AuthButton } from "./AuthButton";

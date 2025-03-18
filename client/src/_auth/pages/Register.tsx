@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { RegisterValidationType } from '../schemas';
 import { Shell } from "@/components/dashboard/shell";
-import { useResendVerificationEmail } from '../lib/queries';
+import { useResendVerificationEmail } from '@/api/auth/queries';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { VerifyAccountForm, RegisterForm, GoogleLoginButton } from '../components';
 import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion"

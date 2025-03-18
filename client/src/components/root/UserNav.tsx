@@ -27,7 +27,7 @@ import { Icons } from "../shared";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserContext } from "@/context/AuthContext";
 import { first } from "lodash";
-import { useLogoutUser } from "@/_auth/lib/queries";
+import { useLogoutUser } from "@/api/auth/queries";
 
 export function UserNav() {
   const { mutate: signOut } = useLogoutUser();

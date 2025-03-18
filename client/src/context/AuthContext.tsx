@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { ACCOUNT_TYPE, AUTH_TYPE, IUser } from "@/types";
-import { useGetUserSession } from "@/_auth/lib/queries";
+import { useGetUserSession } from "@/api/auth/queries";
 
 export const INITIAL_USER: IUser = {
   _id: '',

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLoginUser } from "../lib/queries";
+import { useLoginUser } from "@/api/auth/queries";
 import { Input } from "@/components/ui/input";
 import { AuthButton } from "./AuthButton";
 import { Link, useNavigate } from "react-router-dom";

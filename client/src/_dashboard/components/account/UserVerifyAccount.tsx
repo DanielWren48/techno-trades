@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUserContext } from "@/context/AuthContext";
 import { AuthButton } from "@/_auth/components/AuthButton";
-import { useResendVerificationEmail, useVerifyAccountUser } from "@/_auth/lib/queries";
+import { useResendVerificationEmail, useVerifyAccountUser } from "@/api/auth/queries";
 import { verifyAccountScheme, VerifyAccountSchemeType } from "@/_dashboard/schemas/account";
 
 export default function VerifyUserAccount() {

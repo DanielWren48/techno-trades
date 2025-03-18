@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useVerifyAccountUser } from "../lib/queries";
+import { useVerifyAccountUser } from "@/api/auth/queries";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { Fragment, useEffect } from "react";
 import { RegisterValidationType, OtpSchemaType, otpSchema } from "../schemas";
@@ -42,7 +42,7 @@ export default function VerifyAccountForm({ userData, activeTab, setActiveTab, t
     }, [errors, isSubmitting]);
 
     async function onSubmit(data: OtpSchemaType) {
-        const { message, status } = await verifyAccount({ otp: data.otp, email: userData!.email });
+        const { message, status } = await verifyAccount({ otp: +data.otp, email: userData!.email });
         if (status === 'failure') {
             form.setError("otp", { message })
             form.setFocus('otp')
