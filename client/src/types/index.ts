@@ -1,3 +1,4 @@
+import { ShippingAddressFormSchema } from "@/components/addressForm";
 import { Icons } from "@/components/shared";
 
 //-------------USER TYPES----------------------------------
@@ -21,6 +22,7 @@ export interface IUser {
     isEmailVerified: boolean;
     authType: AUTH_TYPE;
     accountType: ACCOUNT_TYPE;
+    shippingAddress?: [ShippingAddressFormSchema] | undefined
     createdAt?: Date;
     updatedAt?: Date;
 }

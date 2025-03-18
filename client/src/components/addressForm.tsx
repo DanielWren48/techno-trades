@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/select"
 import { toast } from "sonner"
 import { Checkbox } from "./ui/checkbox"
+import { useUserContext } from "@/context/AuthContext"
+import { Fragment } from "react"
 
 const counties = [
     {
@@ -31,35 +33,43 @@ const counties = [
 ];
 
 const shippingAddressFormSchema = z.object({
-    firstName: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 100 characters." }),
-    lastName: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 100 characters." }),
-    address: z.string().min(1, 'Address is required'),
-    appartment: z.string().optional(),
+    line1: z.string().min(1, 'Address is required'),
+    line2: z.string().optional(),
     city: z.string().min(1, 'City is required'),
     state: z.string().optional(),
-    postcode: z.string().min(5, 'Postcode must be at least 5 characters'),
+    postal_code: z.string().min(5, 'Postcode must be at least 5 characters'),
     country: z.enum(counties.map((county) => county.value) as [string, ...string[]], {
         required_error: "Country is required",
     }),
-    same_as_billing: z.boolean().default(true).optional(),
+    save_address: z.boolean().optional(),
 })
 
 export type ShippingAddressFormSchema = z.infer<typeof shippingAddressFormSchema>
-
 
 interface ShippingFormProps {
     setShippingAddress: React.Dispatch<React.SetStateAction<ShippingAddressFormSchema | undefined>>
 }
 
 export default function AddressForm({ setShippingAddress }: ShippingFormProps) {
+    const { user } = useUserContext();
     const form = useForm<ShippingAddressFormSchema>({
         resolver: zodResolver(shippingAddressFormSchema),
-        defaultValues: {
-            same_as_billing: true
-        }
+        // defaultValues: {
+        //     line1: '8 Barnton Rd',
+        //     line2: '',
+        //     city: 'Dumfries',
+        //     country: 'GB',
+        //     postal_code: 'DG1 4HL',
+        // }
     })
 
+    const setAddress = (address: string) => {
+        const selectedAddress = JSON.parse(address) as ShippingAddressFormSchema
+        setShippingAddress(selectedAddress)
+    }
+
     function onSubmit(data: ShippingAddressFormSchema) {
+        console.log(data)
         toast.info("Address Submited")
         setShippingAddress(data)
     }
@@ -69,42 +79,41 @@ export default function AddressForm({ setShippingAddress }: ShippingFormProps) {
             <CardHeader>
                 <CardTitle className="text-xl font-semibold">Shipping Address</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col gap-5">
+                <Select onValueChange={setAddress}>
+                    <SelectTrigger className="h-12">
+                        <SelectValue placeholder="Select your address" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            {user.shippingAddress?.map((address, index) => (
+                                <SelectItem key={index} value={JSON.stringify(address)}>
+                                    <span className="flex items-center">
+                                        {[address.line1, address.line2, address.city, address.postal_code, address.country].filter(Boolean).join(", ")}
+                                    </span>
+                                </SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+
+                <Fragment>
+                    <div className="flex items-center justify-between my-2">
+                        <span className="w-[45%] border-b dark:border-gray-600"></span>
+                        <div className="text-sm text-center text-gray-500 dark:text-gray-400">or</div>
+                        <span className="w-[45%] border-b dark:border-gray-400"></span>
+                    </div>
+                </Fragment>
+
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-3">
-                        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:gap-4">
-                            <FormField
-                                control={form.control}
-                                name="firstName"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <Input type="text" placeholder="First Name" className="block w-full px-4 py-2 h-12"   {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="lastName"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <Input type="text" placeholder="Last Name" className="block w-full px-4 py-2 h-12"{...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
                         <FormField
                             control={form.control}
-                            name="address"
+                            name="line1"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Input type="text" className="h-12" placeholder="Address"{...field} />
+                                        <Input type="text" className="h-12" placeholder="Address Line 1"{...field} />
                                     </FormControl>
                                     <FormMessage className="shad-form_message" />
                                 </FormItem>
@@ -112,11 +121,11 @@ export default function AddressForm({ setShippingAddress }: ShippingFormProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="appartment"
+                            name="line2"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Input type="text" className="h-12" placeholder="Appartment/Suite (Optional)"{...field} />
+                                        <Input type="text" className="h-12" placeholder="Address Line 2 (Optional)"{...field} />
                                     </FormControl>
                                     <FormMessage className="shad-form_message" />
                                 </FormItem>
@@ -177,7 +186,7 @@ export default function AddressForm({ setShippingAddress }: ShippingFormProps) {
                             />
                             <FormField
                                 control={form.control}
-                                name="postcode"
+                                name="postal_code"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormControl>
@@ -190,19 +199,18 @@ export default function AddressForm({ setShippingAddress }: ShippingFormProps) {
                         </div>
                         <FormField
                             control={form.control}
-                            name="same_as_billing"
+                            name="save_address"
                             render={({ field }) => (
                                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-2 pl-1">
                                     <FormControl>
                                         <Checkbox
                                             checked={field.value}
                                             onCheckedChange={field.onChange}
-                                            disabled
                                         />
                                     </FormControl>
                                     <div className="space-y-1 leading-none">
                                         <FormLabel className="font-medium">
-                                            My billing address is the same as my shipping address.
+                                            Save my address for future purchases.
                                         </FormLabel>
                                     </div>
                                 </FormItem>

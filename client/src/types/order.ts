@@ -8,12 +8,14 @@ type OrderProduct = {
 }
 
 type OrderShippingAddress = {
-    city: string;
-    country: string;
-    line1: string;
-    line2: string | null;
-    postal_code: string;
-    state: string;
+    address: {
+        city: string;
+        country: string;
+        line1: string;
+        line2: string | null;
+        postal_code: string;
+        state: string;
+    },
 }
 
 export type PaymentMethodDetails = {

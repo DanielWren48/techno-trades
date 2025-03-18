@@ -108,14 +108,14 @@ const OrderInvoice = ({ order, className }: Props) => {
                   <span className="block">
                     {order.paymentIntentDetails.billing_details.name}
                   </span>
-                  <span className="block">{order.shippingAddress.line1}</span>
-                  <span className="block">{order.shippingAddress.line2}</span>
-                  <span className="block">{order.shippingAddress.state}</span>
+                  <span className="block">{order.shippingAddress.address.line1}</span>
+                  <span className="block">{order.shippingAddress.address.line2}</span>
+                  <span className="block">{order.shippingAddress.address.state}</span>
                   <span className="block">
-                    {order.shippingAddress.city},{" "}
-                    {order.shippingAddress.postal_code}
+                    {order.shippingAddress.address.city},{" "}
+                    {order.shippingAddress.address.postal_code}
                   </span>
-                  <span className="block">{order.shippingAddress.country}</span>
+                  <span className="block">{order.shippingAddress.address.country}</span>
                 </address>
               </dd>
             </div>
@@ -188,7 +188,7 @@ const OrderInvoice = ({ order, className }: Props) => {
             <div className="flex justify-between">
               <dt className="font-medium text-gray-900 dark:text-light-1">Shipping</dt>
               <dd className="text-gray-900 dark:text-light-2/80">
-                {formatPrice(order.shippingCost.amount_total / 100, {
+                {formatPrice(0, {
                   currency: "GBP",
                 })}
               </dd>
@@ -203,7 +203,7 @@ const OrderInvoice = ({ order, className }: Props) => {
         </div>
       </div>
 
-    </div>
+    </div >
   );
 };
 
