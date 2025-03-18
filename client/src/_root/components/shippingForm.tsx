@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
-import { Label } from "./ui/label";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { formatDate, formatPrice } from "@/lib/utils";
 
 export interface ShippingOption {

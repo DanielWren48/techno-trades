@@ -21,9 +21,9 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Checkbox } from "./ui/checkbox"
 import { useUserContext } from "@/context/AuthContext"
 import { Fragment } from "react"
+import { Checkbox } from "@/components/ui/checkbox"
 
 const counties = [
     {

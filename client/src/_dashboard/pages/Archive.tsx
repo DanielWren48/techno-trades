@@ -8,18 +8,14 @@ import { useGetArchivedProducts } from "@/lib/react-query/queries/product-querie
 const Archive = () => {
     const { data, isLoading } = useGetArchivedProducts();
 
-    return isLoading ? (
-        <>
-            <h1>loading</h1>
-        </>
-    ) : (
+    return (
         <Shell>
             <Header
                 title="Archive"
                 description="Manage all the Archived prioducts here."
             />
             <Separator />
-            <DataTable columns={columns} data={data?.data.products} />
+            <DataTable columns={columns} data={data?.data.products} loading={isLoading} />
         </Shell>
     );
 };

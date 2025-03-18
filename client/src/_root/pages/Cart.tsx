@@ -10,7 +10,7 @@ import { useUserContext } from "@/context/AuthContext";
 import { buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
-const Cart = () => {
+export default function Cart() {
   const { items } = useCart();
   const { isAuthenticated, user } = useUserContext();
   const [isMounted, setIsMounted] = useState<boolean>(false);
@@ -24,7 +24,7 @@ const Cart = () => {
     <div className="flex flex-col flex-1 min-h-screen items-center">
       <div className="w-full px-2.5 md:px-10 my-20 max-w-screen-xl">
 
-        {!user.isEmailVerified &&
+        {isAuthenticated && !user.isEmailVerified &&
           <div className="p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800" role="alert">
             <div className="flex items-center">
               <Icons.info />
@@ -182,5 +182,3 @@ const Cart = () => {
     </div>
   );
 };
-
-export default Cart;

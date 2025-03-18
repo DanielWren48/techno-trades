@@ -15,9 +15,11 @@ export const INITIAL_USER: IUser = {
   firstName: '',
   lastName: '',
   email: '',
-  avatar: null,
+  avatar: undefined,
   authType: AUTH_TYPE.PASSWORD,
-  accountType: ACCOUNT_TYPE.BUYER
+  accountType: ACCOUNT_TYPE.BUYER,
+  isActive: false,
+  isEmailVerified: false
 };
 
 interface IAuthContext {

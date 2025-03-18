@@ -3,19 +3,21 @@ import { cn } from "@/lib/utils";
 import { Shell } from "@/components/dashboard/shell";
 import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/dashboard/header";
+import { useGetProducts } from "@/api/products/queries";
 import { categories } from "@/components/tables/products-table/filters";
-import { useGetProducts } from "@/lib/react-query/queries/product-queries";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const Categories = () => {
-    const { data: products } = useGetProducts();
+  const { data, isLoading: allProductsLoading } = useGetProducts();
+
+  const products = data?.data?.items
 
     const getProductCountByCategory = useMemo(() => {
-        if (!products || !products.data.products) {
+        if (!products) {
             return {};
         }
 
-        return products.data.products.reduce((countByCategory: { [x: string]: any; }, product: { category: string; }) => {
+        return products.reduce((countByCategory: { [x: string]: any; }, product: { category: string; }) => {
             const category = product.category;
             countByCategory[category] = (countByCategory[category] || 0) + 1;
             return countByCategory;
