@@ -2,17 +2,17 @@ import { Loader2 } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useCallback, useEffect, useState } from "react";
 import { cn, formatPrice } from "@/lib/utils";
-import StripePaymentForm from '@/components/StripePaymentForm'
-import AddressForm, { ShippingAddressFormSchema } from "@/components/addressForm";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CartItem } from "@/components/root";
 import { buttonVariants } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import ShippingForm, { ShippingOption } from "@/components/shippingForm";
 import { useUserContext } from "@/context/AuthContext";
-import { createPaymentIntent } from "@/lib/backend-api/orders";
 import { Icons } from "@/components/shared";
+import { ShippingOption } from "../components/shippingForm";
+import { ShippingAddressFormSchema } from "../components/addressForm";
+import { PaymentForm, AddressForm, ShippingForm } from "../components";
+import { stripeApi } from "@/api/stripe/request";
 
 export default function Checkout() {
     const { items, clearCart } = useCart();
@@ -38,7 +38,7 @@ export default function Checkout() {
     }, []);
 
     const fetchPaymentIntent = useCallback(async () => {
-        if (!isAuthenticated || !user?._id || items.length === 0) {
+        if (!isAuthenticated || !user?._id || items.length === 0 || !shippingAddress || !selectedShippingOption) {
             return;
         }
 
@@ -51,9 +51,11 @@ export default function Checkout() {
                 quantity: quantity,
             }));
 
-            const clientSecret = await createPaymentIntent({
+            const clientSecret = await stripeApi.createPaymentIntent({
                 order: order,
-                userId: user._id
+                userId: user._id,
+                shippingAddress,
+                selectedShippingOption
             });
 
             if (clientSecret) {
@@ -68,7 +70,7 @@ export default function Checkout() {
         } finally {
             setLoading(false);
         }
-    }, [items, user._id]);
+    }, [items, user._id, shippingAddress, selectedShippingOption]);
 
     useEffect(() => {
         fetchPaymentIntent();
@@ -104,12 +106,15 @@ export default function Checkout() {
                                 </div>
                             </div>
                         }
-                        <StripePaymentForm
-                            loading={loading}
-                            clientSecret={clientSecret}
-                            onPaymentSuccess={handlePaymentSuccess}
-                            onPaymentError={handlePaymentError}
-                        />
+                        {shippingAddress &&
+                            <PaymentForm
+                                user={user}
+                                loading={loading}
+                                clientSecret={clientSecret}
+                                shippingAddress={shippingAddress}
+                                onPaymentSuccess={handlePaymentSuccess}
+                                onPaymentError={handlePaymentError}
+                            />}
                     </div>
                     <section className="border lg:col-span-2 mt-16 rounded-lg bg-zinc-50 dark:bg-dark-4 px-4 py-6 sm:p-6 lg:mt-0 lg:p-8 h-fit relative">
                         <div className="w-full flex flex-row justify-between items-center mb-3">
