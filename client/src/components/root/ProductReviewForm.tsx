@@ -11,7 +11,6 @@ import { Rating } from "@smastrom/react-rating";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUserContext } from "@/context/AuthContext";
 import { ProductReviewValidation } from "@/lib/validation";
-import { useCreateReview } from "@/lib/react-query/queries/review-queries";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form";
 
 type ReviewFormProps = {
@@ -20,7 +19,7 @@ type ReviewFormProps = {
 
 const ProductReviewForm = ({ product }: ReviewFormProps) => {
   const { isAuthenticated } = useUserContext();
-  const { mutateAsync: CreateReview } = useCreateReview()
+  // const { mutateAsync: CreateReview } = useCreateReview()
 
   const form = useForm<z.infer<typeof ProductReviewValidation>>({
     resolver: zodResolver(ProductReviewValidation),
@@ -32,26 +31,26 @@ const ProductReviewForm = ({ product }: ReviewFormProps) => {
   });
 
   const handleSubmit = async (value: z.infer<typeof ProductReviewValidation>) => {
-    if (isAuthenticated) {
-      const res = await CreateReview({
-        productId: product._id!,
-        rating: value.rating,
-        title: value.title,
-        comment: value.comment
-      })
-      if (res && (res.status === 201 && res.statusText === "Created")) {
-        form.reset()
-        toast.success('Success', {
-          description: "Review Published",
-          duration: 4000,
-        })
-      } else {
-        toast.error('Oops, Someone Fucked Up', {
-          description: "Error Creating Reivew",
-          duration: 4000,
-        })
-      }
-    }
+    // if (isAuthenticated) {
+    //   const res = await CreateReview({
+    //     productId: product._id!,
+    //     rating: value.rating,
+    //     title: value.title,
+    //     comment: value.comment
+    //   })
+    //   if (res && (res.status === 201 && res.statusText === "Created")) {
+    //     form.reset()
+    //     toast.success('Success', {
+    //       description: "Review Published",
+    //       duration: 4000,
+    //     })
+    //   } else {
+    //     toast.error('Oops, Someone Fucked Up', {
+    //       description: "Error Creating Reivew",
+    //       duration: 4000,
+    //     })
+    //   }
+    // }
   };
 
   return (

@@ -21,8 +21,8 @@ import {
 import { deliveryStatuses } from "../filters";
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useUpdateShippingStatus } from "@/lib/react-query/queries/order-queries";
 import { toast } from "sonner";
+import { useUpdateShippingStatus } from "@/api/orders/queries";
 
 type EditProps = {
   order: OrderType;
@@ -47,11 +47,11 @@ export default function ShippingStatusDialog({ order, setOpen }: EditProps) {
   });
 
   const handleSubmit = async (value: z.infer<typeof deliveryStatusSchema>) => {
-    const res = await updateStatus({ orderId: value._id, status: value.deliveryStatus });
-    if (res && (res.status === 200 && !isError)) {
-      toast.success('Success', { description: "Order status updated to " + value.deliveryStatus })
-    } else if (res === false || isError) {
-      toast.error('Success', { description: "An error occured when updating order status. Please try again!" })
+    const { status, message } = await updateStatus({ orderId: value._id, status: value.deliveryStatus });
+    if (status === 'success') {
+      toast.success(message);
+    } else {
+      toast.error(message);
     }
     setOpen(false)
   };

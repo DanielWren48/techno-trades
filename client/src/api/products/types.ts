@@ -33,3 +33,9 @@ export interface AllProductsResponse {
     totalPages: number;
     itemsPerPage: number;
 }
+
+export interface UpdateProductDiscount {
+    id: string;
+    isDiscounted: boolean;
+    discountedPrice?: number;
+}

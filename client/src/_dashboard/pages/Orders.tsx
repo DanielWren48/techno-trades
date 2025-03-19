@@ -10,11 +10,12 @@ import { cn, formatDate, formatPrice } from "@/lib/utils";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import PDFExportComponent from "@/components/shared/ExportToPDF";
 import { CardSkeleton } from "@/components/dashboard/card-skeleton";
-import { useGetMyOrders } from "@/lib/react-query/queries/order-queries";
+import { useGetMyOrders } from "@/api/orders/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function DashboardOrders() {
-  const { data: orders, isLoading: loadingOrders, isError: errorLoaidngOrders } = useGetMyOrders();
+  const { data, isLoading: loadingOrders, isError: errorLoaidngOrders } = useGetMyOrders();
+  const orders = data?.data?.orders
 
   const [orderDetails, setOrderDetails] = useState<Order>();
   const [open, setOpen] = useState<boolean>(false);

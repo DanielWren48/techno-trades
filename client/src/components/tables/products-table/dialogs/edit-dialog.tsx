@@ -23,7 +23,6 @@ import { categories } from "../filters";
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { useUpdateProduct } from "@/lib/react-query/queries/product-queries";
 import { useUserContext } from "@/context/AuthContext";
 import { toast } from "sonner";
 
@@ -34,7 +33,7 @@ type EditProps = {
 
 export default function EditDialog({ product, setOpen }: EditProps) {
   const { user } = useUserContext();
-  const { mutateAsync: updateProduct, isError: isUpdatingError } = useUpdateProduct();
+  // const { mutateAsync: updateProduct, isError: isUpdatingError } = useUpdateProduct();
 
   const form = useForm<z.infer<typeof ProductCreateValidation>>({
     resolver: zodResolver(ProductCreateValidation),
@@ -52,18 +51,18 @@ export default function EditDialog({ product, setOpen }: EditProps) {
   });
 
   const handleSubmit = async (value: z.infer<typeof ProductCreateValidation>) => {
-    const updatedProduct = await updateProduct({
-      _id: product._id,
-      ...value,
-      userId: user._id,
-    })
-    setOpen?.(false);
-    if(updatedProduct && updatedProduct.status === 200 && updatedProduct.data.message === "Product Updated"){
-      toast.success('Product updated successfully')
-    }
-    if((updatedProduct && updatedProduct.status === 500) || isUpdatingError){
-      toast.error('Error while updating Product')
-    }
+    // const updatedProduct = await updateProduct({
+    //   _id: product._id,
+    //   ...value,
+    //   userId: user._id,
+    // })
+    // setOpen?.(false);
+    // if(updatedProduct && updatedProduct.status === 200 && updatedProduct.data.message === "Product Updated"){
+    //   toast.success('Product updated successfully')
+    // }
+    // if((updatedProduct && updatedProduct.status === 500) || isUpdatingError){
+    //   toast.error('Error while updating Product')
+    // }
   }
 
   return (

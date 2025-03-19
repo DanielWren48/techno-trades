@@ -1,6 +1,6 @@
 import { Order } from "@/types/order";
 
-export interface BaseUserResponse<T> {
+export interface BaseResponse<T> {
     status: 'success' | 'failure';
     message: string;
     code?: string;
@@ -18,11 +18,6 @@ export interface IOrdersResponse {
 
 export interface IOrderResponse {
     order: Order;
-}
-
-export interface NewOrder {
-    order: { productId: string; quantity: number }[];
-    userId: string;
 }
 
 export interface UpdateShippingStatus {

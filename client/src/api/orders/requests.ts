@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import axios, { AxiosError } from 'axios';
 import { Order } from '@/types/order';
-import { BaseUserResponse, ErrorResponse, IOrderResponse, IOrdersResponse, NewOrder, UpdateShippingStatus } from './types';
+import { BaseResponse, ErrorResponse, IOrderResponse, IOrdersResponse, UpdateShippingStatus } from './types';
 
 // API client setup
 const api = axios.create({
@@ -25,7 +25,7 @@ api.interceptors.request.use(
 // Custom error handler
 const handleAuthError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
-        const err = error as AxiosError<BaseUserResponse<ErrorResponse>>;
+        const err = error as AxiosError<BaseResponse<ErrorResponse>>;
         if (err.response?.data) {
             return err.response.data;
         }
@@ -36,56 +36,36 @@ const handleAuthError = (error: unknown) => {
 
 // API functions
 export const ordersApi = {
-    getAllOrders: async (): Promise<BaseUserResponse<IOrdersResponse>> => {
+    getAllOrders: async (): Promise<BaseResponse<IOrdersResponse>> => {
         try {
-            const response = await api.get<BaseUserResponse<IOrdersResponse>>('');
+            const response = await api.get<BaseResponse<IOrdersResponse>>('');
             return response.data;
         } catch (error) {
-            return handleAuthError(error) as BaseUserResponse<IOrdersResponse>;
+            return handleAuthError(error) as BaseResponse<IOrdersResponse>;
         }
     },
-    getOrdersBySessionId: async (sessionId: string): Promise<BaseUserResponse<IOrderResponse>> => {
+    getOrdersBySessionId: async (sessionId: string): Promise<BaseResponse<IOrderResponse>> => {
         try {
-            const response = await api.get<BaseUserResponse<IOrderResponse>>(`/${sessionId}`);
+            const response = await api.get<BaseResponse<IOrderResponse>>(`/${sessionId}`);
             return response.data;
         } catch (error) {
-            return handleAuthError(error) as BaseUserResponse<IOrderResponse>;
+            return handleAuthError(error) as BaseResponse<IOrderResponse>;
         }
     },
-    getMyOrders: async (): Promise<BaseUserResponse<IOrdersResponse>> => {
+    getMyOrders: async (): Promise<BaseResponse<IOrdersResponse>> => {
         try {
-            const response = await api.get<BaseUserResponse<IOrdersResponse>>('/my-orders');
+            const response = await api.get<BaseResponse<IOrdersResponse>>('/my-orders');
             return response.data;
         } catch (error) {
-            return handleAuthError(error) as BaseUserResponse<IOrdersResponse>;
+            return handleAuthError(error) as BaseResponse<IOrdersResponse>;
         }
     },
-    updateShippingStatus: async (data: UpdateShippingStatus): Promise<BaseUserResponse<Order>> => {
+    updateShippingStatus: async (data: UpdateShippingStatus): Promise<BaseResponse<Order>> => {
         try {
-            const response = await axios.patch<BaseUserResponse<Order>>("/update-shipping-status", data);
+            const response = await axios.patch<BaseResponse<Order>>("/update-shipping-status", data);
             return response.data;
         } catch (error) {
-            return handleAuthError(error) as BaseUserResponse<Order>;
-        }
-    },
-    // STRIPE ENDPOINTS
-    createCheckoutSession: async (data: NewOrder): Promise<string | undefined> => {
-        try {
-            const { data: responseData } = await axios.post("/api/v1/stripe/create-checkout-session", data);
-            if (responseData && responseData.url) {
-                window.location.href = responseData.url;
-            }
-            return responseData;
-        } catch (error) {
-            console.error("Error during checkout:", error);
-        }
-    },
-    createPaymentIntent: async (data: NewOrder): Promise<string | undefined> => {
-        try {
-            const response = await axios.post<string | undefined>("/api/v1/stripe/create-payment-intent", data);
-            return response.data;
-        } catch (error) {
-            console.error("Error during checkout:", error);
+            return handleAuthError(error) as BaseResponse<Order>;
         }
     },
 }

@@ -9,8 +9,6 @@ import { cn, convertFileToUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Loader2, RotateCcw, X } from "lucide-react";
 import { toast } from "sonner";
-import { deleteMediaFilesByKey } from "@/lib/backend-api/medias";
-import { useUpdateProduct } from "@/lib/react-query/queries/product-queries";
 import { IUpdateProduct, ProductImage } from "@/types";
 import { Progress } from "@/components/ui/progress";
 
@@ -29,7 +27,7 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const { user } = useUserContext();
 
-  const { mutateAsync: updateProduct, isPending: isLoadingUpdate, isError: isUpdatingError } = useUpdateProduct();
+  // const { mutateAsync: updateProduct, isPending: isLoadingUpdate, isError: isUpdatingError } = useUpdateProduct();
 
   const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
     const newFiles = [...files, ...acceptedFiles];
@@ -99,13 +97,13 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
     if (DeleteFileUrl.length > 0) {
       // If there are images to delete
       const keysToDelete = getKeysToDelete();
-      toast.promise(() => deleteMediaFilesByKey([...keysToDelete]),
-        {
-          loading: 'Removing your old file...',
-          success: () => 'Removed old file',
-          error: () => 'Error deleting files.',
-        }
-      );
+      // toast.promise(() => deleteMediaFilesByKey([...keysToDelete]),
+      //   {
+      //     loading: 'Removing your old file...',
+      //     success: () => 'Removed old file',
+      //     error: () => 'Error deleting files.',
+      //   }
+      // );
 
       // Update the product without the deleted images
       updatedProduct = {
@@ -154,15 +152,15 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
 
     console.log(newProduct);
 
-    // Add the logic to update the product in the database
-    const fullUpdatedProduct = await updateProduct(newProduct);
-    if (fullUpdatedProduct && fullUpdatedProduct.status === 200 && fullUpdatedProduct.data.message === "Product Updated") {
-      toast.success('Product updated successfully')
-    }
-    if ((fullUpdatedProduct && fullUpdatedProduct.status === 500) || isUpdatingError) {
-      toast.error('Error while updating Product')
-    }
-    console.log(fullUpdatedProduct)
+    // // Add the logic to update the product in the database
+    // const fullUpdatedProduct = await updateProduct(newProduct);
+    // if (fullUpdatedProduct && fullUpdatedProduct.status === 200 && fullUpdatedProduct.data.message === "Product Updated") {
+    //   toast.success('Product updated successfully')
+    // }
+    // if ((fullUpdatedProduct && fullUpdatedProduct.status === 500) || isUpdatingError) {
+    //   toast.error('Error while updating Product')
+    // }
+    // console.log(fullUpdatedProduct)
 
     setOpen?.(false);
   };
@@ -245,7 +243,7 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
       {isUploading && <Progress value={uploadProgress} />}
       <Button
         onClick={handleSubmit}
-        disabled={isUploading || isLoadingUpdate || (DeleteFileUrl.length === 0 && newFileUrl.length === 0)}
+        disabled={isUploading || false || (DeleteFileUrl.length === 0 && newFileUrl.length === 0)}
         className={cn("w-full rounded-b-lg rounded-t-none h-12 text-lg")}
       >
         {isUploading ? (
@@ -253,7 +251,7 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
             <Loader2 className="animate-spin h-5 w-5 mr-3" />
             Uploading...
           </>
-        ) : isLoadingUpdate ? (
+        ) : false ? (
           <>
             <Loader2 className="animate-spin h-5 w-5 mr-3" />
             Updating...

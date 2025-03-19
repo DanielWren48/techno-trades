@@ -9,9 +9,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ProductType } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
-import { useArchiveProduct } from "@/lib/react-query/queries/product-queries";
 import { toast } from "sonner"
-import { deleteMediaFilesByKey } from "@/lib/backend-api/medias";
 
 type DeleteProps = {
   product: ProductType;
@@ -21,13 +19,13 @@ type DeleteProps = {
 
 export default function DeleteDialog({ product, isOpen, showActionToggle }: DeleteProps) {
 
-  const { mutateAsync: archiveProduct } = useArchiveProduct();
+  // const { mutateAsync: archiveProduct } = useArchiveProduct();
 
   async function handleEvent() {
     showActionToggle(false);
 
-    const res = await archiveProduct(product._id)
-    toast.success(res.message)
+    // const res = await archiveProduct(product._id)
+    // toast.success(res.message)
 
     // if (product.image.length > 0) {
 

@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { calculateDiscountPercentage, cn, formatPrice } from "@/lib/utils";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
-import { useSetProductDiscount } from "@/lib/react-query/queries/product-queries";
 import { AlertCircle } from "lucide-react";
+import { useSetProductDiscount } from "@/api/products/queries";
+import { toast } from "sonner";
 
 type EditProps = {
   product: ProductType;
@@ -33,26 +34,37 @@ export default function SetDiscount({ product, setOpen }: EditProps) {
     </Button>
   );
 
-  function handleRemoveDiscount() {
+  async function handleRemoveDiscount() {
     if (!discount) return;
-    setProductDiscount({
-      id: product._id,
+    const response = await setProductDiscount({
+      id: product._id!,
       isDiscounted: false,
       discountedPrice: undefined,
     })
+    if (response.status === "success") {
+      setOpen(false)
+      toast.success(response.message)
+    } else {
+      toast.error(response.message)
+    }
     setOpen(false)
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
 
     const discountedPrice = discount && product.price - (product.price * discount) / 100;
 
-    let res = setProductDiscount({
-      id: product._id,
+    const response = await setProductDiscount({
+      id: product._id!,
       isDiscounted: discount !== undefined,
       discountedPrice: discountedPrice,
     })
-    console.log(res)
+    if (response.status === "success") {
+      setOpen(false)
+      toast.success(response.message)
+    } else {
+      toast.error(response.message)
+    }
     setOpen(false)
   }
 
