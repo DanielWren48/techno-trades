@@ -36,35 +36,23 @@ export default function SetDiscount({ product, setOpen }: EditProps) {
 
   async function handleRemoveDiscount() {
     if (!discount) return;
-    const response = await setProductDiscount({
+    const { status, message } = await setProductDiscount({
       id: product._id!,
       isDiscounted: false,
       discountedPrice: undefined,
     })
-    if (response.status === "success") {
-      setOpen(false)
-      toast.success(response.message)
-    } else {
-      toast.error(response.message)
-    }
+    status === "success" ? toast.info(message) : toast.error(message)
     setOpen(false)
   }
 
   async function handleSubmit() {
-
     const discountedPrice = discount && product.price - (product.price * discount) / 100;
-
-    const response = await setProductDiscount({
+    const { status, message } = await setProductDiscount({
       id: product._id!,
       isDiscounted: discount !== undefined,
       discountedPrice: discountedPrice,
     })
-    if (response.status === "success") {
-      setOpen(false)
-      toast.success(response.message)
-    } else {
-      toast.error(response.message)
-    }
+    status === "success" ? toast.info(message) : toast.error(message)
     setOpen(false)
   }
 

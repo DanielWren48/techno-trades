@@ -1,7 +1,7 @@
 import { INewProduct, Product } from '@/types';
 import { shopApi } from './requests';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { BaseShopResponse, ProductFilterBody, ProductQueryParams, UpdateProductDiscount } from './types';
+import { BaseShopResponse, ProductFilterBody, ProductQueryParams, UpdateProduct, UpdateProductDiscount } from './types';
 import { ErrorResponse } from 'react-router-dom';
 
 enum QUERY_KEYS {
@@ -79,6 +79,21 @@ export const useSetProductDiscount = () => {
     const queryClient = useQueryClient();
     return useMutation<BaseShopResponse<Product>, BaseShopResponse<ErrorResponse>, UpdateProductDiscount>({
         mutationFn: shopApi.updateDiscount,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_PRODUCTS],
+            });
+        },
+        onError: (error) => {
+            console.error('Validation error:', error);
+        }
+    });
+};
+
+export const useUpdateProduct = () => {
+    const queryClient = useQueryClient();
+    return useMutation<BaseShopResponse<Product>, BaseShopResponse<ErrorResponse>, UpdateProduct>({
+        mutationFn: shopApi.updateProductById,
         onSuccess: (data) => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_PRODUCTS],

@@ -25,6 +25,7 @@ import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useUserContext } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { useUpdateProduct } from "@/api/products/queries";
 
 type EditProps = {
   product: ProductType;
@@ -33,7 +34,7 @@ type EditProps = {
 
 export default function EditDialog({ product, setOpen }: EditProps) {
   const { user } = useUserContext();
-  // const { mutateAsync: updateProduct, isError: isUpdatingError } = useUpdateProduct();
+  const { mutateAsync: updateProduct } = useUpdateProduct();
 
   const form = useForm<z.infer<typeof ProductCreateValidation>>({
     resolver: zodResolver(ProductCreateValidation),
@@ -51,18 +52,17 @@ export default function EditDialog({ product, setOpen }: EditProps) {
   });
 
   const handleSubmit = async (value: z.infer<typeof ProductCreateValidation>) => {
-    // const updatedProduct = await updateProduct({
-    //   _id: product._id,
-    //   ...value,
-    //   userId: user._id,
-    // })
-    // setOpen?.(false);
-    // if(updatedProduct && updatedProduct.status === 200 && updatedProduct.data.message === "Product Updated"){
-    //   toast.success('Product updated successfully')
-    // }
-    // if((updatedProduct && updatedProduct.status === 500) || isUpdatingError){
-    //   toast.error('Error while updating Product')
-    // }
+    const { message, status } = await updateProduct({
+      id: product._id!,
+      ...value,
+    })
+    if (status === "success") {
+      toast.success(message)
+      setOpen?.(false);
+    }
+    if (status === "failure") {
+      toast.error(message)
+    }
   }
 
   return (

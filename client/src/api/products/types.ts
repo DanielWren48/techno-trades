@@ -1,4 +1,4 @@
-import { Product, ProductCategory } from "@/types";
+import { Product, ProductCategory, ProductImage } from "@/types";
 
 export interface ProductQueryParams {
     name?: string;
@@ -38,4 +38,15 @@ export interface UpdateProductDiscount {
     id: string;
     isDiscounted: boolean;
     discountedPrice?: number;
+}
+
+export interface UpdateProduct {
+    id: string;
+    name?: string;
+    image?: ProductImage[];
+    brand?: string;
+    category?: ProductCategory;
+    description?: string;
+    price?: number;
+    countInStock?: number;
 }

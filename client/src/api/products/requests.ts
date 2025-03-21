@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { BaseShopResponse, AllProductsResponse, ProductQueryParams, ProductFilterBody, UpdateProductDiscount } from './types';
+import { BaseShopResponse, AllProductsResponse, ProductQueryParams, ProductFilterBody, UpdateProductDiscount, UpdateProduct } from './types';
 import { INewProduct, Product } from '@/types';
 
 // API client setup
@@ -46,7 +46,12 @@ export const shopApi = {
         return response.data;
     },
     updateDiscount: async (data: UpdateProductDiscount): Promise<BaseShopResponse<Product>> => {
-        const response = await api.post<BaseShopResponse<Product>>(`/${data.id}/discount`, data);
+        const response = await api.patch<BaseShopResponse<Product>>(`/products/${data.id}/discount`, data);
+        console.log(response)
+        return response.data;
+    },
+    updateProductById: async (data: UpdateProduct): Promise<BaseShopResponse<Product>> => {
+        const response = await api.patch<BaseShopResponse<Product>>(`/products/${data.id}/update`, data);
         console.log(response)
         return response.data;
     },
