@@ -19,6 +19,7 @@ import userRouter from "./controllers/user";
 import shopRouter from "./controllers/products";
 import orderRouter from "./controllers/order";
 import stripeRouter from "./controllers/stripe";
+import mediaRouter from "./controllers/media";
 
 connectDB()
 
@@ -38,12 +39,11 @@ app.use(cors(corsOptions));
 app.use(helmet(helmetOptions));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-const server = http.createServer(app)
-
 app.use("/api/v1/stripe", stripeRouter);
 app.use(express.json())
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/shop", shopRouter)
+app.use("/api/v1/media", mediaRouter)
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/orders', orderRouter)
 app.use("/api/uploadthing", createUploadthingExpressHandler({ router: uploadRouter }));
@@ -65,6 +65,8 @@ if (process.env.NODE_ENV === 'PRODUCTION') {
     next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
   })
 }
+
+const server = http.createServer(app)
 
 server.listen(env.PORT, () => {
   console.log(`Server is running on port ${env.PORT}`);
