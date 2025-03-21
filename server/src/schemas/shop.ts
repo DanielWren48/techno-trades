@@ -10,6 +10,7 @@ import {
     ArrayNotEmpty,
     ValidateNested,
     IsOptional,
+    ValidateIf,
 } from 'class-validator';
 import { UserSchema } from "./base";
 
@@ -49,6 +50,7 @@ export class ProductCreateSchema {
 
     @Expose()
     @IsNumber()
+    @IsOptional()
     @Min(0, { message: 'Discounted price must be a positive number' })
     discountedPrice?: number;
 
@@ -80,6 +82,46 @@ export class ProductCreateSchema {
             throw new Error('Discounted price must be less than the original price when isDiscounted is true');
         }
     }
+}
+
+export class ProductUpdateSchema {
+    @Expose()
+    @IsString()
+    @IsNotEmpty({ message: 'Name is required' })
+    name?: string;
+
+    @Expose()
+    @IsString()
+    @IsNotEmpty({ message: 'Description is required' })
+    description?: string;
+
+    @Expose()
+    @IsNumber()
+    @Min(0, { message: 'Price must be a positive number' })
+    price?: number;
+
+    @Expose()
+    @IsString()
+    @IsNotEmpty({ message: 'Category is required' })
+    category?: string;
+
+    @Expose()
+    @IsString()
+    @IsNotEmpty({ message: 'Brand is required' })
+    brand?: string;
+
+    @Expose()
+    @IsNumber()
+    @Min(0, { message: 'Count in stock must be a non-negative number' })
+    countInStock?: number;
+
+    @Expose()
+    @IsArray()
+    @IsOptional()
+    @ArrayNotEmpty({ message: 'At least one image is required' })
+    @ValidateNested({ each: true })
+    @Type(() => ImageSchema)
+    image?: ImageSchema[];
 }
 
 export class ProductSchema {
@@ -177,13 +219,14 @@ export class UpdateProductDiscountSchema {
     isDiscounted?: boolean;
 
     @Expose()
+    @ValidateIf(o => o.isDiscounted === true)
     @IsNumber()
     @Min(0, { message: 'Discounted price must be a positive number' })
     discountedPrice?: number;
 
     validate() {
-        if (this.isDiscounted && (!this.discountedPrice)) {
-            throw new Error('Discounted price must be less than the original price when isDiscounted is true');
+        if (this.isDiscounted && (!this.discountedPrice && this.discountedPrice !== 0)) {
+            throw new Error('Discounted price must be provided and be a positive number when isDiscounted is true');
         }
     }
 }

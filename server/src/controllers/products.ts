@@ -6,7 +6,7 @@ import { ErrorCode, NotFoundError, RequestError } from "../config/handlers";
 import { Product } from "../models/products";
 import { authMiddleware } from "../middlewares/auth";
 import { validationMiddleware } from "../middlewares/error";
-import { ProductCreateSchema, ProductSchema, ReviewCreateSchema, ReviewSchema, UpdateProductDiscountSchema, UpdateProductStockSchema } from "../schemas/shop";
+import { ProductCreateSchema, ProductSchema, ProductUpdateSchema, ReviewCreateSchema, ReviewSchema, UpdateProductDiscountSchema, UpdateProductStockSchema } from "../schemas/shop";
 
 const shopRouter = Router();
 
@@ -137,6 +137,23 @@ shopRouter.patch('/products/:id/stock', authMiddleware, validationMiddleware(Upd
         return res.status(200).json(CustomResponse.success('Product stock updated successfully', updatedProduct));
     } catch (error) {
         next(error);
+    }
+});
+
+shopRouter.patch('/products/:id/update', authMiddleware, validationMiddleware(ProductUpdateSchema), async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const { name, description, price, category, brand, countInStock, image } = req.body
+
+        const updatedProduct = await Product.findByIdAndUpdate(
+            id,
+            { $set: { name, description, price, category, brand, countInStock, image } },
+            { new: true }
+        ).lean();
+
+        return res.status(200).json(CustomResponse.success('Products Updated Successfully', updatedProduct))
+    } catch (error) {
+        next(error)
     }
 });
 
