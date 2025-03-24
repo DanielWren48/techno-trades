@@ -62,7 +62,7 @@ export const ordersApi = {
     },
     updateShippingStatus: async (data: UpdateShippingStatus): Promise<BaseResponse<Order>> => {
         try {
-            const response = await axios.patch<BaseResponse<Order>>("/update-shipping-status", data);
+            const response = await api.patch<BaseResponse<Order>>('/update-shipping-status', data);
             return response.data;
         } catch (error) {
             return handleAuthError(error) as BaseResponse<Order>;

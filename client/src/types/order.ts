@@ -66,6 +66,6 @@ export type Order = {
     };
     orderNumber: string;
     deliveryStatus: "pending" | "shipped" | "delivered";
-    paymentStatus: "paid" | "unpaid";
+    paymentStatus: "succeeded" | "failed";
     createdAt: Date;
 }

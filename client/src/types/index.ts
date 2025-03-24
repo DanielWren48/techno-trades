@@ -1,4 +1,4 @@
-import { ShippingAddressFormSchema } from "@/components/addressForm";
+import { ShippingAddressFormSchema } from "@/_root/components/addressForm";
 import { Icons } from "@/components/shared";
 
 //-------------USER TYPES----------------------------------

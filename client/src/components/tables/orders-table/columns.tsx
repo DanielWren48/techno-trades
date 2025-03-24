@@ -13,11 +13,7 @@ export const columns: ColumnDef<OrderType>[] = [
       const orderNumber = row.getValue("orderNumber") as string
       return (
         <div className="flex items-center text-center flex-row gap-2">
-          <div className="font-semibold">{orderNumber.slice(7)}</div>
-          {/* <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-base font-medium text-green-800 ring-1 ring-inset ring-green-600/20">
-            Succeeded
-            <Check className="w-4 h-4 ml-1 text-green-700" strokeWidth={3} />
-          </span> */}
+          <div className="font-semibold">{orderNumber.slice(12)}</div>
         </div>
       );
     },
@@ -99,14 +95,14 @@ export const columns: ColumnDef<OrderType>[] = [
     accessorKey: "paymentStatus",
     header: "Payment",
     cell: ({ row }) => {
-      const paymentStatus = row.getValue("paymentStatus");
-      const isPaid = paymentStatus === "paid";
-      const isUnpaid = paymentStatus === "unpaid";
+      const paymentStatus = row.getValue("paymentStatus") as string;
+      const success = paymentStatus === "succeeded";
+      const fail = paymentStatus === "failed";
 
       return (
         <div className="flex space-x-2">
-          {isUnpaid && <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-sm font-medium text-red-700 ring-1 ring-inset ring-red-600/10">Unpaid</span>}
-          {isPaid && <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-sm font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Paid</span>}
+          {success && <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-sm font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Paid</span>}
+          {fail && <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-sm font-medium text-red-700 ring-1 ring-inset ring-red-600/10">Unpaid</span>}
         </div>
       )
     },
