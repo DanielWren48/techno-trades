@@ -271,7 +271,7 @@ interface ProductStockUpdate {
     stockChange: number;
 }
 
-const updateMultipleProductStocks = async (updates: ProductStockUpdate[], userId: string): Promise<IProduct[]> => {
+const updateMultipleProductStocks = async (updates: ProductStockUpdate[]): Promise<IProduct[]> => {
     const session = await mongoose.startSession();
 
     try {
@@ -287,7 +287,7 @@ const updateMultipleProductStocks = async (updates: ProductStockUpdate[], userId
         const productIds = updates.map(update => new mongoose.Types.ObjectId(update.productId));
 
         // Fetch all products in one query
-        const products = await Product.find({ _id: { $in: productIds }, user: userId }).session(session);
+        const products = await Product.find({ _id: { $in: productIds } }).session(session);
 
         // Create a map for quick product lookup
         const productMap = new Map(products.map(p => [p._id.toString(), p]));
