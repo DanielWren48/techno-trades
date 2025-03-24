@@ -13,3 +13,13 @@ export class EmailSchema {
     @IsEmail({}, { message: "Enter a valid email address" })
     email?: string
 }
+
+export class UserSchema {
+    @Expose()
+    @Example("John Doe")
+    name?: string
+
+    @Expose()
+    @Example("https://img.com/john-doe")
+    avatar?: string
+}

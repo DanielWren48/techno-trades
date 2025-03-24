@@ -236,3 +236,10 @@ export class UpdateProductStockSchema {
     @IsNumber()
     stockChange?: number;
 }
+
+export class DeleteFileByKey {
+    @Expose()
+    @IsArray()
+    @ArrayNotEmpty({ message: 'At least one image key is required' })
+    fileKeys?: string[];
+}

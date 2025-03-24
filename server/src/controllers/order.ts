@@ -8,7 +8,10 @@ const orderRouter = Router();
 
 orderRouter.get('/', authMiddleware, staff, async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const orders = await Order.find()
+        const orders = await Order.find().populate({
+            path: 'user',
+            model: 'User',
+        })
         if (!orders) {
             throw new NotFoundError("Orders not found")
         }
@@ -21,7 +24,13 @@ orderRouter.get('/', authMiddleware, staff, async (req: Request, res: Response, 
 orderRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params
-        const order = await Order.findOne({ 'paymentIntentDetails.sessionId': id })
+        const order = await Order.findOne({ 'paymentIntentDetails.sessionId': id }).populate({
+            path: 'user',
+            model: 'User',
+        }).populate({
+            path: 'products.product',
+            model: 'Product',
+        });
         if (!order) {
             throw new NotFoundError("Order not found")
         }
@@ -44,7 +53,7 @@ orderRouter.get('/my-orders', authMiddleware, async (req: Request, res: Response
     }
 });
 
-orderRouter.post('/update-shipping-status', authMiddleware, staff, async (req: Request, res: Response, next: NextFunction) => {
+orderRouter.patch('/update-shipping-status', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { orderId, status } = req.body
 
@@ -57,7 +66,7 @@ orderRouter.post('/update-shipping-status', authMiddleware, staff, async (req: R
         if (!order) {
             throw new NotFoundError("Orders not found")
         }
-        return res.status(200).json(CustomResponse.success("OK", { order }))
+        return res.status(200).json(CustomResponse.success(`Order status updated to ${status} successfully`, { order }))
 
     } catch (error) {
         next(error)

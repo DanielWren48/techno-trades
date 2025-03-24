@@ -2,7 +2,7 @@ import { Request, Response, NextFunction, Router } from "express";
 import { CustomResponse } from "../config/utils";
 import { User } from "../models/users";
 import { ErrorCode, NotFoundError, RequestError, ValidationErr } from "../config/handlers";
-import { checkPassword, createAccessToken, createOtp, createRefreshToken, createUser, setAuthCookie } from "../managers/users";
+import { checkPassword, createAccessToken, createOtp, createRefreshToken, createUser, hashPassword, setAuthCookie } from "../managers/users";
 import asyncHandler from "../middlewares/asyncHandler";
 import { authMiddleware, staff } from "../middlewares/auth";
 
@@ -35,10 +35,10 @@ userRouter.get('/:id', asyncHandler(async (req: Request, res: Response, next: Ne
 
 userRouter.patch('/update-my-password', authMiddleware, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const userData = req.body;
-    const { currentPassword, newPassword } = userData;
+    const { passwordCurrent, password } = userData;
 
     const user = req.user
-    if (!user || !(await checkPassword(user, currentPassword as string))) {
+    if (!user || !(await checkPassword(user, passwordCurrent as string))) {
         throw new RequestError("Invalid credentials!", 401, ErrorCode.INVALID_CREDENTIALS);
     }
     if (!user.isEmailVerified) {
@@ -48,12 +48,12 @@ userRouter.patch('/update-my-password', authMiddleware, asyncHandler(async (req:
     // Update user
     await User.updateOne(
         { _id: user._id },
-        { $set: { password: newPassword } }
+        { $set: { password: await hashPassword(password as string) } }
     );
     return res.status(200).json(CustomResponse.success('Password reset successful'))
 }));
 
-userRouter.get('/send-email-change-otp', authMiddleware, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+userRouter.post('/send-email-change-otp', authMiddleware, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
 
@@ -70,13 +70,9 @@ userRouter.get('/send-email-change-otp', authMiddleware, asyncHandler(async (req
 
 userRouter.patch('/update-my-email', authMiddleware, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const user = req.user
         const userData = req.body;
         const { email, otp } = userData;
-
-        const user = req.user
-        if (user.isEmailVerified) {
-            return res.status(200).json(CustomResponse.success("Email already verified"))
-        }
 
         // Verify otp
         const currentDate = new Date()
