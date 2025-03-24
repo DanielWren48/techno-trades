@@ -26,10 +26,11 @@ const envSchema = z.object({
     ACCESS_TOKEN_EXPIRY: z.string().transform(Number),
     REFRESH_TOKEN_EXPIRY: z.string().transform(Number),
 
-    EMAIL_EMAIL: z.string().email(),
-    EMAIL_PASSWORD: z.string(),
+    EMAIL_HOST_USER: z.string().email(),
+    EMAIL_HOST_PASSWORD: z.string(),
     EMAIL_HOST: z.string(),
     EMAIL_PORT: z.string().regex(/^\d+$/).transform(Number),
+    EMAIL_USE_SSL: z.string().transform((val) => val.toLowerCase() === 'true'),
 
     STRIPE_SECRET_KEY: z.string(),
     STRIPE_TEST_KEY: z.string(),

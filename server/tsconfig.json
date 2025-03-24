@@ -6,6 +6,8 @@
     "strict": true,
     "baseUrl": "src",
     "outDir": "dist",
+    "experimentalDecorators": true, // Enable decorator support
+    "emitDecoratorMetadata": true,  // Emit decorator metadata
     "sourceMap": true,
     "noImplicitAny": true,
     "esModuleInterop": true,

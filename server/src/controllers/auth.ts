@@ -10,7 +10,7 @@ import ENV from "../config/config";
 import { randomBytes } from "crypto";
 import { validationMiddleware } from "../middlewares/error";
 import { LoginSchema, OtpLoginSchema, RefreshTokenSchema, RegisterSchema, SetNewPasswordSchema, TokenSchema, VerifyEmailSchema } from "../schemas/auth";
-import { EmailSchema } from "schemas/base";
+import { EmailSchema } from "../schemas/base";
 
 const authRouter = Router();
 
@@ -139,9 +139,9 @@ authRouter.post('/login', validationMiddleware(LoginSchema), async (req: Request
         if (!user || !(await checkPassword(user, password as string))) {
             throw new RequestError("Incorrect email or password.", 401, ErrorCode.INVALID_CREDENTIALS);
         }
-        if (!user.isEmailVerified) {
-            throw new RequestError("Verify your email first", 401, ErrorCode.UNVERIFIED_USER);
-        }
+        // if (!user.isEmailVerified) {
+        //     throw new RequestError("Verify your email first", 401, ErrorCode.UNVERIFIED_USER);
+        // }
 
         // Generate tokens
         const access = createAccessToken(user.id)

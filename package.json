@@ -9,8 +9,7 @@
     "client": "npm run dev --prefix client",
     "server": "nodemon server/src/index.ts",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "postinstall": "tsc -p server",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+    "postinstall": "tsc -p server"
   },
   "keywords": [
     "node",
@@ -20,7 +19,7 @@
     "vite",
     "mern-stack"
   ],
-  "author": "Dan Smirnov",
+  "author": "Daniel Wren",
   "license": "MIT",
   "dependencies": {
     "@react-email/components": "0.0.15",
