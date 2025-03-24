@@ -1,6 +1,5 @@
 import { ProductType } from "@/lib/validation";
 import { useCallback, useState } from "react";
-import { useUserContext } from "@/context/AuthContext";
 import { useDropzone } from "@uploadthing/react/hooks";
 import { generateClientDropzoneAccept } from "uploadthing/client";
 import { FileWithPath } from "@uploadthing/react";
@@ -9,8 +8,10 @@ import { cn, convertFileToUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Loader2, RotateCcw, X } from "lucide-react";
 import { toast } from "sonner";
-import { IUpdateProduct, ProductImage } from "@/types";
+import { ProductImage } from "@/types";
 import { Progress } from "@/components/ui/progress";
+import { useUpdateProduct } from "@/api/products/queries";
+import { medaiApi } from "@/api/media/requests";
 
 type MediaProps = {
   product: ProductType;
@@ -25,9 +26,8 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
   const [DeleteFileUrl, setDeleteFileUrls] = useState<string[]>([]);
   const [files, setFiles] = useState<FileWithPath[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const { user } = useUserContext();
 
-  // const { mutateAsync: updateProduct, isPending: isLoadingUpdate, isError: isUpdatingError } = useUpdateProduct();
+  const { mutateAsync: updateProduct } = useUpdateProduct();
 
   const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
     const newFiles = [...files, ...acceptedFiles];
@@ -38,9 +38,21 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
   }, [files]);
 
   const { startUpload, isUploading, permittedFileInfo, } = useUploadThing("videoAndImage", {
-    onClientUploadComplete: (data) => { console.log(data) },
-    onUploadError: (error: Error) => { console.log(error) },
-    onUploadBegin: (fileName: string) => { console.log("upload started for ", fileName) },
+    onClientUploadComplete: () => {
+      toast.success("Uploaded images successfully!", {
+        id: "uploading",
+      });
+    },
+    onUploadError: (error: Error) => {
+      toast.error(error.message, {
+        id: "uploading",
+      });
+    },
+    onUploadBegin: () => {
+      toast.loading("Uploading images...", {
+        id: "uploading",
+      });
+    },
     onUploadProgress: (progress: number) => setUploadProgress(progress),
   });
 
@@ -50,14 +62,6 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
     onDrop,
     accept: fileTypes ? generateClientDropzoneAccept(fileTypes) : undefined,
   });
-
-  const getKeysToDelete = () => {
-    const keysToDelete = DeleteFileUrl.map((imageUrl) => {
-      const parts = imageUrl.split('/');
-      return parts[parts.length - 1];
-    });
-    return keysToDelete;
-  };
 
   function handleRemoveCurrent(index: number) {
     // Remove the image from current state
@@ -96,14 +100,18 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
 
     if (DeleteFileUrl.length > 0) {
       // If there are images to delete
-      const keysToDelete = getKeysToDelete();
-      // toast.promise(() => deleteMediaFilesByKey([...keysToDelete]),
-      //   {
-      //     loading: 'Removing your old file...',
-      //     success: () => 'Removed old file',
-      //     error: () => 'Error deleting files.',
-      //   }
-      // );
+      const keysToDelete = DeleteFileUrl.map((imageUrl) => {
+        const parts = imageUrl.split('/');
+        return parts[parts.length - 1];
+      });
+
+      toast.promise(() => medaiApi.deleteFiles([...keysToDelete]),
+        {
+          loading: 'Removing file...',
+          success: () => 'File deleted succesfully',
+          error: () => 'Error deleting files.',
+        }
+      );
 
       // Update the product without the deleted images
       updatedProduct = {
@@ -144,24 +152,15 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
       };
     }
 
-    // Update the product in the database
-    const newProduct: IUpdateProduct = {
-      ...updatedProduct,
-      userId: user._id,
-    };
-
-    console.log(newProduct);
-
-    // // Add the logic to update the product in the database
-    // const fullUpdatedProduct = await updateProduct(newProduct);
-    // if (fullUpdatedProduct && fullUpdatedProduct.status === 200 && fullUpdatedProduct.data.message === "Product Updated") {
-    //   toast.success('Product updated successfully')
-    // }
-    // if ((fullUpdatedProduct && fullUpdatedProduct.status === 500) || isUpdatingError) {
-    //   toast.error('Error while updating Product')
-    // }
-    // console.log(fullUpdatedProduct)
-
+    // Add the logic to update the product in the database
+    const { status, message } = await updateProduct({ id: updatedProduct._id!, ...updatedProduct });
+    if (status === "success") {
+      toast.success(message)
+    } else if (status === "failure") {
+      toast.error(message)
+    } else {
+      toast.info(message)
+    }
     setOpen?.(false);
   };
 
