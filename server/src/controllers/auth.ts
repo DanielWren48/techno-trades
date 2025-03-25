@@ -4,7 +4,7 @@ import { ACCOUNT_TYPE, AUTH_TYPE, IUser, User } from "../models/users";
 import { ErrorCode, NotFoundError, RequestError, ValidationErr } from "../config/handlers";
 import { checkPassword, createAccessToken, createOtp, createRefreshToken, createUser, hashPassword, setAuthCookie, validateGoogleToken, verifyRefreshToken } from "../managers/users";
 import { authMiddleware, getUser } from "../middlewares/auth";
-import { sendEmail, EmailType } from '../utils/mailSender'
+import { sendEmail, EmailType } from '../utils/emailer'
 import { TokenPayload } from "google-auth-library";
 import ENV from "../config/config";
 import { randomBytes } from "crypto";

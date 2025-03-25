@@ -5,7 +5,7 @@ import { ErrorCode, NotFoundError, RequestError, ValidationErr } from "../config
 import { checkPassword, createAccessToken, createOtp, createRefreshToken, createUser, hashPassword, setAuthCookie } from "../managers/users";
 import asyncHandler from "../middlewares/asyncHandler";
 import { authMiddleware, staff } from "../middlewares/auth";
-import { EmailType, sendEmail } from "../utils/mailSender";
+import { EmailType, sendEmail } from "../utils/emailer";
 
 const userRouter = Router();
 
