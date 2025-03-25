@@ -15,10 +15,10 @@ import {
   import * as React from "react";
   
   interface VerifyEmailProps {
-    verificationCode: string;
+    otp: string;
   }
   
-  export default function ForgotPasswordVerification({ verificationCode }: VerifyEmailProps) {
+  export default function ForgotPasswordVerification({ otp }: VerifyEmailProps) {
     return (
       <Html>
         <Head />
@@ -43,7 +43,7 @@ import {
                 <Section style={verificationSection}>
                   <Text style={verifyText}>Verification code</Text>
   
-                  <Text style={codeText}>{verificationCode}</Text>
+                  <Text style={codeText}>{otp}</Text>
                   <Text style={validityText}>
                     (This code is valid for 10 minutes)
                   </Text>
