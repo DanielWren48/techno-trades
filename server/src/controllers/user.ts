@@ -5,6 +5,7 @@ import { ErrorCode, NotFoundError, RequestError, ValidationErr } from "../config
 import { checkPassword, createAccessToken, createOtp, createRefreshToken, createUser, hashPassword, setAuthCookie } from "../managers/users";
 import asyncHandler from "../middlewares/asyncHandler";
 import { authMiddleware, staff } from "../middlewares/auth";
+import { EmailType, sendEmail } from "../utils/mailSender";
 
 const userRouter = Router();
 
@@ -61,7 +62,9 @@ userRouter.post('/send-email-change-otp', authMiddleware, asyncHandler(async (re
             throw new RequestError("Verify your email first", 401, ErrorCode.UNVERIFIED_USER);
         }
 
-        let otp = await createOtp(user);
+        const otp = await createOtp(user);
+        await sendEmail({ user, emailType: EmailType.RESET_EMAIL, data: otp })
+        
         return res.status(200).json(CustomResponse.success('Email sent successful', otp))
     } catch (error) {
         next(error)

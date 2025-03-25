@@ -24,7 +24,9 @@ authRouter.post('/register', validationMiddleware(RegisterSchema), async (req: R
             throw new ValidationErr("email", "Email already registered")
         }
         const user = await createUser(req.body)
-        let otp = await createOtp(user);
+        const otp = await createOtp(user);
+        await sendEmail({ user, emailType: EmailType.ACTIVATE, data: otp })
+
         return res.status(201).json(CustomResponse.success('Registration successful', { user, otp }))
     } catch (error) {
         next(error)
@@ -56,6 +58,8 @@ authRouter.post('/verify-email', validationMiddleware(VerifyEmailSchema), async 
             { $set: { otp: null, otpExpiry: null, isEmailVerified: true } }
         );
 
+        await sendEmail({ user, emailType: EmailType.WELCOME })
+
         return res.status(200).json(CustomResponse.success('Verification successful', user))
     } catch (error) {
         next(error)
@@ -76,6 +80,7 @@ authRouter.post('/resend-verification-email', validationMiddleware(EmailSchema),
         }
 
         const otp = await createOtp(user);
+        await sendEmail({ user, emailType: EmailType.ACTIVATE, data: otp })
 
         return res.status(200).json(CustomResponse.success('Email sent successful', otp))
     } catch (error) {
@@ -95,7 +100,9 @@ authRouter.post('/send-password-reset-otp', validationMiddleware(EmailSchema), a
             throw new RequestError("Cannot request password reset for account created via google sign in", 401, ErrorCode.INCORRECT_EMAIL)
         }
 
-        let otp = await createOtp(user);
+        const otp = await createOtp(user);
+        await sendEmail({ user, emailType: EmailType.RESET_PASSWORD, data: otp })
+
         return res.status(200).json(CustomResponse.success('Email sent successful', otp))
     } catch (error) {
         next(error)
@@ -175,7 +182,9 @@ authRouter.post('/send-login-otp', validationMiddleware(EmailSchema), async (req
             throw new RequestError("Verify your email first", 401, ErrorCode.UNVERIFIED_USER);
         }
 
-        let otp = await createOtp(user);
+        const otp = await createOtp(user);
+        await sendEmail({ user, emailType: EmailType.OTP_LOGIN, data: otp })
+        
         return res.status(201).json(CustomResponse.success('Login otp sent successful', otp))
     } catch (error) {
         next(error)
