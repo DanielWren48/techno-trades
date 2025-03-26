@@ -29,7 +29,8 @@ mediaRouter.get('/:key', authMiddleware, async (req: Request, res: Response, nex
 
 mediaRouter.delete('/', authMiddleware, validationMiddleware(DeleteFileByKey), async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { success } = await utapi.deleteFiles(req.body.fileKeys);
+        const keys = req.body.fileKeys as string[]
+        const { success } = await utapi.deleteFiles(keys);
         if (success) {
             return res.status(201).json(CustomResponse.success('OK'))
         } else {

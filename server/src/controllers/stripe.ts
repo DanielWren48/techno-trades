@@ -1,7 +1,7 @@
 import express, { Request, Response, Router } from "express";
 import Stripe from "stripe";
 import { IProduct, Product } from "../models/products";
-import asyncHandler from "../middlewares/asyncHandler";
+import { asyncHandler } from "../middlewares/error";
 import { authMiddleware } from "../middlewares/auth";
 import { ErrorCode, RequestError } from "../config/handlers";
 import { CustomResponse } from "../config/utils";

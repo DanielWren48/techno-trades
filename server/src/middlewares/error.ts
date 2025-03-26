@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { ClassConstructor, plainToInstance } from "class-transformer";
 import { validate, ValidationError } from 'class-validator';
 import { ErrorCode, RequestError } from "../config/handlers"
@@ -40,3 +40,11 @@ export const handleError = (err: RequestError, req: Request, res: Response, next
 
     res.status(status).json(errorResponse);
 };
+
+export const asyncHandler = (fn: any) => (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+}

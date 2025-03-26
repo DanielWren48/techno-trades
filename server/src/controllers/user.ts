@@ -3,13 +3,14 @@ import { CustomResponse } from "../config/utils";
 import { User } from "../models/users";
 import { ErrorCode, NotFoundError, RequestError, ValidationErr } from "../config/handlers";
 import { checkPassword, createAccessToken, createOtp, createRefreshToken, createUser, hashPassword, setAuthCookie } from "../managers/users";
-import asyncHandler from "../middlewares/asyncHandler";
 import { authMiddleware, staff } from "../middlewares/auth";
 import { EmailType, sendEmail } from "../utils/emailer";
+import { validationMiddleware } from "../middlewares/error";
+import { UpdateUserDetails, UpdateUserEmail, UpdateUserPassword } from "../schemas/user";
 
 const userRouter = Router();
 
-userRouter.get('/', authMiddleware, staff, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+userRouter.get('/', authMiddleware, staff, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const users = await User.find()
         if (!users) {
@@ -19,9 +20,9 @@ userRouter.get('/', authMiddleware, staff, asyncHandler(async (req: Request, res
     } catch (error) {
         next(error)
     }
-}));
+});
 
-userRouter.get('/:id', asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+userRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params
         const user = await User.findById(id).select('-password')
@@ -32,29 +33,33 @@ userRouter.get('/:id', asyncHandler(async (req: Request, res: Response, next: Ne
     } catch (error) {
         next(error)
     }
-}));
+});
 
-userRouter.patch('/update-my-password', authMiddleware, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    const userData = req.body;
-    const { passwordCurrent, password } = userData;
+userRouter.patch('/update-my-password', authMiddleware, validationMiddleware(UpdateUserPassword), async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userData = req.body as UpdateUserPassword;
+        const { passwordCurrent, password } = userData;
 
-    const user = req.user
-    if (!user || !(await checkPassword(user, passwordCurrent as string))) {
-        throw new RequestError("Invalid credentials!", 401, ErrorCode.INVALID_CREDENTIALS);
+        const user = req.user
+        if (!user || !(await checkPassword(user, passwordCurrent as string))) {
+            throw new RequestError("Invalid credentials!", 401, ErrorCode.INVALID_CREDENTIALS);
+        }
+        if (!user.isEmailVerified) {
+            throw new RequestError("Verify your email first", 401, ErrorCode.UNVERIFIED_USER);
+        }
+
+        // Update user
+        await User.updateOne(
+            { _id: user._id },
+            { $set: { password: await hashPassword(password as string) } }
+        );
+        return res.status(200).json(CustomResponse.success('Password reset successful'))
+    } catch (error) {
+        next(error)
     }
-    if (!user.isEmailVerified) {
-        throw new RequestError("Verify your email first", 401, ErrorCode.UNVERIFIED_USER);
-    }
+});
 
-    // Update user
-    await User.updateOne(
-        { _id: user._id },
-        { $set: { password: await hashPassword(password as string) } }
-    );
-    return res.status(200).json(CustomResponse.success('Password reset successful'))
-}));
-
-userRouter.post('/send-email-change-otp', authMiddleware, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+userRouter.post('/send-email-change-otp', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
 
@@ -64,17 +69,17 @@ userRouter.post('/send-email-change-otp', authMiddleware, asyncHandler(async (re
 
         const otp = await createOtp(user);
         await sendEmail({ user, emailType: EmailType.RESET_EMAIL, data: otp })
-        
+
         return res.status(200).json(CustomResponse.success('Email sent successful', otp))
     } catch (error) {
         next(error)
     }
-}));
+});
 
-userRouter.patch('/update-my-email', authMiddleware, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+userRouter.patch('/update-my-email', authMiddleware, validationMiddleware(UpdateUserEmail),async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
-        const userData = req.body;
+        const userData = req.body as UpdateUserEmail;
         const { email, otp } = userData;
 
         // Verify otp
@@ -94,11 +99,11 @@ userRouter.patch('/update-my-email', authMiddleware, asyncHandler(async (req: Re
     } catch (error) {
         next(error)
     }
-}));
+});
 
-userRouter.patch('/update-me', authMiddleware, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+userRouter.patch('/update-me', authMiddleware, validationMiddleware(UpdateUserDetails), async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const userData = req.body;
+        const userData = req.body as UpdateUserDetails;
 
         const updatedUser = await User.findByIdAndUpdate(req.user._id, userData,
             { new: true, runValidators: true }
@@ -108,15 +113,15 @@ userRouter.patch('/update-me', authMiddleware, asyncHandler(async (req: Request,
     } catch (error) {
         next(error)
     }
-}));
+});
 
-userRouter.delete('/deactivate-me', authMiddleware, asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+userRouter.delete('/deactivate-me', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
         await User.findByIdAndUpdate(req.user._id, { active: false })
         return res.status(200).json(CustomResponse.success('User deleted successfully'))
     } catch (error) {
         next(error)
     }
-}));
+});
 
 export default userRouter;
