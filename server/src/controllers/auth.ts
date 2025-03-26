@@ -40,8 +40,12 @@ authRouter.post('/verify-email', validationMiddleware(VerifyEmailSchema), async 
         const otp = Number(userData.otp)
 
         const user = await User.findOne({ email })
-        if (!user) throw new NotFoundError("Incorrect email!")
-
+        if (!user) {
+            throw new NotFoundError("Incorrect email!")
+        }
+        if (user.authType === AUTH_TYPE.GOOGLE) {
+            throw new RequestError("Cannot verify account created via google sign in", 401, ErrorCode.NOT_ALLOWED)
+        }
         if (user.isEmailVerified) {
             return res.status(200).json(CustomResponse.success("Email already verified"))
         }
@@ -74,7 +78,9 @@ authRouter.post('/resend-verification-email', validationMiddleware(EmailSchema),
         if (!user) {
             throw new NotFoundError("Incorrect email!")
         }
-
+        if (user.authType === AUTH_TYPE.GOOGLE) {
+            throw new RequestError("Cannot request password reset for account created via google sign in", 401, ErrorCode.NOT_ALLOWED)
+        }
         if (user.isEmailVerified) {
             return res.status(200).json(CustomResponse.success("Email already verified"))
         }
@@ -97,7 +103,7 @@ authRouter.post('/send-password-reset-otp', validationMiddleware(EmailSchema), a
             throw new NotFoundError("Incorrect email!")
         }
         if (user.authType === AUTH_TYPE.GOOGLE) {
-            throw new RequestError("Cannot request password reset for account created via google sign in", 401, ErrorCode.INCORRECT_EMAIL)
+            throw new RequestError("Cannot request password reset for account created via google sign in", 401, ErrorCode.NOT_ALLOWED)
         }
 
         const otp = await createOtp(user);
@@ -119,6 +125,9 @@ authRouter.post('/set-new-password', validationMiddleware(SetNewPasswordSchema),
         const user = await User.findOne({ email })
         if (!user) {
             throw new NotFoundError("Incorrect email!")
+        }
+        if (user.authType === AUTH_TYPE.GOOGLE) {
+            throw new RequestError("Cannot access for account created via google sign in", 401, ErrorCode.NOT_ALLOWED)
         }
 
         // Verify otp
@@ -146,9 +155,9 @@ authRouter.post('/login', validationMiddleware(LoginSchema), async (req: Request
         if (!user || !(await checkPassword(user, password as string))) {
             throw new RequestError("Incorrect email or password.", 401, ErrorCode.INVALID_CREDENTIALS);
         }
-        // if (!user.isEmailVerified) {
-        //     throw new RequestError("Verify your email first", 401, ErrorCode.UNVERIFIED_USER);
-        // }
+        if (user.authType === AUTH_TYPE.GOOGLE) {
+            throw new RequestError("Cannot sign in with account created via google sign in", 401, ErrorCode.NOT_ALLOWED)
+        }
 
         // Generate tokens
         const access = createAccessToken(user.id)
