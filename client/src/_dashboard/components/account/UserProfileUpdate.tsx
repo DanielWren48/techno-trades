@@ -16,6 +16,8 @@ import { generateClientDropzoneAccept } from "uploadthing/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AccountUpdateSchemaType, accountUpdateSchema } from "@/_dashboard/schemas/account";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { medaiApi } from "@/api/media/requests";
+import { Icons } from "@/components/shared";
 
 export default function UpdateProfile() {
     const { user } = useUserContext();
@@ -39,6 +41,10 @@ export default function UpdateProfile() {
 
         setFile(newFile);
         setFileUrl(newFileUrls[0]);
+
+        if (!user.avatar) {
+            form.setValue("avatar", newFileUrls[0])
+        }
     }, [file]);
 
     const { startUpload, isUploading, permittedFileInfo } = useUploadThing("videoAndImage", {
@@ -68,25 +74,70 @@ export default function UpdateProfile() {
         maxFiles: 1
     });
 
+    const removeAvatar = () => {
+        setFile([]);
+        setFileUrl(undefined);
+        // Set to null to indicate avatar removal
+        form.setValue("avatar", null);
+    }
+
     const handleUpdate = async (value: AccountUpdateSchemaType) => {
-        let newAvatar = undefined;
-        if (file.length > 0) {
-            const UploadFileResponse = await startUpload(file)
-            if (UploadFileResponse) {
-                newAvatar = UploadFileResponse[0].url
-            } else {
-                toast.error('File Uploading error. Please try again!')
+        let newAvatar: string | null | undefined = user.avatar;
+
+        // Determine if avatar is actually changing
+        const isAvatarChanging =
+            file.length > 0 ||  // New file selected
+            value.avatar === null ||  // Explicitly removing avatar
+            value.avatar !== user.avatar;  // Different avatar URL
+
+        // Only process avatar if it's changing
+        if (isAvatarChanging) {
+            // Delete existing avatar if it exists
+            if (user.avatar) {
+                const avatar_key = user.avatar.split("/").at(-1);
+                if (avatar_key) {
+                    try {
+                        toast.promise(() => medaiApi.deleteFiles([avatar_key]),
+                            {
+                                loading: 'Removing file...',
+                                success: () => 'File deleted succesfully',
+                                error: () => 'Error deleting files.',
+                            }
+                        );
+                        // const { message } = await medaiApi.deleteFiles([avatar_key]);
+                        // toast.info(message);
+                    } catch (error) {
+                        toast.error('Failed to delete existing avatar');
+                    }
+                }
+            }
+
+            // Handle new file upload
+            if (file.length > 0) {
+                const uploadFileResponse = await startUpload(file);
+                if (uploadFileResponse) {
+                    newAvatar = uploadFileResponse[0].url;
+                } else {
+                    toast.error('File upload error. Please try again!');
+                    return;
+                }
+            }
+            // Explicitly handle avatar removal
+            else if (value.avatar === null) {
+                newAvatar = null;
             }
         }
+
         const response = await mutateAsync({
             firstName: value.firstName,
             lastName: value.lastname,
-            avatar: newAvatar,
-        })
+            avatar: isAvatarChanging ? newAvatar : undefined, // Only send avatar if it's changing
+        });
+
         if (response.status === "success" && response.data) {
-            toast.success(response.message)
+            toast.success(response.message);
         } else {
-            toast.error(response.message)
+            toast.error(response.message);
         }
     };
 
@@ -104,16 +155,33 @@ export default function UpdateProfile() {
                             <FormControl>
                                 <div {...getRootProps()}>
                                     <input {...getInputProps()} className="cursor-pointer" />
-                                    <div className="cursor-pointer flex-center gap-4 flex flex-row items-center">
-                                        <Avatar className="h-28 w-28 border-4">
-                                            <AvatarImage
-                                                src={fileUrl}
-                                                alt={user.email}
-                                                className="object-cover"
-                                            />
-                                            <AvatarFallback className="text-3xl font-semibold">{user.firstName.slice(0, 1)}{user.lastName.slice(0, 1)}</AvatarFallback>
-                                        </Avatar>
-                                        <p className="small-regular md:base-semibold text-dark-4 dark:text-muted-foreground">Change profile photo</p>
+                                    <div className="cursor-pointer flex-center gap-4 flex flex-row items-center relative">
+                                        <div className="relative">
+                                            <Avatar className="h-28 w-28 border-4">
+                                                <AvatarImage
+                                                    src={fileUrl}
+                                                    alt={user.email}
+                                                    className="object-cover"
+                                                />
+                                                <AvatarFallback className="text-3xl font-semibold">
+                                                    {user.firstName.slice(0, 1)}{user.lastName.slice(0, 1)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            {fileUrl && (
+                                                <Button
+                                                    type="button"
+                                                    variant="destructive"
+                                                    size="icon"
+                                                    onClick={removeAvatar}
+                                                    className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-6 h-6 rounded-full p-1"
+                                                >
+                                                    <Icons.X className="w-4 h-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                        <p className="small-regular md:base-semibold text-dark-4 dark:text-muted-foreground">
+                                            Change profile photo
+                                        </p>
                                     </div>
                                 </div>
                             </FormControl>

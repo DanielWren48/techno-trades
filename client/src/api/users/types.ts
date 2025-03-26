@@ -19,7 +19,7 @@ export interface ErrorResponse {
 export interface UpdateUserProfile {
     firstName: string | undefined;
     lastName: string | undefined;
-    avatar: string | undefined;
+    avatar?: string | null;
 }
 
 export interface UpdateUserEmail {
