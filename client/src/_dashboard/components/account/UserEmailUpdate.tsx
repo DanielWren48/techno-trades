@@ -40,6 +40,8 @@ export default function UpdateUserEmail() {
         },
     });
 
+    const { formState: { isDirty, isSubmitting, isValid }, getValues } = form
+
     const handleNewEmailChange = (newEmail: string) => {
         form.clearErrors("newEmail")
         form.setValue('newEmail', newEmail);
@@ -52,11 +54,11 @@ export default function UpdateUserEmail() {
         const isValidEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
         const email = form.getValues('newEmail');
         if (email.trim() !== '' && email.match(isValidEmail)) {
-            setShowOTPField(true);
             const { data, message, status } = await sendEmailChangeOtp()
             if (data && status === "success") {
                 toast.success(message);
                 form.setFocus("otp")
+                setShowOTPField(true);
             } else {
                 toast.error(message);
             }
@@ -82,6 +84,7 @@ export default function UpdateUserEmail() {
             form.setValue("currentEmail", data.email)
         } else {
             toast.error(message);
+            form.setError("otp", { message: message }, { shouldFocus: true })
         }
     };
 
@@ -167,6 +170,7 @@ export default function UpdateUserEmail() {
                                             <div className="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-gray-500">
                                                 <p>Didn't recieve code?</p>
                                                 <Button
+                                                    type="button"
                                                     variant={"link"}
                                                     className="flex flex-row items-center text-blue-600 p-0"
                                                 >
@@ -186,8 +190,8 @@ export default function UpdateUserEmail() {
                 </Button>
                 }
 
-                {showOTPField && <Button type="submit" className="max-w-xs" disabled={false}>
-                    {false ? (
+                {showOTPField && <Button type="submit" className="max-w-xs" disabled={userEmailUpdateLoading || !isValid}>
+                    {userEmailUpdateLoading ? (
                         <>
                             <Loader2 className="animate-spin h-5 w-5 mr-3" />
                             Uploading...

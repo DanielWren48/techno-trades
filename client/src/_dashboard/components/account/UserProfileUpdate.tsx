@@ -35,6 +35,8 @@ export default function UpdateProfile() {
         },
     });
 
+    const { formState: { isDirty, isSubmitting, isValid }, getValues } = form
+
     const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
         const newFile = [...acceptedFiles];
         const newFileUrls = newFile.map(convertFileToUrl);

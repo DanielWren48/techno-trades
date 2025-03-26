@@ -2,9 +2,9 @@ import { takeRight } from 'lodash'
 import { Button } from "@/components/ui/button"
 import { Overview } from "@/components/dashboard/overview"
 import { RecentSales } from "@/components/dashboard/recent-sales"
-import { useGetOrders } from "@/lib/react-query/queries/order-queries"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useGetOrders } from '@/api/orders/queries'
 
 export default function Dashboard() {
   const { data: orders, isLoading: loadingOrders } = useGetOrders()
@@ -153,7 +153,7 @@ export default function Dashboard() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {!loadingOrders && <RecentSales orders={takeRight(orders.orders, 5)} />}
+                    {!loadingOrders && <RecentSales orders={takeRight(orders?.data?.orders, 5)} />}
                   </CardContent>
                 </Card>
               </div>

@@ -79,8 +79,8 @@ export const usersTableSchema = z.object({
     avatar: z.string().optional(),
     authType: z.custom<AUTH_TYPE>(),
     accountType: z.custom<ACCOUNT_TYPE>(),
-    createdAt: z.date().optional(),
-    updatedAt: z.date().optional(),
+    // createdAt: z.date().optional(),
+    // updatedAt: z.date().optional(),
 })
 export type UserType = z.infer<typeof usersTableSchema>
 
@@ -111,10 +111,10 @@ export const orderTableSchema = z.object({
     customerEmail: z.string().email(),
     total: z.number(),
     paymentIntentDetails: z.object({ card: cardDetailsSchema }),
-    shippingCost: shippingDetailsSchema,
-    createdAt: z.string(),
+    // shippingCost: shippingDetailsSchema,
+    // createdAt: z.date().optional(),
     deliveryStatus: z.enum(["pending", "shipped", "delivered"]),
-    paymentStatus: z.enum(["paid", "unpaid"]),
+    paymentStatus: z.enum(["succeeded", "failed"]),
 });
 
 export type OrderType = z.infer<typeof orderTableSchema>
