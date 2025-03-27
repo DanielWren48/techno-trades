@@ -2,93 +2,136 @@ import mongoose, { PipelineStage, Types } from "mongoose";
 import { IProduct, Product } from "../models/products";
 import { ErrorCode, RequestError } from "../config/handlers";
 
+const createProductAggregationPipeline = (matchCondition?: Record<string, any>): PipelineStage[] => {
+    const baseAggregationStages: PipelineStage[] = [];
+
+    // Optional match stage
+    if (matchCondition) {
+        baseAggregationStages.push({
+            $match: matchCondition
+        } as PipelineStage.Match);
+    }
+
+    // Add reviewsCount and avgRating
+    baseAggregationStages.push({
+        $addFields: {
+            reviewsCount: { $size: { $ifNull: ['$reviews', []] } },
+            avgRating: {
+                $cond: {
+                    if: { $gt: [{ $size: { $ifNull: ['$reviews', []] } }, 0] },
+                    then: { $avg: '$reviews.rating' }, else: 0,
+                },
+            },
+        }
+    } as PipelineStage.AddFields);
+
+    // Unwind reviews
+    baseAggregationStages.push({
+        $unwind: {
+            path: '$reviews',
+            preserveNullAndEmptyArrays: true
+        }
+    } as PipelineStage.Unwind);
+
+    // Lookup user details for reviews
+    baseAggregationStages.push({
+        $lookup: {
+            from: 'users',
+            localField: 'reviews.user',
+            foreignField: '_id',
+            as: 'reviewUser'
+        }
+    } as PipelineStage.Lookup);
+
+    // Unwind reviewUser
+    baseAggregationStages.push({
+        $unwind: {
+            path: '$reviewUser',
+            preserveNullAndEmptyArrays: true
+        }
+    } as PipelineStage.Unwind);
+
+    // Add user details to review
+    baseAggregationStages.push({
+        $addFields: {
+            'reviews.userFirstName': '$reviewUser.firstName',
+            'reviews.userLastName': '$reviewUser.lastName',
+            'reviews.userAvatar': '$reviewUser.avatar'
+        }
+    } as PipelineStage.AddFields);
+
+    // Group back to original structure
+    baseAggregationStages.push({
+        $group: {
+            _id: '$_id',
+            user: { $first: '$user' },
+            name: { $first: '$name' },
+            slug: { $first: '$slug' },
+            description: { $first: '$description' },
+            price: { $first: '$price' },
+            isDiscounted: { $first: '$isDiscounted' },
+            discountedPrice: { $first: '$discountedPrice' },
+            category: { $first: '$category' },
+            brand: { $first: '$brand' },
+            countInStock: { $first: '$countInStock' },
+            image: { $first: '$image' },
+            reviews: { $push: '$reviews' },
+            reviewsCount: { $first: '$reviewsCount' },
+            avgRating: { $first: '$avgRating' },
+            createdAt: { $first: '$createdAt' }
+        }
+    } as PipelineStage.Group);
+
+    // Populate seller
+    baseAggregationStages.push({
+        $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'user'
+        }
+    } as PipelineStage.Lookup);
+
+    baseAggregationStages.push({
+        $unwind: {
+            path: '$user',
+            preserveNullAndEmptyArrays: true
+        }
+    } as PipelineStage.Unwind);
+
+    return baseAggregationStages;
+};
+
 const getProducts = async () => {
     try {
-        const aggregateData: PipelineStage[] = [
-            // Add reviewsCount and avgRating
-            {
-                $addFields: {
-                    reviewsCount: { $size: { $ifNull: ['$reviews', []] } },
-                    avgRating: {
-                        $cond: {
-                            if: { $gt: [{ $size: { $ifNull: ['$reviews', []] } }, 0] },
-                            then: { $avg: '$reviews.rating' }, else: 0,
-                        },
-                    },
-                },
-            },
-            // Unwind reviews to be able to lookup user details
-            {
-                $unwind: {
-                    path: '$reviews',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            // Lookup user details for each review
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'reviews.user',
-                    foreignField: '_id',
-                    as: 'reviewUser'
-                }
-            },
-            // Unwind the reviewUser
-            {
-                $unwind: {
-                    path: '$reviewUser',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            // Add user details to the review
-            {
-                $addFields: {
-                    'reviews.userFirstName': '$reviewUser.firstName',
-                    'reviews.userLastName': '$reviewUser.lastName',
-                    'reviews.userAvatar': '$reviewUser.avatar'
-                }
-            },
-            // Group back to original structure
-            {
-                $group: {
-                    _id: '$_id',
-                    user: { $first: '$user' },
-                    name: { $first: '$name' },
-                    slug: { $first: '$slug' },
-                    description: { $first: '$description' },
-                    price: { $first: '$price' },
-                    isDiscounted: { $first: '$isDiscounted' },
-                    discountedPrice: { $first: '$discountedPrice' },
-                    category: { $first: '$category' },
-                    brand: { $first: '$brand' },
-                    countInStock: { $first: '$countInStock' },
-                    image: { $first: '$image' },
-                    reviews: { $push: '$reviews' },
-                    reviewsCount: { $first: '$reviewsCount' },
-                    avgRating: { $first: '$avgRating' },
-                    createdAt: { $first: '$createdAt' }
-                }
-            },
-            // Populate the seller
-            {
-                $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'user' },
-            },
-            {
-                $unwind: {
-                    path: '$user',
-                    preserveNullAndEmptyArrays: true, // Allow products without a seller
-                },
-            },
-            // Sort by createdAt descending
-            { $sort: { createdAt: -1 } }
+        const aggregateData = createProductAggregationPipeline();
+
+        // Explicitly type the full pipeline
+        const fullAggregationPipeline: PipelineStage[] = [
+            ...aggregateData,
+            { $sort: { createdAt: -1 } } as PipelineStage.Sort
         ];
-        const products = await Product.aggregate(aggregateData)
+
+        const products = await Product.aggregate(fullAggregationPipeline);
         return products;
     } catch (err) {
         console.error(err);
         throw err;
     }
-}
+};
+
+const getProductBySlug = async (slug: string) => {
+    try {
+        const aggregateData = createProductAggregationPipeline({ slug: slug });
+        const products = await Product.aggregate(aggregateData);
+
+        // Return null if no product found, which will trigger the NotFoundError
+        return products.length > 0 ? products[0] : null;
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+};
 
 interface ProductFilterBody {
     hideOutOfStock?: boolean;
@@ -333,4 +376,4 @@ const updateMultipleProductStocks = async (updates: ProductStockUpdate[]): Promi
     }
 };
 
-export { getProducts, updateProductDiscount, updateProductStock, updateMultipleProductStocks, getFilteredProducts, ProductFilterBody }
+export { getProducts, getProductBySlug, updateProductDiscount, updateProductStock, updateMultipleProductStocks, getFilteredProducts, ProductFilterBody }

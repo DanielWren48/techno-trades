@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { paginateRecords } from "../utils/paginators";
 import { CustomResponse } from "../config/utils";
-import { getFilteredProducts, getProducts, ProductFilterBody, updateProductDiscount, updateProductStock } from "../managers/products";
+import { getFilteredProducts, getProductBySlug, getProducts, ProductFilterBody, updateProductDiscount, updateProductStock } from "../managers/products";
 import { ErrorCode, NotFoundError, RequestError } from "../config/handlers";
 import { Product } from "../models/products";
 import { authMiddleware } from "../middlewares/auth";
@@ -35,7 +35,7 @@ shopRouter.post('/products/filter', async (req: Request, res: Response, next: Ne
 
 shopRouter.get('/products/:slug', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const product = await Product.findOne({ slug: req.params.slug })
+        const product = await getProductBySlug(req.params.slug)
         if (!product) {
             throw new NotFoundError("Product does not exist!")
         }
@@ -48,6 +48,7 @@ shopRouter.get('/products/:slug', async (req: Request, res: Response, next: Next
 shopRouter.post('/products/:slug', authMiddleware, validationMiddleware(ReviewCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
+        console.log(user)
         const product = await Product.findOne({ slug: req.params.slug })
         if (!product) {
             throw new NotFoundError("Product does not exist!")
@@ -55,7 +56,7 @@ shopRouter.post('/products/:slug', authMiddleware, validationMiddleware(ReviewCr
 
         const { rating, title, comment } = req.body
 
-        let review = product.reviews.find((review: any) => review.user = user._id)
+        let review = product.reviews.find((review: any) => review.user === user._id)
         let action = "Added"
         if (review) {
             review.title = title
