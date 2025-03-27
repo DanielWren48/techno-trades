@@ -9,9 +9,9 @@ import { Header } from "@/components/dashboard/header";
 import { cn, formatDate, formatPrice } from "@/lib/utils";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import PDFExportComponent from "@/components/shared/ExportToPDF";
-import { CardSkeleton } from "@/components/dashboard/card-skeleton";
 import { useGetMyOrders } from "@/api/orders/queries";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardOrders() {
   const { data, isLoading: loadingOrders, isError: errorLoaidngOrders } = useGetMyOrders();
@@ -21,52 +21,68 @@ export default function DashboardOrders() {
   const [open, setOpen] = useState<boolean>(false);
   const navigate = useNavigate()
 
-  function handleViewDetails() {
-    if (loadingOrders) {
-      return (
-        <>
-          <CardSkeleton />
-          <CardSkeleton />
-          <CardSkeleton />
-          <CardSkeleton />
-        </>
-      )
-    }
-    if (errorLoaidngOrders) {
-      return (
-        <div className="text-center text-red-500 font-medium py-8">
-          An error occurred while fetching your orders
-          <div className="flex flex-col items-center justify-start px-4 py-8 sm:px-6 md:py-12 lg:px-8 xl:pt-16">
-            <div className="text-red-500 font-medium text-xl">
-              An error occurred
-            </div>
-            <p className="mt-3 max-w-screen-md text-center text-gray-500 dark:text-gray-300">
-              Please try again later.
-            </p>
-          </div>
-        </div>
-      )
-    }
-    if (!loadingOrders && orders?.length === 0) {
-      return (
-        <div className="flex flex-col items-center w-full justify-center h-full gap-3">
-          <img src="/images/2762885.png" className="w-[30rem] object-contain" />
-          <h1 className="text-4xl text-muted-foreground font-medium">It appears you haven't ordered anything yet!</h1>
-          <Link
-            to="/explore"
-            className={buttonVariants({
-              variant: "link",
-              className: "text-xl underline",
-            })}
-          >
-            Let's fix that
-          </Link>
-        </div>
-      )
-    }
+  if (loadingOrders) {
+    return (
+      <div className="w-full flex flex-col gap-5">
+        {[...Array(5)].map((_, index) => (
+          <Card key={index}>
+            <CardHeader className="gap-2">
+              <Skeleton className="h-5 w-1/5" />
+              <Skeleton className="h-4 w-4/5" />
+            </CardHeader>
+            <CardContent className="h-10" />
+            <CardFooter>
+              <Skeleton className="h-8 w-[120px]" />
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    )
+  }
 
-    if (!loadingOrders && orders?.length !== 0) {
-      return (
+  if (errorLoaidngOrders) {
+    return (
+      <div className="text-center text-red-500 font-medium py-8">
+        An error occurred while fetching your orders
+        <div className="flex flex-col items-center justify-start px-4 py-8 sm:px-6 md:py-12 lg:px-8 xl:pt-16">
+          <div className="text-red-500 font-medium text-xl">
+            An error occurred
+          </div>
+          <p className="mt-3 max-w-screen-md text-center text-gray-500 dark:text-gray-300">
+            Please try again later.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!loadingOrders && orders?.length === 0) {
+    return (
+      <div className="flex flex-col items-center w-full justify-center h-full gap-3">
+        <img src="/images/2762885.png" className="w-[30rem] object-contain" />
+        <h1 className="text-4xl text-muted-foreground font-medium">It appears you haven't ordered anything yet!</h1>
+        <Link
+          to="/explore"
+          className={buttonVariants({
+            variant: "link",
+            className: "text-xl underline",
+          })}
+        >
+          Let's fix that
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <Shell>
+      <Header
+        title="Orders"
+        description="View all of your purchases, invloices and order details"
+        size="default"
+      />
+      <div className="grid gap-10">
+        <Separator />
         <div className="">
           {orders?.map((order) => (
             <Card key={order._id} className="mb-5">
@@ -86,12 +102,20 @@ export default function DashboardOrders() {
                         <p>DISPATCH TO</p>
                         <p>{order.paymentIntentDetails.billing_details.name}</p>
                       </div>
+                      <div className="">
+                        <p>STATUS</p>
+                        <p className="capitalize">{order.deliveryStatus}</p>
+                      </div>
+                      <div className="">
+                        <p>SHIPPING</p>
+                        <p className="capitalize">{order.shippingOption.type}</p>
+                      </div>
                     </div>
                     <div className="flex flex-row">
                       <div className="flex flex-col gap-1">
                         <p>ORDER # {order.orderNumber}</p>
                         <div className="flex flex-row gap-5 justify-end items-center">
-                          <Button onClick={() => { setOpen(true); setOrderDetails(order) }} className={cn("text-blue-800/80 dark:text-blue-500 text-left p-0 m-0 w-fit h-5")} variant={"link"}>View order details </Button>
+                          <Button onClick={() => { setOpen(true); setOrderDetails(order) }} className={cn("text-blue-800/80 dark:text-blue-500 text-left p-0 m-0 w-fit h-5 mt-1")} variant={"link"}>View order details </Button>
                           <PDFExportComponent invoiceComponent={<OrderInvoice order={order} />} orderName={order.orderNumber} />
                         </div>
                       </div>
@@ -112,7 +136,7 @@ export default function DashboardOrders() {
                               src={product.image[0].url || ""}
                               alt={product.name}
                             />
-                            <div className="flex-auto flex flex-col">
+                            <div>
                               <h4 className="font-medium text-muted-foreground">{product.name}</h4>
                               <div className="mt-6 flex-1 flex items-end">
                                 <dl className="flex text-sm divide-x divide-gray-200 space-x-4 sm:space-x-6">
@@ -138,8 +162,8 @@ export default function DashboardOrders() {
                             >
                               Leave Review
                             </Button>
-                            <Button variant={"secondary"} onClick={() => { console.log() }} className="w-full">Request Refound</Button>
-                            <Button variant={"secondary"} onClick={() => { console.log() }} className="w-full">Contact Support</Button>
+                            <Button variant={"secondary"} onClick={() => { alert("not implemented") }} className="w-full">Request Refound</Button>
+                            <Button variant={"secondary"} onClick={() => { alert("not implemented") }} className="w-full">Contact Support</Button>
                           </div>
                         </div>
                       </div>
@@ -155,20 +179,6 @@ export default function DashboardOrders() {
             </DialogContent>
           </Dialog>
         </div>
-      )
-    }
-  }
-
-  return (
-    <Shell>
-      <Header
-        title="Orders"
-        description="View all of your purchases, invloices and order details"
-        size="default"
-      />
-      <div className="grid gap-10">
-        <Separator />
-        {handleViewDetails()}
       </div>
     </Shell>
   );

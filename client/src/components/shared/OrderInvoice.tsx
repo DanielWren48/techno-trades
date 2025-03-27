@@ -170,8 +170,8 @@ const OrderInvoice = ({ order, className }: Props) => {
             <div>
               <dt className="font-medium text-gray-900 dark:text-light-1">Shipping method</dt>
               <dd className="flex flex-col mt-2 text-gray-700 dark:text-light-2/70 gap-1">
-                <p>DHL</p>
-                <p>Takes up to 3 working days</p>
+                <p className="capitalize">{order.shippingOption.type}</p>
+                <p>Between {order.shippingOption.minDeliveryDays} and {order.shippingOption.maxDeliveryDays}</p>
               </dd>
             </div>
           </dl>
@@ -188,7 +188,7 @@ const OrderInvoice = ({ order, className }: Props) => {
             <div className="flex justify-between">
               <dt className="font-medium text-gray-900 dark:text-light-1">Shipping</dt>
               <dd className="text-gray-900 dark:text-light-2/80">
-                {formatPrice(0, {
+                {formatPrice(order.shippingOption.price, {
                   currency: "GBP",
                 })}
               </dd>

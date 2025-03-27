@@ -64,6 +64,12 @@ export type Order = {
         amount_total: number;
         shipping_rate: string;
     };
+    shippingOption: {
+        type: string,
+        price: number,
+        minDeliveryDays: number,
+        maxDeliveryDays: number
+    }
     orderNumber: string;
     deliveryStatus: "pending" | "shipped" | "delivered";
     paymentStatus: "succeeded" | "failed";
