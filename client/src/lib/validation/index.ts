@@ -59,15 +59,6 @@ export const productTableSchema = z.object({
 export type ProductType = z.infer<typeof productTableSchema>
 
 // ============================================================
-// REVIEW
-// ============================================================
-export const ProductReviewValidation = z.object({
-    rating: z.number().min(1, { message: "Please provide a Rating" }).max(5),
-    title: z.string().min(1, { message: "Please provide a Title" }).max(1000, { message: "Maximum 1000 characters." }),
-    comment: z.string().max(5000, { message: "Maximum 5000 characters." }),
-});
-
-// ============================================================
 // USERS TABLE
 // ============================================================
 

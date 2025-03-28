@@ -50,3 +50,10 @@ export interface UpdateProduct {
     price?: number;
     countInStock?: number;
 }
+
+export interface CreateReview {
+    rating: number
+    title: string
+    comment: string
+    slug: string
+}

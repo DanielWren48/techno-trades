@@ -31,13 +31,25 @@ export interface IUser {
 
 export type Review = {
     _id: string;
-    name: string;
-    rating: number;
     title: string;
+    rating: number;
     comment: string;
     user: IUser;
+    userFirstName: string;
+    userLastName: string;
+    userAvatar: string;
     createdAt: string;
     updatedAt: string;
+};
+
+export type INewReview = {
+    review: {
+        user: IUser;
+        title: string;
+        comment: string;
+        rating: number;
+    },
+    slug: string
 };
 
 export type ProductImage = {
@@ -59,21 +71,21 @@ export type ProductCategory =
 
 export type Product = {
     _id?: string;
+    user: IUser;
     name: string;
     slug: string;
-    image: ProductImage[];
-    brand: string;
-    category: ProductCategory;
     description: string;
-    rating: number;
-    numReviews: number;
     price: number;
-    countInStock: number;
     isDiscounted: boolean;
     discountedPrice?: number;
+    category: ProductCategory;
+    brand: string;
+    countInStock: number;
+    image: ProductImage[];
     reviews?: Review[];
+    reviewsCount: number;
+    avgRating: number;
     createdAt: string;
-    updatedAt: string;
 };
 
 export type INewProduct = {

@@ -1,7 +1,7 @@
-import { INewProduct, Product } from '@/types';
-import { shopApi } from './requests';
+import { INewProduct, INewReview, Product } from '@/types';
+import { shopApi} from './requests';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { BaseShopResponse, ProductFilterBody, ProductQueryParams, UpdateProduct, UpdateProductDiscount } from './types';
+import { BaseShopResponse, CreateReview, ProductFilterBody, ProductQueryParams, UpdateProduct, UpdateProductDiscount } from './types';
 import { ErrorResponse } from 'react-router-dom';
 
 enum QUERY_KEYS {
@@ -98,6 +98,24 @@ export const useUpdateProduct = () => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_PRODUCTS],
             });
+        },
+        onError: (error) => {
+            console.error('Validation error:', error);
+        }
+    });
+};
+
+export const useCreateProductReview = () => {
+    const queryClient = useQueryClient();
+    return useMutation<BaseShopResponse<INewReview>, BaseShopResponse<ErrorResponse>, CreateReview>({
+        mutationFn: shopApi.createReview,
+        onSuccess: (response) => {
+            if (response.status === 'success' && response.data) {
+                const slug = response.data.slug
+                queryClient.invalidateQueries({
+                    queryKey: [QUERY_KEYS.GET_PRODUCT_BY_SLUG, slug],
+                });
+            }
         },
         onError: (error) => {
             console.error('Validation error:', error);
