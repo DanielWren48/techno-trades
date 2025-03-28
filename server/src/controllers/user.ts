@@ -8,6 +8,7 @@ import { EmailType, sendEmail } from "../utils/emailer";
 import { validationMiddleware } from "../middlewares/error";
 import { UpdateUserDetails, UpdateUserEmail, UpdateUserPassword } from "../schemas/user";
 import { utapi } from "../upload";
+import { rateLimiter, RATE_CFG } from "../middlewares/rate_limitor";
 
 const userRouter = Router();
 
@@ -36,7 +37,7 @@ userRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) =
     }
 });
 
-userRouter.patch('/update-my-password', authMiddleware, validationMiddleware(UpdateUserPassword), async (req: Request, res: Response, next: NextFunction) => {
+userRouter.patch('/update-my-password', rateLimiter(RATE_CFG.routes.passwordReset), authMiddleware, validationMiddleware(UpdateUserPassword), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
         const userData = req.body as UpdateUserPassword;
@@ -64,7 +65,7 @@ userRouter.patch('/update-my-password', authMiddleware, validationMiddleware(Upd
     }
 });
 
-userRouter.post('/send-email-change-otp', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+userRouter.post('/send-email-change-otp', rateLimiter(RATE_CFG.routes.sendOtp), authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
 
@@ -85,7 +86,7 @@ userRouter.post('/send-email-change-otp', authMiddleware, async (req: Request, r
     }
 });
 
-userRouter.patch('/update-my-email', authMiddleware, validationMiddleware(UpdateUserEmail), async (req: Request, res: Response, next: NextFunction) => {
+userRouter.patch('/update-my-email', rateLimiter(RATE_CFG.routes.passwordReset), authMiddleware, validationMiddleware(UpdateUserEmail), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
         const userData = req.body as UpdateUserEmail;
@@ -114,7 +115,7 @@ userRouter.patch('/update-my-email', authMiddleware, validationMiddleware(Update
     }
 });
 
-userRouter.patch('/update-me', authMiddleware, validationMiddleware(UpdateUserDetails), async (req: Request, res: Response, next: NextFunction) => {
+userRouter.patch('/update-me', rateLimiter(RATE_CFG.routes.passwordReset), authMiddleware, validationMiddleware(UpdateUserDetails), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
         const userData = req.body as UpdateUserDetails;

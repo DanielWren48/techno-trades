@@ -17,6 +17,7 @@ export class ErrorCode {
     static readonly INVALID_VALUE = "invalid_value";
     static readonly NOT_ALLOWED = "not_allowed";
     static readonly INVALID_DATA_TYPE = "invalid_data_type";
+    static readonly TOO_MANY_REQUESTS = "too_many_requests";
 }
 
 export class RequestError extends Error {

@@ -6,11 +6,12 @@ import { ErrorCode, NotFoundError, RequestError } from "../config/handlers";
 import { Product } from "../models/products";
 import { authMiddleware } from "../middlewares/auth";
 import { validationMiddleware } from "../middlewares/error";
+import { rateLimiter, RATE_CFG, rateLimiterSimple } from "../middlewares/rate_limitor";
 import { ProductCreateSchema, ProductSchema, ProductUpdateSchema, ReviewCreateSchema, ReviewSchema, UpdateProductDiscountSchema, UpdateProductStockSchema } from "../schemas/shop";
 
 const shopRouter = Router();
 
-shopRouter.get('/products', async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.get('/products', rateLimiter(RATE_CFG.routes.getProducts), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const products = await getProducts()
         const data = await paginateRecords(req, products)
@@ -21,7 +22,7 @@ shopRouter.get('/products', async (req: Request, res: Response, next: NextFuncti
     }
 });
 
-shopRouter.post('/products/filter', async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.post('/products/filter', rateLimiter(RATE_CFG.routes.getProducts), async (req: Request, res: Response, next: NextFunction) => {
     try {
         // Handle empty body or undefined filters
         const filters = Object.keys(req.body).length > 0 ? req.body : undefined;
@@ -33,7 +34,7 @@ shopRouter.post('/products/filter', async (req: Request, res: Response, next: Ne
     }
 });
 
-shopRouter.get('/products/:slug', async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.get('/products/:slug', rateLimiter(RATE_CFG.routes.getProducts), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const product = await getProductBySlug(req.params.slug)
         if (!product) {
@@ -45,10 +46,9 @@ shopRouter.get('/products/:slug', async (req: Request, res: Response, next: Next
     }
 });
 
-shopRouter.post('/products/:slug', authMiddleware, validationMiddleware(ReviewCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.post('/products/:slug', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, validationMiddleware(ReviewCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
-        console.log(user)
         const product = await Product.findOne({ slug: req.params.slug })
         if (!product) {
             throw new NotFoundError("Product does not exist!")
@@ -68,13 +68,14 @@ shopRouter.post('/products/:slug', authMiddleware, validationMiddleware(ReviewCr
         }
         await product.save()
         review = { user, title, comment, rating }
-        return res.status(200).json(CustomResponse.success(`Review ${action} Successfully`, review, ReviewSchema))
+        let slug = product.slug
+        return res.status(200).json(CustomResponse.success(`Review ${action} Successfully`, { review, slug }))
     } catch (error) {
         next(error)
     }
 });
 
-shopRouter.post('/', authMiddleware, validationMiddleware(ProductCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.post('/', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, validationMiddleware(ProductCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
         const { name, description, price, isDiscounted, discountedPrice, category, brand, countInStock, image } = req.body
@@ -106,7 +107,7 @@ shopRouter.post('/', authMiddleware, validationMiddleware(ProductCreateSchema), 
     }
 });
 
-shopRouter.patch('/products/:id/discount', authMiddleware, validationMiddleware(UpdateProductDiscountSchema), async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.patch('/products/:id/discount', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, validationMiddleware(UpdateProductDiscountSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
         const { id } = req.params;
@@ -128,7 +129,7 @@ shopRouter.patch('/products/:id/discount', authMiddleware, validationMiddleware(
     }
 });
 
-shopRouter.patch('/products/:id/stock', authMiddleware, validationMiddleware(UpdateProductStockSchema), async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.patch('/products/:id/stock', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, validationMiddleware(UpdateProductStockSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user;
         const { id } = req.params;
@@ -141,7 +142,7 @@ shopRouter.patch('/products/:id/stock', authMiddleware, validationMiddleware(Upd
     }
 });
 
-shopRouter.patch('/products/:id/update', authMiddleware, validationMiddleware(ProductUpdateSchema), async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.patch('/products/:id/update', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, validationMiddleware(ProductUpdateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
         const { name, description, price, category, brand, countInStock, image } = req.body

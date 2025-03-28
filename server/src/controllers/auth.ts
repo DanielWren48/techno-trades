@@ -11,10 +11,11 @@ import { randomBytes } from "crypto";
 import { validationMiddleware } from "../middlewares/error";
 import { LoginSchema, OtpLoginSchema, RefreshTokenSchema, RegisterSchema, SetNewPasswordSchema, TokenSchema, VerifyEmailSchema } from "../schemas/auth";
 import { EmailSchema } from "../schemas/base";
+import { rateLimiter, RATE_CFG } from "../middlewares/rate_limitor";
 
 const authRouter = Router();
 
-authRouter.post('/register', validationMiddleware(RegisterSchema), async (req: Request, res: Response, next: NextFunction) => {
+authRouter.post('/register', rateLimiter(RATE_CFG.routes.register), validationMiddleware(RegisterSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userData: RegisterSchema = req.body;
         const { email } = userData;
@@ -70,7 +71,7 @@ authRouter.post('/verify-email', validationMiddleware(VerifyEmailSchema), async 
     }
 });
 
-authRouter.post('/resend-verification-email', validationMiddleware(EmailSchema), async (req: Request, res: Response, next: NextFunction) => {
+authRouter.post('/resend-verification-email', rateLimiter(RATE_CFG.routes.sendOtp), validationMiddleware(EmailSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email }: EmailSchema = req.body;
 
@@ -94,7 +95,7 @@ authRouter.post('/resend-verification-email', validationMiddleware(EmailSchema),
     }
 });
 
-authRouter.post('/send-password-reset-otp', validationMiddleware(EmailSchema), async (req: Request, res: Response, next: NextFunction) => {
+authRouter.post('/send-password-reset-otp', rateLimiter(RATE_CFG.routes.sendOtp), validationMiddleware(EmailSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email }: EmailSchema = req.body;
 
@@ -115,7 +116,7 @@ authRouter.post('/send-password-reset-otp', validationMiddleware(EmailSchema), a
     }
 });
 
-authRouter.post('/set-new-password', validationMiddleware(SetNewPasswordSchema), async (req: Request, res: Response, next: NextFunction) => {
+authRouter.post('/set-new-password', rateLimiter(RATE_CFG.routes.passwordReset), validationMiddleware(SetNewPasswordSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userData: SetNewPasswordSchema = req.body;
 
@@ -147,7 +148,7 @@ authRouter.post('/set-new-password', validationMiddleware(SetNewPasswordSchema),
     }
 });
 
-authRouter.post('/login', validationMiddleware(LoginSchema), async (req: Request, res: Response, next: NextFunction) => {
+authRouter.post('/login', rateLimiter(RATE_CFG.routes.login), validationMiddleware(LoginSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, password }: LoginSchema = req.body;
 
@@ -179,7 +180,7 @@ authRouter.post('/login', validationMiddleware(LoginSchema), async (req: Request
     }
 });
 
-authRouter.post('/send-login-otp', validationMiddleware(EmailSchema), async (req: Request, res: Response, next: NextFunction) => {
+authRouter.post('/send-login-otp', rateLimiter(RATE_CFG.routes.sendOtp), validationMiddleware(EmailSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email }: EmailSchema = req.body;
 
@@ -193,14 +194,14 @@ authRouter.post('/send-login-otp', validationMiddleware(EmailSchema), async (req
 
         const otp = await createOtp(user);
         await sendEmail({ user, emailType: EmailType.OTP_LOGIN, data: otp })
-        
+
         return res.status(201).json(CustomResponse.success('Login otp sent successful', otp))
     } catch (error) {
         next(error)
     }
 });
 
-authRouter.post('/login-with-otp', validationMiddleware(OtpLoginSchema), async (req: Request, res: Response, next: NextFunction) => {
+authRouter.post('/login-with-otp', rateLimiter(RATE_CFG.routes.login), validationMiddleware(OtpLoginSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userData: OtpLoginSchema = req.body;
         const { email } = userData;
@@ -299,7 +300,7 @@ authRouter.get('/logout', authMiddleware, async (req: Request, res: Response, ne
     }
 });
 
-authRouter.post('/google', validationMiddleware(TokenSchema), async (req: Request, res: Response, next: NextFunction) => {
+authRouter.post('/google', rateLimiter(RATE_CFG.routes.login), validationMiddleware(TokenSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userData: TokenSchema = req.body;
         const { token } = userData;
