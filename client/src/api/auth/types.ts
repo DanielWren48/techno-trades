@@ -64,5 +64,5 @@ export interface SetNewPasswordData {
 
 export interface SignInWithOtp {
     email: string;
-    otp: string;
+    otp: number;
 }
