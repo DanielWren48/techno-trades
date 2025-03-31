@@ -17,7 +17,7 @@ interface SigninFormProps {
 
 export default function SignInForm({ showPasswordReset = true, setOpen, triggerErrorAnimation }: SigninFormProps) {
   const navigate = useNavigate();
-  const [error, setError] = useState<string | undefined>();
+  const [error, setError] = useState<{ status: string, message: string, code: string | undefined } | undefined>();
   const { mutateAsync: signInAccount, isPending } = useLoginUser();
   const [type, setType] = useState<'password' | 'text'>('password');
   const form = useForm<SignInSchemaType>({ resolver: zodResolver(signInSchema) });
@@ -33,10 +33,10 @@ export default function SignInForm({ showPasswordReset = true, setOpen, triggerE
 
   const handleSignin = async (user: SignInSchemaType) => {
     // await new Promise((resolve) => setTimeout(resolve, 3000));
-    const { message, status, data } = await signInAccount(user);
+    const { message, status, data, code } = await signInAccount(user);
     if (status === "failure") {
       triggerErrorAnimation && triggerErrorAnimation()
-      setError(message)
+      setError({ status, message, code })
     } else if (status === "success") {
       setOpen && setOpen(false)
       if (!data?.user.isEmailVerified) {
@@ -55,7 +55,7 @@ export default function SignInForm({ showPasswordReset = true, setOpen, triggerE
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="block text-sm font-medium text-gray-600 dark:text-gray-200">Email Address</FormLabel>
+              <FormLabel className="block text-sm font-medium text-gray-600 dark:text-gray-200">Email Address<span className="text-red-500 ml-1">*</span></FormLabel>
               <FormControl>
                 <Input autoComplete="new-password" type="email" placeholder="john.doe@email.com" className="block w-full px-4 py-2 h-12" {...field} onFocus={() => setError(undefined)} />
               </FormControl>
@@ -70,14 +70,14 @@ export default function SignInForm({ showPasswordReset = true, setOpen, triggerE
           render={({ field }) => (
             <FormItem>
               <div className="flex flex-row justify-between">
-                <FormLabel className="block text-sm font-medium text-gray-600 dark:text-gray-200">Password</FormLabel>
+                <FormLabel className="block text-sm font-medium text-gray-600 dark:text-gray-200">Password<span className="text-red-500 ml-1">*</span></FormLabel>
                 {showPasswordReset && <Link to="/auth/forgot-password" className="text-sm text-black/60 dark:text-gray-300 hover:underline">Forgot your Password?</Link>}
               </div>
               <div className="relative">
                 <FormControl className="flex-grow pr-10">
                   <Input autoComplete="new-password" type={type} maxLength={35} placeholder="Password" className="block w-full px-4 py-2 h-12" {...field} onFocus={() => setError(undefined)} />
                 </FormControl>
-                <span className="absolute right-3 top-3 cursor-pointer" onClick={handleToggle}>
+                <span className="absolute right-0 top-0 cursor-pointer bg-accent p-[11px] rounded-r-md border" onClick={handleToggle}>
                   {type === 'password' ? <Eye /> : <EyeOff />}
                 </span>
               </div>
@@ -89,7 +89,7 @@ export default function SignInForm({ showPasswordReset = true, setOpen, triggerE
           <div className="flex items-center text-sm text-red-600" role="alert">
             <AlertTriangleIcon className="w-5 h-5 mr-2" />
             <span className="sr-only">Info</span>
-            <span>{error}</span>
+            <span>{error.message}</span>
           </div>
         }
         <AuthButton type="submit" disabled={isPending || isSubmitting} isPending={isPending || isSubmitting} size={"lg"} text={"Sign in"} />

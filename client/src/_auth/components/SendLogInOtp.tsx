@@ -17,7 +17,7 @@ interface SendOtpProps {
 }
 
 export default function SendLogInOtp({ showOTPField, setShowOTPField, setUserData, triggerErrorAnimation }: SendOtpProps) {
-    const [error, setError] = useState<string | undefined>();
+    const [error, setError] = useState<{ status: string, message: string, code: string | undefined } | undefined>();
     const { mutateAsync: sendLoginOtp } = useSendLoginOtp()
     const form = useForm<UserEmailSchemaType>({ resolver: zodResolver(userEmailSchema) });
     const { errors, isSubmitting } = form.formState;
@@ -36,10 +36,10 @@ export default function SendLogInOtp({ showOTPField, setShowOTPField, setUserDat
     };
 
     async function onSubmit(data: UserEmailSchemaType) {
-        const { message, status } = await sendLoginOtp({ email: data.email })
+        const { message, status, code } = await sendLoginOtp({ email: data.email })
         if (status === 'failure') {
             triggerErrorAnimation && triggerErrorAnimation();
-            setError(message)
+            setError({ status, message, code })
             form.setFocus("email")
         }
         if (status === 'success') {
@@ -62,7 +62,7 @@ export default function SendLogInOtp({ showOTPField, setShowOTPField, setUserDat
                         name="email"
                         render={({ field }) => (
                             <FormItem className="w-full">
-                                <FormLabel className="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-200">Email Address</FormLabel>
+                                <FormLabel className="block text-sm font-medium text-gray-600 dark:text-gray-200">Email Address<span className="text-red-500 ml-1">*</span></FormLabel>
                                 <div className="flex gap-2">
                                     <FormControl>
                                         <Input
@@ -88,16 +88,16 @@ export default function SendLogInOtp({ showOTPField, setShowOTPField, setUserDat
                                     <div className="flex items-center text-sm text-red-600" role="alert">
                                         <AlertTriangleIcon className="w-5 h-5 mr-2" />
                                         <span className="sr-only">Info</span>
-                                        <span>{error}</span>
+                                        <span>{error.message}</span>
                                     </div>
                                 }
-                                {(!showOTPField && !error) && (
+                                {/* {(!showOTPField && !error) && (
                                     <FormDescription className="max-w-sm">
                                         We will email you a{" "}
                                         <span className="italic font-medium">One Time Password</span> to Sign
                                         in to your account!
                                     </FormDescription>
-                                )}
+                                )} */}
                             </FormItem>
                         )}
                     />

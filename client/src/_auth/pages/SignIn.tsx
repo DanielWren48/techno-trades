@@ -100,10 +100,9 @@ export default function SignIn() {
                                     setUserData={setUserData}
                                     triggerErrorAnimation={triggerShakeAnimation}
                                 />
-                                {showOTPField &&
+                                {(showOTPField && userData) &&
                                     <SignInWithOtp
                                         showOTPField={showOTPField}
-                                        setShowOTPField={setShowOTPField}
                                         userData={userData}
                                         triggerErrorAnimation={triggerShakeAnimation}
                                     />

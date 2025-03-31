@@ -23,12 +23,11 @@ import { AuthButton } from "./AuthButton";
 
 interface SigninWithOtpProps {
     showOTPField: boolean
-    setShowOTPField: React.Dispatch<React.SetStateAction<boolean>>
-    userData: UserEmailSchemaType | undefined
+    userData: UserEmailSchemaType
     triggerErrorAnimation?: () => void
 }
 
-export default function SignInWithOtp({ showOTPField, setShowOTPField, userData, triggerErrorAnimation }: SigninWithOtpProps) {
+export default function SignInWithOtp({ showOTPField, userData, triggerErrorAnimation }: SigninWithOtpProps) {
     const [error, setError] = useState<string | undefined>();
     const { mutateAsync: signInWithOtp, isPending } = useSignInWithOtp()
     const form = useForm<OtpSchemaType>({ resolver: zodResolver(otpSchema) });
@@ -43,10 +42,10 @@ export default function SignInWithOtp({ showOTPField, setShowOTPField, userData,
 
     async function onSubmit(data: OtpSchemaType) {
         const { message, status } = await signInWithOtp({
-            otp: data.otp,
-            email: userData!.email
+            otp: +data.otp,
+            email: userData.email
         });
-        if (status === 'failure' && message === 'Otp is invalid or expired') {
+        if (status === 'failure') {
             triggerErrorAnimation && triggerErrorAnimation()
             form.resetField('otp')
             form.setFocus('otp')
@@ -99,9 +98,8 @@ export default function SignInWithOtp({ showOTPField, setShowOTPField, userData,
                             {(showOTPField && !error) && (
                                 <Fragment>
                                     <FormDescription className="py-2">
-                                        We emailed you an eight-digit code to{" "}
+                                        We emailed a six-digit code to{" "}
                                         <span className="font-bold text-base">{userData?.email}</span>.
-                                        Enter the code you recieved to confirm your identity and continue resetting your password.
                                     </FormDescription>
                                 </Fragment>
                             )}

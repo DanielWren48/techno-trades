@@ -15,7 +15,7 @@ interface RegisterProps {
 }
 
 export default function RegisterForm({ setActiveTab, setUserData, triggerErrorAnimation }: RegisterProps) {
-  const [error, setError] = useState<string | undefined>();
+  const [error, setError] = useState<{ status: string, message: string, code: string | undefined } | undefined>();
   const [type, setType] = useState<'password' | 'text'>('password');
   const { mutateAsync: createAccount, isPending: loadingUser } = useRegisterUser();
   const form = useForm<RegisterValidationType>({ resolver: zodResolver(registerSchema) })
@@ -29,13 +29,13 @@ export default function RegisterForm({ setActiveTab, setUserData, triggerErrorAn
     }
   }, [errors, isSubmitting]);
 
-  async function onSubmit(data: RegisterValidationType) {
-    const account = await createAccount(data);
-    if (account.status === 'success' && account.data) {
+  async function onSubmit(user: RegisterValidationType) {
+    const { message, status, data, code } = await createAccount(user);
+    if (status === 'success' && data) {
       setActiveTab('otp')
-      setUserData(data)
+      setUserData(user)
     } else {
-      setError(account.message)
+      setError({ status, message, code })
     }
   };
 
@@ -46,7 +46,7 @@ export default function RegisterForm({ setActiveTab, setUserData, triggerErrorAn
           <AlertCircle className="w-6 h-6 mr-2" />
           <span className="sr-only">Info</span>
           <div className="text-base">
-            <span className="font-medium">{error}</span>
+            <span className="font-medium">{error.message}</span>
           </div>
         </div>
       }
@@ -60,7 +60,7 @@ export default function RegisterForm({ setActiveTab, setUserData, triggerErrorAn
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-200">First Name</FormLabel>
+                <FormLabel className="block mb-2 text-sm font-medium text-gray-600 dark:text-gra-200">First Name<span className="text-red-500 ml-1">*</span></FormLabel>
                 <FormControl>
                   <Input type="text" placeholder="John" className="block w-full px-4 py-2 h-12"   {...field} />
                 </FormControl>
@@ -74,7 +74,7 @@ export default function RegisterForm({ setActiveTab, setUserData, triggerErrorAn
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-200">Last Name</FormLabel>
+                <FormLabel className="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-200">Last Name<span className="text-red-500 ml-1">*</span></FormLabel>
                 <FormControl>
                   <Input type="text" placeholder="Doe" className="block w-full px-4 py-2 h-12"{...field} />
                 </FormControl>
@@ -88,7 +88,7 @@ export default function RegisterForm({ setActiveTab, setUserData, triggerErrorAn
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-200">Email Address</FormLabel>
+                <FormLabel className="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-200">Email Address<span className="text-red-500 ml-1">*</span></FormLabel>
                 <FormControl>
                   <Input type="email" autoComplete="new-password" placeholder="john.doe@email.com" className="block w-full px-4 py-2 h-12" {...field} />
                 </FormControl>
@@ -102,12 +102,12 @@ export default function RegisterForm({ setActiveTab, setUserData, triggerErrorAn
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-200">Password</FormLabel>
+                <FormLabel className="block mb-2 text-sm font-medium text-gray-600 dark:text-gray-200">Password<span className="text-red-500 ml-1">*</span></FormLabel>
                 <div className="relative">
                   <FormControl className="flex-grow pr-10">
                     <Input type={type} autoComplete="new-password" maxLength={50} placeholder="Password" className="block w-full px-4 py-2 h-12" {...field} />
                   </FormControl>
-                  <span className="absolute right-3 top-3 cursor-pointer" onClick={handleToggle}>
+                  <span className="absolute right-0 top-0 cursor-pointer bg-accent p-[11px] rounded-r-md border" onClick={handleToggle}>
                     {type === 'password' ? <Eye /> : <EyeOff />}
                   </span>
                 </div>
