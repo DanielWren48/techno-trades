@@ -144,7 +144,6 @@ interface ProductFilterBody {
     categories?: string[];
     ratings?: number;
     name?: string;
-    sortPrice?: 'asc' | 'desc';
 }
 
 const hasActiveFilters = (filters: Partial<ProductFilterBody> | undefined): boolean => {
@@ -157,8 +156,7 @@ const hasActiveFilters = (filters: Partial<ProductFilterBody> | undefined): bool
         (filters.prices?.min || filters.prices?.max) ||
         (filters.categories && filters.categories.length > 0) ||
         (filters.brands && filters.brands.length > 0) ||
-        filters.ratings ||
-        filters.sortPrice
+        filters.ratings
     );
 };
 
@@ -169,73 +167,86 @@ const getFilteredProducts = async (filters: ProductFilterBody | undefined) => {
             return await Product.aggregate([{ $sort: { createdAt: -1 } }]);
         }
 
-        // If we have filters, add the filter stages
-        const filterStages: PipelineStage[] = [
-            {
-                $match: {
-                    $and: [
-                        // Text search
-                        filters?.name
-                            ? { name: { $regex: filters.name, $options: 'i' } }
-                            : {},
+        console.log({ filters });
 
-                        // Categories filter
-                        filters?.categories && filters.categories.length > 0
-                            ? { category: { $in: filters.categories } }
-                            : {},
-
-                        // Brands filter
-                        filters?.brands && filters.brands.length > 0
-                            ? { brand: { $in: filters.brands } }
-                            : {},
-
-                        // Stock filter
-                        filters?.hideOutOfStock
-                            ? { countInStock: { $gt: 0 } }
-                            : {},
-
-                        // Stock filter
-                        filters?.discounted
-                            ? { isDiscounted: true }
-                            : {},
-
-                        // Price range filter
-                        filters?.prices
-                            ? {
-                                $or: [
-                                    {
-                                        price: {
-                                            $gte: filters.prices.min,
-                                            $lte: filters.prices.max
-                                        }
-                                    },
-                                    {
-                                        isDiscounted: true,
-                                        discountedPrice: {
-                                            $gte: filters.prices.min,
-                                            $lte: filters.prices.max
-                                        }
-                                    }
-                                ]
-                            }
-                            : {},
-
-                        // Rating filter
-                        filters?.ratings
-                            ? { avgRating: { $gte: filters.ratings } }
-                            : {},
-                    ].filter(filter => Object.keys(filter).length > 0) // Remove empty filters
-                }
-            },
-            // Sorting
-            {
-                $sort: filters?.sortPrice
-                    ? { price: filters.sortPrice === 'asc' ? 1 : -1 }
-                    : { createdAt: -1 }
+        // Calculate reviewsCount and avgRating first
+        const calculateFieldsStage = {
+            $addFields: {
+                reviewsCount: { $size: { $ifNull: ['$reviews', []] } },
+                avgRating: {
+                    $cond: {
+                        if: { $gt: [{ $size: { $ifNull: ['$reviews', []] } }, 0] },
+                        then: { $avg: '$reviews.rating' },
+                        else: 0,
+                    },
+                },
             }
+        } as PipelineStage.AddFields;
+
+        // Then apply the filters
+        const matchStage = {
+            $match: {
+                $and: [
+                    // Text search
+                    filters?.name
+                        ? { name: { $regex: filters.name, $options: 'i' } }
+                        : {},
+
+                    // Categories filter
+                    filters?.categories && filters.categories.length > 0
+                        ? { category: { $in: filters.categories } }
+                        : {},
+
+                    // Brands filter
+                    filters?.brands && filters.brands.length > 0
+                        ? { brand: { $in: filters.brands } }
+                        : {},
+
+                    // Stock filter
+                    filters?.hideOutOfStock
+                        ? { countInStock: { $gt: 0 } }
+                        : {},
+
+                    // Stock filter
+                    filters?.discounted
+                        ? { isDiscounted: true }
+                        : {},
+
+                    // Price range filter
+                    filters?.prices
+                        ? {
+                            $or: [
+                                {
+                                    price: {
+                                        $gte: filters.prices.min,
+                                        $lte: filters.prices.max
+                                    }
+                                },
+                                {
+                                    isDiscounted: true,
+                                    discountedPrice: {
+                                        $gte: filters.prices.min,
+                                        $lte: filters.prices.max
+                                    }
+                                }
+                            ]
+                        }
+                        : {},
+
+                    // Rating filter
+                    filters?.ratings
+                        ? { avgRating: { $gte: filters.ratings } }
+                        : {},
+                ].filter(filter => Object.keys(filter).length > 0)
+            }
+        } as PipelineStage.Match;
+
+        const pipeline = [
+            calculateFieldsStage,
+            matchStage,
         ];
 
-        return await Product.aggregate([...filterStages]);
+        return await Product.aggregate(pipeline);
     } catch (err) {
         console.error('Error in getFilteredProducts:', err);
         throw err;
