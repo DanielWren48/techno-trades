@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import UsersTable from "@/components/tables/users-table/data";
 import OrdersTable from '@/components/tables/orders-table/data'
 import ProductsTable from '@/components/tables/products-table/data'
+import ReviewTable from '@/components/tables/reviews-table/data'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Dashboard() {
@@ -14,7 +15,7 @@ export default function Dashboard() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
-    if (tabParam && ['products', 'orders', 'users'].includes(tabParam)) {
+    if (tabParam && ['products', 'orders', 'users', 'reviews'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [location.search]);
@@ -31,6 +32,7 @@ export default function Dashboard() {
           <TabsTrigger className="w-full" value="products">Products</TabsTrigger>
           <TabsTrigger className="w-full" value="orders">Orders</TabsTrigger>
           <TabsTrigger className="w-full" value="users">Users</TabsTrigger>
+          <TabsTrigger className="w-full" value="reviews">Reviews</TabsTrigger>
         </TabsList>
         <TabsContent value="products">
           <ProductsTable />
@@ -40,6 +42,9 @@ export default function Dashboard() {
         </TabsContent>
         <TabsContent value="users">
           <UsersTable />
+        </TabsContent>
+        <TabsContent value="reviews">
+          <ReviewTable />
         </TabsContent>
       </Tabs>
     </Shell>

@@ -3,6 +3,7 @@ import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogTitle,
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -30,7 +31,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
   const order = orderTableSchema.parse(row.original);
 
   const handleDeliveryStatusClick = () => {
-    setDialogContent(<ShippingStatusDialog order={order} setOpen={setOpen}/>);
+    setDialogContent(<ShippingStatusDialog order={order} setOpen={setOpen} />);
   };
 
   return (
@@ -69,7 +70,13 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
 
         </DropdownMenuContent>
       </DropdownMenu>
-      {dialogContent && <DialogContent>{dialogContent}</DialogContent>}
+      {dialogContent &&
+        <DialogContent>
+          <DialogTitle>Update Order Shipping Status</DialogTitle>
+          <div className="py-4">
+            {dialogContent}
+          </div>
+        </DialogContent>}
     </Dialog>
   );
 }

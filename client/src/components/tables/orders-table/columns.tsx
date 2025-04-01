@@ -4,6 +4,7 @@ import { DataTableColumnHeader } from "../shared/data-table-column-header"
 import { PaymentMethodDetails } from "@/types/order"
 import { Icons } from "@/components/shared";
 import { DataTableRowActions } from "./data-table-row-actions"
+import UpdateOrderShippingStatus from "./dialogs/update-shipping-status";
 
 export const columns: ColumnDef<OrderType>[] = [
   {
@@ -74,21 +75,14 @@ export const columns: ColumnDef<OrderType>[] = [
     accessorKey: "deliveryStatus",
     header: "Shipping",
     cell: ({ row }) => {
-      const deliveryStatus = row.getValue("deliveryStatus");
-      const isPending = deliveryStatus === "pending";
-      const isShipped = deliveryStatus === "shipped";
-      const isDelivered = deliveryStatus === "delivered";
+      const isDelivered = row.original.deliveryStatus === "delivered"
+      if (isDelivered) {
+        return <p className="capitalize">{row.original.deliveryStatus}</p>
+      }
 
-      return (
-        <div className="flex space-x-2">
-          {isPending && <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-sm font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Pending</span>}
-          {isShipped && <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-sm font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Shipped</span>}
-          {isDelivered && <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-sm font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Delivered</span>}
-        </div>
+      return(
+        <UpdateOrderShippingStatus order={{ _id: row.original._id, deliveryStatus: row.original.deliveryStatus }} />
       )
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
     },
   },
   {
@@ -112,6 +106,6 @@ export const columns: ColumnDef<OrderType>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row}/>
+    cell: ({ row }) => <DataTableRowActions row={row} />
   },
 ]

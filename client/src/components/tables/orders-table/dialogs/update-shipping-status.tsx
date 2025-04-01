@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { OrderType } from "@/lib/validation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -7,7 +6,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import {
@@ -19,26 +17,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { deliveryStatuses } from "../filters";
-import { Button } from "@/components/ui/button";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useUpdateShippingStatus } from "@/api/orders/queries";
-
-type EditProps = {
-  order: OrderType;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-};
+import { Label } from "@/components/ui/label";
 
 const deliveryStatusSchema = z.object({
   _id: z.string(),
   deliveryStatus: z.enum(["pending", "shipped", "delivered"]),
 });
 
-export default function ShippingStatusDialog({ order, setOpen }: EditProps) {
+export type UpdateOrderDeliveryStatusType = z.infer<typeof deliveryStatusSchema>
 
-  const { mutateAsync: updateStatus, isError } = useUpdateShippingStatus()
+type EditProps = {
+  order: UpdateOrderDeliveryStatusType;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
-  const form = useForm<z.infer<typeof deliveryStatusSchema>>({
+export default function UpdateOrderShippingStatus({ order, setOpen }: EditProps) {
+
+  const { mutateAsync: updateStatus, isPending } = useUpdateShippingStatus()
+
+  const form = useForm<UpdateOrderDeliveryStatusType>({
     resolver: zodResolver(deliveryStatusSchema),
     defaultValues: {
       _id: order._id,
@@ -46,65 +45,56 @@ export default function ShippingStatusDialog({ order, setOpen }: EditProps) {
     },
   });
 
-  const handleSubmit = async (value: z.infer<typeof deliveryStatusSchema>) => {
+  const handleSubmit = async (value: UpdateOrderDeliveryStatusType) => {
+    toast.loading("Updating order status", { id: "order-status-loading" });
     const { status, message } = await updateStatus({ orderId: value._id, status: value.deliveryStatus });
     if (status === 'success') {
-      toast.success(message);
+      toast.success(message, { id: "order-status-loading" });
     } else {
-      toast.error(message);
+      toast.error(message, { id: "order-status-loading" });
     }
-    setOpen(false)
+    setOpen?.(false)
   };
 
   return (
-    <div>
-      <DialogHeader>
-        <DialogTitle>Edit Order Shipping Status</DialogTitle>
-      </DialogHeader>
-
-      <div className="py-4">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="grid gap-3"
-          >
-            <FormField
-              control={form.control}
-              name="deliveryStatus"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a Status to Update" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectGroup>
-                        {deliveryStatuses.map((status, index) => (
-                          <SelectItem key={index} value={status.value}>
-                            <span className="flex items-center">
-                              {status.label}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="mt-2 w-full">
-              Update Status
-            </Button>
-          </form>
-        </Form>
-      </div>
-    </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <FormField
+          control={form.control}
+          name="deliveryStatus"
+          render={({ field }) => (
+            <FormItem>
+              <Label htmlFor={`${order._id}-shipping-status`} className="sr-only">
+                Shipping Status
+              </Label>
+              <Select
+                disabled={isPending}
+                onValueChange={(val) => {
+                  const parsed = deliveryStatusSchema.shape.deliveryStatus.parse(val);
+                  handleSubmit({ deliveryStatus: parsed, _id: order._id });
+                }}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectGroup>
+                    {deliveryStatuses.map((status, index) => (
+                      <SelectItem key={index} value={status.value}>
+                        {status.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
   );
 }
