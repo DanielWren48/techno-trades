@@ -80,6 +80,10 @@ export const dashboardConfig: DashboardConfig = {
           title: "Users",
           href: "/dashboard/data-tables?tab=users",
         },
+        {
+          title: "Reviews",
+          href: "/dashboard/data-tables?tab=reviews",
+        },
       ],
     },
     {

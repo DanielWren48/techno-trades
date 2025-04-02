@@ -58,12 +58,12 @@ const ListProductList = ({ products }: ListProductListProps) => {
                 </Link>
                 <div className="flex items-center">
                   <Rating
-                    value={product?.rating || 0}
+                    value={product.avgRating || 0}
                     readOnly
                     className="max-w-[120px]"
                     itemStyles={ratingStyle}
                   />
-                  <h1 className="ml-2">({product.numReviews})</h1>
+                  <h1 className="ml-2">({product.reviewsCount || 0})</h1>
                 </div>
                 <ul className="max-w-md space-y-2 font-medium list-disc list-inside dark:text-light-2/90">
                   <li>Capacity: 10.4 litres</li>
@@ -78,7 +78,7 @@ const ListProductList = ({ products }: ListProductListProps) => {
 
               <div className="col-span-1 flex flex-col gap-5 w-full h-full py-5">
                 <span className="text-2xl font-semibold">
-                  {product?.isDiscounted ? (
+                  {product.isDiscounted ? (
                     <>
                       <span>{product && formatPrice(product.discountedPrice!, { currency: "GBP" })}</span>
                       <span className="ml-3 text-base font-normal text-dark-4 line-through dark:text-light-2/80 transform transition duration-500 ease-in-out">

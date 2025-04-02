@@ -76,6 +76,23 @@ export const usersTableSchema = z.object({
 export type UserType = z.infer<typeof usersTableSchema>
 
 // ============================================================
+// REVIEWS TABLE
+// ============================================================
+
+export const reviewsTableSchema = z.object({
+    _id: z.string(),
+    title: z.string(),
+    rating: z.number(),
+    comment: z.string(),
+    userFirstName: z.string(),
+    userLastName: z.string(),
+    userAvatar: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+})
+export type ReviewType = z.infer<typeof reviewsTableSchema>
+
+// ============================================================
 // ORDER TABLE
 // ============================================================
 

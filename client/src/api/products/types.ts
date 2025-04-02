@@ -1,4 +1,5 @@
 import { Product, ProductCategory, ProductImage } from "@/types";
+import { SortCategory } from "@/constants/idnex";
 
 export interface ProductQueryParams {
     name?: string;
@@ -17,6 +18,7 @@ export interface ProductFilterBody {
     categories?: ProductCategory[];
     ratings?: number;
     name?: string;
+    sort?: SortCategory["value"]
 }
 
 export interface BaseShopResponse<T> {

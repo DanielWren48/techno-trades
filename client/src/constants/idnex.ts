@@ -1,7 +1,7 @@
 import { categories } from "@/components/tables/products-table/filters";
 import { Appearance, StripePaymentElementOptions } from '@stripe/stripe-js';
 
-interface SortCategory {
+export interface SortCategory {
     value: string;
     label: string;
 }

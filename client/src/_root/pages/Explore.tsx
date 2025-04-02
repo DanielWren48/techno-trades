@@ -3,15 +3,16 @@ import { ProductCategory } from "@/types";
 import { useFilterProducts } from "@/api/products/queries";
 import { GridProductList, ListProductList } from "@/components/shared";
 import { Pagination, PaginationContent } from "@/components/ui/pagination"
-import { useSorting, useBrandFilter, useStockFiltering, useCategoryFilter, usePriceFilter } from "@/hooks/store";
+import { useSorting, useBrandFilter, useStockFiltering, useCategoryFilter, usePriceFilter, useRatingFilterStore } from "@/hooks/store";
 import { FilterLoader, ProductFilters, ProductLoader, ProductSearch, ProductSorting } from "@/components/product-filters";
 
 export default function Explore() {
   const { hideOutOfStock } = useStockFiltering();
-  const { isChecked, selectedShowPerPage } = useSorting();
+  const { isChecked, selectedShowPerPage, selectedSort } = useSorting();
   const { debouncedMin, debouncedMax } = usePriceFilter();
   const { selectedCategories } = useCategoryFilter();
   const { selectedBrands } = useBrandFilter();
+  const { selectedRatings } = useRatingFilterStore();
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const { data: products, isLoading: loadingProducts } = useFilterProducts(
@@ -22,6 +23,8 @@ export default function Explore() {
         prices: { min: debouncedMin, max: debouncedMax },
         brands: selectedBrands,
         categories: [...selectedCategories as ProductCategory[]],
+        ratings: Math.max(...selectedRatings),
+        sort: selectedSort
       }
     }
   )
