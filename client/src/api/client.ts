@@ -1,6 +1,12 @@
 import { IUser } from '@/types';
 import Cookies from 'js-cookie';
+import { Order } from '@/types/order';
+import { INewProduct, INewReview, Product } from '@/types';
+import { CreateCheckout, NewOrder } from './stripe/types';
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
+import { UpdateUserEmail, UpdateUserPassword, UpdateUserProfile } from './users/types';
+import { IOrderResponse, IOrdersResponse, UpdateShippingStatus } from './orders/types';
+import { AllProductsResponse, ProductQueryParams, ProductFilterBody, UpdateProductDiscount, UpdateProduct, CreateReview } from './products/types';
 import { IUserResponse, LoginData, LoginResponse, RegisterData, RegisterResponse, VerifyAccountData, EmailData, SetNewPasswordData, SignInWithOtp, GoogleLoginData } from './auth/types';
 
 // Generic response type
@@ -254,6 +260,11 @@ class ApiClient {
 
 // Create shared API client for auth
 const authApi = new ApiClient({ baseURL: '/api/v1/auth' });
+const shopApi = new ApiClient({ baseURL: '/api/v1/shop' });
+const usersApi = new ApiClient({ baseURL: '/api/v1/users' })
+const mediaApi = new ApiClient({ baseURL: '/api/v1/media' });
+const ordersApi = new ApiClient({ baseURL: '/api/v1/orders' });
+const stripeApi = new ApiClient({ baseURL: '/api/v1/stripe' });
 
 // Export the shared instance
 export const authApiService = {
@@ -274,3 +285,38 @@ export const authApiService = {
     clearAuthTokens: () => authApi.clearAuthTokens(),
     onAuthStateChange: authApi.onAuthStateChange.bind(authApi),
 };
+
+export const shopApiEndpoints = {
+    products: (params?: ProductQueryParams) => shopApi.get<AllProductsResponse>('/products', params),
+    filterProducts: ({ params, filters }: { params?: ProductQueryParams, filters?: ProductFilterBody }) => shopApi.post<AllProductsResponse>('/products/filter', filters, { params }),
+    getProductBySlug: (slug: string) => shopApi.get<Product>(`/products/${slug}`),
+    createProduct: (data: INewProduct) => shopApi.post<Product>('', data),
+    updateDiscount: (data: UpdateProductDiscount) => shopApi.patch<Product>(`/products/${data.id}/discount`, data),
+    updateProductById: (data: UpdateProduct) => shopApi.patch<Product>(`/products/${data.id}/update`, data),
+    createReview: (data: CreateReview) => shopApi.post<INewReview>(`/products/${data.slug}`, data)
+};
+
+export const usersAiEndpoints = {
+    getAllUsers: () => usersApi.get<IUserResponse>(''),
+    updateUserDetails: (data: UpdateUserProfile) => usersApi.patch<IUser>('/update-me', data),
+    sendEmailChangeOtp: () => usersApi.post<number>('/send-email-change-otp', null),
+    updateUserEmail: (data: UpdateUserEmail) => usersApi.patch<IUser>('/update-my-email', data),
+    updateUserPassword: (data: UpdateUserPassword) => usersApi.patch<IUser>('/update-my-password', data),
+    closeUserAccount: () => usersApi.delete<null>('/deactivate-me')
+};
+export const mediaApiEndpoints = {
+    getAllFiles: () => mediaApi.get<null>(''),
+    getFileByKey: (key: string) => mediaApi.get<File[]>(`/:${key}`),
+    deleteFiles: (fileKeys: string[]) => mediaApi.delete<null>('/', { data: fileKeys })
+};
+
+export const ordersApiEndpoints = {
+    getAllOrders: () => ordersApi.get<IOrdersResponse>(''),
+    getOrdersBySessionId: (sessionId: string) => ordersApi.get<IOrderResponse>(`/${sessionId}`),
+    getMyOrders: () => ordersApi.get<IOrdersResponse>('/my-orders'),
+    updateShippingStatus: (data: UpdateShippingStatus) => ordersApi.patch<Order>('/update-shipping-status', data),
+}
+
+export const stripeApiEndpoints = {
+    createPaymentIntent: (data: NewOrder) => stripeApi.post<CreateCheckout>('/create-payment-intent', data),
+}

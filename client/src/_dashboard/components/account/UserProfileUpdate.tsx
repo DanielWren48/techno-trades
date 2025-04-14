@@ -18,6 +18,7 @@ import { AccountUpdateSchemaType, accountUpdateSchema } from "@/_dashboard/schem
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { medaiApi } from "@/api/media/requests";
 import { Icons } from "@/components/shared";
+import { mediaApiEndpoints } from "@/api/client";
 
 export default function UpdateProfile() {
     const { user } = useUserContext();
@@ -99,14 +100,14 @@ export default function UpdateProfile() {
                 const avatar_key = user.avatar.split("/").at(-1);
                 if (avatar_key) {
                     try {
-                        toast.promise(() => medaiApi.deleteFiles([avatar_key]),
+                        toast.promise(() => mediaApiEndpoints.deleteFiles([avatar_key]),
                             {
                                 loading: 'Removing file...',
                                 success: () => 'File deleted succesfully',
                                 error: () => 'Error deleting files.',
                             }
                         );
-                        // const { message } = await medaiApi.deleteFiles([avatar_key]);
+                        // const { message } = await mediaApiEndpoints.deleteFiles([avatar_key]);
                         // toast.info(message);
                     } catch (error) {
                         toast.error('Failed to delete existing avatar');

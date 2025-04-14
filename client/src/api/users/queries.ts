@@ -1,4 +1,4 @@
-import { usersApi } from './requests';
+import { usersAiEndpoints } from '../client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     BaseUserResponse,
@@ -22,7 +22,7 @@ export enum QUERY_KEYS {
 export const useGetAllUsers = () => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_ALL_USER],
-        queryFn: () => usersApi.getAllUsers(),
+        queryFn: () => usersAiEndpoints.getAllUsers(),
     });
 };
 
@@ -30,7 +30,7 @@ export const useGetAllUsers = () => {
 // React Mutation Hooks
 export const useSendEmailChangeOtp = () => {
     return useMutation({
-        mutationFn: usersApi.sendEmailChangeOtp,
+        mutationFn: usersAiEndpoints.sendEmailChangeOtp,
         onError: (error) => {
             console.error('Validation error:', error);
         }
@@ -42,7 +42,7 @@ export const useUpdateUserProfile = () => {
     const { setUser } = useUserContext();
 
     return useMutation<BaseUserResponse<IUser>, BaseUserResponse<ErrorResponse>, UpdateUserProfile>({
-        mutationFn: usersApi.updateUserDetails,
+        mutationFn: usersAiEndpoints.updateUserDetails,
         onSuccess: (response) => {
             if (response.status === 'success' && response.data) {
                 const user = response.data
@@ -62,7 +62,7 @@ export const useUpdateUserEmail = () => {
     const { setUser } = useUserContext();
 
     return useMutation<BaseUserResponse<IUser>, BaseUserResponse<ErrorResponse>, UpdateUserEmail>({
-        mutationFn: usersApi.updateUserEmail,
+        mutationFn: usersAiEndpoints.updateUserEmail,
         onSuccess: (response) => {
             if (response.status === 'success' && response.data) {
                 const user = response.data
@@ -79,7 +79,7 @@ export const useUpdateUserEmail = () => {
 
 export const useUpdateUserPassword = () => {
     return useMutation<BaseUserResponse<IUser>, BaseUserResponse<ErrorResponse>, UpdateUserPassword>({
-        mutationFn: usersApi.updateUserPassword,
+        mutationFn: usersAiEndpoints.updateUserPassword,
         onError: (error) => {
             console.error('Validation error:', error);
         }
@@ -90,7 +90,7 @@ export const useCloseUserAccount = () => {
     const { setUser, setIsAuthenticated } = useUserContext();
 
     return useMutation<BaseUserResponse<null>, BaseUserResponse<ErrorResponse>>({
-        mutationFn: usersApi.closeUserAccount,
+        mutationFn: usersAiEndpoints.closeUserAccount,
         onSuccess: (response) => {
             if (response.status === 'success') {
                 setIsAuthenticated(false);

@@ -1,5 +1,5 @@
 import { INewProduct, INewReview, Product } from '@/types';
-import { shopApi} from './requests';
+import { shopApiEndpoints } from '../client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { BaseShopResponse, CreateReview, ProductFilterBody, ProductQueryParams, UpdateProduct, UpdateProductDiscount } from './types';
 import { ErrorResponse } from 'react-router-dom';
@@ -14,7 +14,7 @@ enum QUERY_KEYS {
 export const useGetProducts = (params?: ProductQueryParams) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_PRODUCTS, params],
-        queryFn: () => shopApi.products(params),
+        queryFn: () => shopApiEndpoints.products(params),
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         refetchOnReconnect: false
@@ -24,7 +24,7 @@ export const useGetProducts = (params?: ProductQueryParams) => {
 export const useSearchProduct = ({ filters }: { filters?: ProductFilterBody }) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_SIMILAR_PRODUCTS, filters],
-        queryFn: () => shopApi.filterProducts({ filters }),
+        queryFn: () => shopApiEndpoints.filterProducts({ filters }),
         enabled: !!filters?.name,
     });
 };
@@ -32,7 +32,7 @@ export const useSearchProduct = ({ filters }: { filters?: ProductFilterBody }) =
 export const useGetProductBySlug = (slug: string) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_PRODUCT_BY_SLUG, slug],
-        queryFn: () => shopApi.getProductBySlug(slug),
+        queryFn: () => shopApiEndpoints.getProductBySlug(slug),
         enabled: !!slug,
     });
 };
@@ -43,7 +43,7 @@ export const useGetSimimarProducts = (
 ) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_SIMILAR_PRODUCTS, { params, filters }],
-        queryFn: () => shopApi.filterProducts({ params, filters }),
+        queryFn: () => shopApiEndpoints.filterProducts({ params, filters }),
         enabled: !!currentProductId,
         select: (data) => ({
             ...data,
@@ -59,13 +59,13 @@ export const useGetSimimarProducts = (
 export const useFilterProducts = ({ params, filters }: { params?: ProductQueryParams, filters?: ProductFilterBody }) => {
     return useQuery({
         queryKey: [QUERY_KEYS.FILTER_PRODUCTS, { params, filters }],
-        queryFn: () => shopApi.filterProducts({ params, filters }),
+        queryFn: () => shopApiEndpoints.filterProducts({ params, filters }),
     });
 };
 
 export const useCreateNewProduct = () => {
     return useMutation<BaseShopResponse<Product>, BaseShopResponse<ErrorResponse>, INewProduct>({
-        mutationFn: shopApi.createProduct,
+        mutationFn: shopApiEndpoints.createProduct,
         onSuccess: (response) => {
             console.log({ response });
         },
@@ -78,7 +78,7 @@ export const useCreateNewProduct = () => {
 export const useSetProductDiscount = () => {
     const queryClient = useQueryClient();
     return useMutation<BaseShopResponse<Product>, BaseShopResponse<ErrorResponse>, UpdateProductDiscount>({
-        mutationFn: shopApi.updateDiscount,
+        mutationFn: shopApiEndpoints.updateDiscount,
         onSuccess: (data) => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_PRODUCTS],
@@ -93,7 +93,7 @@ export const useSetProductDiscount = () => {
 export const useUpdateProduct = () => {
     const queryClient = useQueryClient();
     return useMutation<BaseShopResponse<Product>, BaseShopResponse<ErrorResponse>, UpdateProduct>({
-        mutationFn: shopApi.updateProductById,
+        mutationFn: shopApiEndpoints.updateProductById,
         onSuccess: (data) => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_PRODUCTS],
@@ -108,7 +108,7 @@ export const useUpdateProduct = () => {
 export const useCreateProductReview = () => {
     const queryClient = useQueryClient();
     return useMutation<BaseShopResponse<INewReview>, BaseShopResponse<ErrorResponse>, CreateReview>({
-        mutationFn: shopApi.createReview,
+        mutationFn: shopApiEndpoints.createReview,
         onSuccess: (response) => {
             if (response.status === 'success' && response.data) {
                 const slug = response.data.slug

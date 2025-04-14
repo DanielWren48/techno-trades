@@ -7,3 +7,7 @@ export interface NewOrder {
     shippingAddress: ShippingAddressFormSchema,
     selectedShippingOption: ShippingOption
 }
+
+export type CreateCheckout = {
+    clientSecret: string
+};

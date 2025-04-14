@@ -12,7 +12,7 @@ import { Icons } from "@/components/shared";
 import { ShippingOption } from "../components/shippingForm";
 import { ShippingAddressFormSchema } from "../components/addressForm";
 import { PaymentForm, AddressForm, ShippingForm } from "../components";
-import { stripeApi } from "@/api/stripe/request";
+import { stripeApiEndpoints } from "@/api/client";
 
 export default function Checkout() {
     const { items, clearCart } = useCart();
@@ -51,16 +51,15 @@ export default function Checkout() {
                 quantity: quantity,
             }));
 
-            const clientSecret = await stripeApi.createPaymentIntent({
+            const { data, code, status, message } = await stripeApiEndpoints.createPaymentIntent({
                 order: order,
                 userId: user._id,
                 shippingAddress,
                 selectedShippingOption
             });
 
-            if (clientSecret) {
-                console.log(clientSecret)
-                setClientSecret(clientSecret);
+            if (status === "success" && data) {
+                setClientSecret(data.clientSecret);
             } else {
                 setError("Failed to create payment intent");
             }
