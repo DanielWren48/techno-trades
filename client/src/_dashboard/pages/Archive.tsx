@@ -1,7 +1,7 @@
 import { Shell } from "@/components/dashboard/shell";
 import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/dashboard/header";
-import { useGetProducts } from "@/api/products/queries";
+import { useGetProducts } from "@/api/queries/product";
 import { columns } from "@/components/tables/products-table/columns";
 import { DataTable } from "@/components/tables/products-table/data-table";
 

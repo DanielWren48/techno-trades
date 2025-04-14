@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { FC } from "react";
-import { useGetProducts } from "@/api/products/queries";
+import { useGetProducts } from "@/api/queries/product";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 

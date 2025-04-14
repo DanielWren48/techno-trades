@@ -1,7 +1,7 @@
 import { INewProduct, INewReview, Product } from '@/types';
 import { shopApiEndpoints } from '../client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { BaseShopResponse, CreateReview, ProductFilterBody, ProductQueryParams, UpdateProduct, UpdateProductDiscount } from './types';
+import { BaseShopResponse, CreateReview, ProductFilterBody, ProductQueryParams, UpdateProduct, UpdateProductDiscount } from '../types/product';
 import { ErrorResponse } from 'react-router-dom';
 
 enum QUERY_KEYS {

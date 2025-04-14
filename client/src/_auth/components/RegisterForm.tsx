@@ -1,7 +1,7 @@
 import { AuthButton } from "./AuthButton";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { useRegisterUser } from "@/api/auth/queries";
+import { useRegisterUser } from "@/api/queries/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Fragment, useEffect, useState } from "react";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";

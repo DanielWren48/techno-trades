@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { ACCOUNT_TYPE, AUTH_TYPE, IUser } from "@/types";
-import { useGetUserSession } from "@/api/auth/queries";
+import { useGetUserSession } from "@/api/queries/auth";
 import { authApiService } from "@/api/client";
 import { useQueryClient } from "@tanstack/react-query";
 

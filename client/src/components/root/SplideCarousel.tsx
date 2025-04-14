@@ -6,7 +6,7 @@ import "@splidejs/splide/dist/css/splide.min.css";
 import { buttonVariants } from "../ui/button";
 import { Link } from "react-router-dom";
 import { Product } from "@/types";
-import { useGetProducts } from "@/api/products/queries";
+import { useGetProducts } from "@/api/queries/product";
 import { Skeleton } from "../ui/skeleton";
 
 const SplideCarousel = () => {

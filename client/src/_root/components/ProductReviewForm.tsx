@@ -11,7 +11,7 @@ import { Rating } from "@smastrom/react-rating";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUserContext } from "@/context/AuthContext";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useCreateProductReview } from "@/api/products/queries";
+import { useCreateProductReview } from "@/api/queries/product";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const createReviewSchema = z.object({

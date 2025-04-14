@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCloseUserAccount } from "@/api/users/queries";
+import { useCloseUserAccount } from "@/api/queries/user";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 
 interface AddressDialogProps {

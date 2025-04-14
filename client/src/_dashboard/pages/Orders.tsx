@@ -9,7 +9,7 @@ import { Header } from "@/components/dashboard/header";
 import { cn, formatDate, formatPrice } from "@/lib/utils";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import PDFExportComponent from "@/components/shared/ExportToPDF";
-import { useGetMyOrders } from "@/api/orders/queries";
+import { useGetMyOrders } from "@/api/queries/order";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 

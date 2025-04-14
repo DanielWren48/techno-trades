@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Slider } from "@/components/ui/slider";
 import { useDebounce } from 'use-debounce';
 import { usePriceFilter } from '@/hooks/store';
-import { useGetProducts } from '@/api/products/queries';
+import { useGetProducts } from '@/api/queries/product';
 import { RotateCcw } from 'lucide-react';
 import { Button } from '../ui/button';
 

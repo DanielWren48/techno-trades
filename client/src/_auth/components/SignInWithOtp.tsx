@@ -1,4 +1,4 @@
-import { useSignInWithOtp } from "@/api/auth/queries";
+import { useSignInWithOtp } from "@/api/queries/auth";
 import {
     Form,
     FormControl,

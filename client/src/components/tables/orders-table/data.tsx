@@ -1,4 +1,4 @@
-import { useGetOrders } from "@/api/orders/queries";
+import { useGetOrders } from "@/api/queries/order";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 

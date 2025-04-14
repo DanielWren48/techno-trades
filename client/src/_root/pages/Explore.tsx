@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ProductCategory } from "@/types";
-import { useFilterProducts } from "@/api/products/queries";
+import { useFilterProducts } from "@/api/queries/product";
 import { GridProductList, ListProductList } from "@/components/shared";
 import { Pagination, PaginationContent } from "@/components/ui/pagination"
 import { useSorting, useBrandFilter, useStockFiltering, useCategoryFilter, usePriceFilter, useRatingFilterStore } from "@/hooks/store";

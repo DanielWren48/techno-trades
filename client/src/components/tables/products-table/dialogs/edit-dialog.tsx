@@ -25,7 +25,7 @@ import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useUserContext } from "@/context/AuthContext";
 import { toast } from "sonner";
-import { useUpdateProduct } from "@/api/products/queries";
+import { useUpdateProduct } from "@/api/queries/product";
 
 type EditProps = {
   product: ProductType;

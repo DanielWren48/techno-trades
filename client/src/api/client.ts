@@ -2,12 +2,12 @@ import { IUser } from '@/types';
 import Cookies from 'js-cookie';
 import { Order } from '@/types/order';
 import { INewProduct, INewReview, Product } from '@/types';
-import { CreateCheckout, NewOrder } from './stripe/types';
+import { CreateCheckout, NewOrder } from './types/stripe';
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
-import { UpdateUserEmail, UpdateUserPassword, UpdateUserProfile } from './users/types';
-import { IOrderResponse, IOrdersResponse, UpdateShippingStatus } from './orders/types';
-import { AllProductsResponse, ProductQueryParams, ProductFilterBody, UpdateProductDiscount, UpdateProduct, CreateReview } from './products/types';
-import { IUserResponse, LoginData, LoginResponse, RegisterData, RegisterResponse, VerifyAccountData, EmailData, SetNewPasswordData, SignInWithOtp, GoogleLoginData } from './auth/types';
+import { UpdateUserEmail, UpdateUserPassword, UpdateUserProfile } from './types/user';
+import { IOrderResponse, IOrdersResponse, UpdateShippingStatus } from './types/order';
+import { AllProductsResponse, ProductQueryParams, ProductFilterBody, UpdateProductDiscount, UpdateProduct, CreateReview } from './types/product';
+import { IUserResponse, LoginData, LoginResponse, RegisterData, RegisterResponse, VerifyAccountData, EmailData, SetNewPasswordData, SignInWithOtp, GoogleLoginData } from './types/auth';
 
 // Generic response type
 export interface BaseResponse<T> {

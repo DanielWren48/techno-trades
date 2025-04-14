@@ -10,8 +10,8 @@ import { Loader2, RotateCcw, X } from "lucide-react";
 import { toast } from "sonner";
 import { ProductImage } from "@/types";
 import { Progress } from "@/components/ui/progress";
-import { useUpdateProduct } from "@/api/products/queries";
-import { medaiApi } from "@/api/media/requests";
+import { useUpdateProduct } from "@/api/queries/product";
+import { mediaApiEndpoints } from "@/api/client";
 
 type MediaProps = {
   product: ProductType;
@@ -105,7 +105,7 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
         return parts[parts.length - 1];
       });
 
-      toast.promise(() => medaiApi.deleteFiles([...keysToDelete]),
+      toast.promise(() => mediaApiEndpoints.deleteFiles([...keysToDelete]),
         {
           loading: 'Removing file...',
           success: () => 'File deleted succesfully',

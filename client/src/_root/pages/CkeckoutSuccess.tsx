@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { OrderInvoice } from "@/components/shared";
-import { useGetOrderBySessionId } from "@/api/orders/queries";
+import { useGetOrderBySessionId } from "@/api/queries/order";
 
 const CkeckoutSuccess: React.FC = () => {
   const { search } = useLocation();

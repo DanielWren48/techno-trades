@@ -1,7 +1,7 @@
 import { Input } from '../ui/input';
 import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
-import { useSearchProduct } from '@/api/products/queries';
+import { useSearchProduct } from '@/api/queries/product';
 import { useDebounce } from 'use-debounce';
 
 const ProductSearch: React.FC = () => {

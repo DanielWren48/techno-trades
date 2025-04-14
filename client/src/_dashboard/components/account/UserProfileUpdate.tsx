@@ -11,12 +11,11 @@ import { Progress } from "@/components/ui/progress"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUserContext } from "@/context/AuthContext";
 import { useDropzone } from "@uploadthing/react/hooks";
-import { useUpdateUserProfile } from "@/api/users/queries";
+import { useUpdateUserProfile } from "@/api/queries/user";
 import { generateClientDropzoneAccept } from "uploadthing/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AccountUpdateSchemaType, accountUpdateSchema } from "@/_dashboard/schemas/account";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { medaiApi } from "@/api/media/requests";
 import { Icons } from "@/components/shared";
 import { mediaApiEndpoints } from "@/api/client";
 

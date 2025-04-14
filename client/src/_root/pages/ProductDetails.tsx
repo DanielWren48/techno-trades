@@ -9,7 +9,7 @@ import { ArrowLeft, Fullscreen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, useParams } from "react-router-dom";
 import SimilarProducts from "../components/SimilarProducts";
-import { useGetProductBySlug } from "@/api/products/queries";
+import { useGetProductBySlug } from "@/api/queries/product";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import MarkdownDisplay from "@/_dashboard/components/product/MarkdownDisplay";
 import { AddToCartButton, AddToFavoritesButton } from "@/components/shared";

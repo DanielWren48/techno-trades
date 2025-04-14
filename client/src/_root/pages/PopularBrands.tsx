@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { useBrandFilter } from "@/hooks/store";
 import { Shell } from "@/components/dashboard/shell";
 import { buttonVariants } from "@/components/ui/button";
-import { useGetProducts } from "@/api/products/queries";
+import { useGetProducts } from "@/api/queries/product";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const PopularBrands = () => {

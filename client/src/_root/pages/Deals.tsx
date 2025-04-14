@@ -1,6 +1,6 @@
 import { GridProductList } from "@/components/shared";
 import { ProductLoader } from "@/components/product-filters";
-import { useFilterProducts } from "@/api/products/queries";
+import { useFilterProducts } from "@/api/queries/product";
 
 const Deals = () => {
   const { data, isPending: isProductLoading } = useFilterProducts(

@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useVerifyAccountUser } from "@/api/auth/queries";
+import { useVerifyAccountUser } from "@/api/queries/auth";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { Fragment, useEffect } from "react";
 import { RegisterValidationType, OtpSchemaType, otpSchema } from "../schemas";

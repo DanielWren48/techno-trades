@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUserContext } from "@/context/AuthContext";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp"
-import { useSendEmailChangeOtp, useUpdateUserEmail } from "@/api/users/queries";
+import { useSendEmailChangeOtp, useUpdateUserEmail } from "@/api/queries/user";
 import { emailUpdateSchema, EmailUpdateSchemaType } from "@/_dashboard/schemas/account";
 
 export default function UpdateUserEmail() {

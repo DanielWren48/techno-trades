@@ -1,4 +1,4 @@
-import { useGetProducts } from "@/api/products/queries";
+import { useGetProducts } from "@/api/queries/product";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 

@@ -1,6 +1,6 @@
 import { Context, GoogleLogin, GsiButtonConfiguration } from '@react-oauth/google';
 import { CredentialResponse } from '@react-oauth/google';
-import { useGoogleLogin as LoginMutate } from '@/api/auth/queries';
+import { useGoogleLogin as LoginMutate } from '@/api/queries/auth';
 import { toast } from 'sonner';
 
 interface GoogleLoginButtonProps {

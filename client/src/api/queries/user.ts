@@ -6,7 +6,7 @@ import {
     UpdateUserEmail,
     UpdateUserPassword,
     UpdateUserProfile,
-} from './types';
+} from '../types/user';
 import { INITIAL_USER, useUserContext } from '@/context/AuthContext';
 import { IUser } from '@/types';
 

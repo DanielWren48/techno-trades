@@ -14,7 +14,7 @@ import {
     SetNewPasswordData,
     SignInWithOtp,
     GoogleLoginData
-} from './types';
+} from '../types/auth';
 import { ACCOUNT_TYPE } from '@/types';
 import { authApiService } from '../client';
 

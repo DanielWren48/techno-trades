@@ -4,7 +4,7 @@ import { Overview } from "@/components/dashboard/overview"
 import { RecentSales } from "@/components/dashboard/recent-sales"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useGetOrders } from '@/api/orders/queries'
+import { useGetOrders } from '@/api/queries/order'
 
 export default function Dashboard() {
   const { data: orders, isLoading: loadingOrders } = useGetOrders()

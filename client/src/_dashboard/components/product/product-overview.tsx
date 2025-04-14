@@ -5,7 +5,7 @@ import Markdown from 'react-markdown';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useUserContext } from '@/context/AuthContext';
-import { useCreateNewProduct } from '@/api/products/queries';
+import { useCreateNewProduct } from '@/api/queries/product';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { NewProductSchemaType } from '@/_dashboard/schemas/product';

@@ -75,7 +75,7 @@ export function DataTableRowActions<TData>({
         <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => navigator.clipboard.writeText(product._id.toString())}
+            onClick={() => navigator.clipboard.writeText(product._id!.toString())}
           >
             <Icons.copy className='mr-2 h-4 w-4' />
             Copy Product ID

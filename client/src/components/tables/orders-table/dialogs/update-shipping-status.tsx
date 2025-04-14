@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { deliveryStatuses } from "../filters";
 import { toast } from "sonner";
-import { useUpdateShippingStatus } from "@/api/orders/queries";
+import { useUpdateShippingStatus } from "@/api/queries/order";
 import { Label } from "@/components/ui/label";
 
 const deliveryStatusSchema = z.object({

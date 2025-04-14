@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useUpdateUserPassword } from "@/api/users/queries";
+import { useUpdateUserPassword } from "@/api/queries/user";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { passwordUpdateSchema, PasswordUpdateSchemaType } from "@/_dashboard/schemas/account";
 

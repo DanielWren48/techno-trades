@@ -2,7 +2,7 @@ import { isEmpty } from "lodash";
 import { Product } from "@/types";
 import { Link } from "react-router-dom";
 import "@smastrom/react-rating/style.css";
-import { useGetSimimarProducts } from "@/api/products/queries";
+import { useGetSimimarProducts } from "@/api/queries/product";
 
 export default function SimilarProducts({ id, category }: { id: Product["_id"], category: Product["category"] }) {
     const { data, isLoading } = useGetSimimarProducts(
