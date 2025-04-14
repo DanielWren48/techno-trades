@@ -31,13 +31,14 @@ import { useLogoutUser } from "@/api/auth/queries";
 
 export function UserNav() {
   const { mutate: signOut } = useLogoutUser();
-  const { user, isStaff } = useUserContext();
+  const { user, isStaff, logout } = useUserContext();
   const { setTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleSignOut = async (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.preventDefault();
-    signOut();
+    // signOut();
+    logout();
     navigate("/");
   };
 

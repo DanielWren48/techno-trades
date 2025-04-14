@@ -9,6 +9,8 @@ import {
 } from "react";
 import { ACCOUNT_TYPE, AUTH_TYPE, IUser } from "@/types";
 import { useGetUserSession } from "@/api/auth/queries";
+import { authApiService } from "@/api/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const INITIAL_USER: IUser = {
   _id: '',
@@ -31,6 +33,7 @@ interface IAuthContext {
   setIsAuthenticated: Dispatch<SetStateAction<boolean>>;
   setIsStaff: Dispatch<SetStateAction<boolean>>;
   checkAuthUser: () => Promise<boolean>;
+  logout: () => void;
 }
 
 const defaultAuthContext: IAuthContext = {
@@ -42,6 +45,7 @@ const defaultAuthContext: IAuthContext = {
   setIsAuthenticated: () => { },
   setIsStaff: () => { },
   checkAuthUser: async () => false,
+  logout: () => { }
 };
 
 const AuthContext = createContext<IAuthContext>(defaultAuthContext);
@@ -50,26 +54,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<IUser>(INITIAL_USER);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
-  const [_, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Get user session with react-query
   const { data, status, isLoading } = useGetUserSession();
 
+  // Auth state change listener
+  useEffect(() => {
+    const unsubscribe = authApiService.onAuthStateChange((authenticated) => {
+      if (!authenticated) {
+        // Clear user state on auth failure
+        setUser(INITIAL_USER);
+        setIsAuthenticated(false);
+        setIsStaff(false);
+
+        // Invalidate the query to prevent retries
+        queryClient.invalidateQueries({ queryKey: ['user-session'] });
+      }
+    });
+
+    return unsubscribe;
+  }, [queryClient]);
+
+  // Check authentication status
   const checkAuthUser = async (): Promise<boolean> => {
-    setIsLoading(isLoading);
     try {
       if (!isLoading && data?.data && status === 'success') {
-        let user = data.data.user
+        const user = data.data.user;
         setUser(user);
         setIsStaff(user.accountType === ACCOUNT_TYPE.STAFF);
         setIsAuthenticated(true);
         return true;
       }
-
       return false;
     } catch (error) {
       console.error("Authentication check failed", error);
       return false;
+    }
+  };
+
+  // Logout function
+  const logout = async () => {
+    try {
+      await authApiService.logout();
     } finally {
-      setIsLoading(isLoading);
+      // Clear auth state regardless of API response
+      authApiService.clearAuthTokens();
+      setUser(INITIAL_USER);
+      setIsAuthenticated(false);
+      setIsStaff(false);
+      queryClient.invalidateQueries({ queryKey: ['user-session'] });
     }
   };
 
@@ -86,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated,
     setIsStaff,
     checkAuthUser,
+    logout
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

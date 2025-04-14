@@ -1,4 +1,4 @@
-import { authApi } from './requests';
+// import { authApi } from './requests';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { INITIAL_USER, useUserContext } from '@/context/AuthContext';
 import {
@@ -16,11 +16,12 @@ import {
     GoogleLoginData
 } from './types';
 import { ACCOUNT_TYPE } from '@/types';
+import { authApiService } from '../client';
 
 // React Query Hooks
 export const useRegisterUser = () => {
     return useMutation<AuthResponse<RegisterResponse>, AuthResponse<ErrorResponse>, RegisterData>({
-        mutationFn: authApi.register,
+        mutationFn: authApiService.register,
         onSuccess: (response) => {
             console.log({ response });
         },
@@ -35,7 +36,7 @@ export const useVerifyAccountUser = () => {
     const { setUser } = useUserContext();
 
     return useMutation<AuthResponse<IUserResponse>, AuthResponse<ErrorResponse>, VerifyAccountData>({
-        mutationFn: authApi.verifyAccount,
+        mutationFn: authApiService.verifyAccount,
         onSuccess: (response) => {
             console.log("success")
             if (response.status === 'success' && response.data) {
@@ -54,7 +55,7 @@ export const useVerifyAccountUser = () => {
 
 export const useResendVerificationEmail = () => {
     return useMutation<AuthResponse<{ otp: string }>, AuthResponse<ErrorResponse>, EmailData>({
-        mutationFn: authApi.resendVerificationEmail,
+        mutationFn: authApiService.resendVerificationEmail,
         onSuccess: (response) => {
             console.log({ response });
         },
@@ -66,7 +67,7 @@ export const useResendVerificationEmail = () => {
 
 export const useSendPasswordResetOtp = () => {
     return useMutation<AuthResponse<{ otp: string }>, AuthResponse<ErrorResponse>, EmailData>({
-        mutationFn: authApi.sendPasswordResetOtp,
+        mutationFn: authApiService.sendPasswordResetOtp,
         onSuccess: (response) => {
             console.log({ response });
         },
@@ -78,7 +79,7 @@ export const useSendPasswordResetOtp = () => {
 
 export const useSetNewPassword = () => {
     return useMutation<AuthResponse<null>, AuthResponse<ErrorResponse>, SetNewPasswordData>({
-        mutationFn: authApi.setNewPassword,
+        mutationFn: authApiService.setNewPassword,
         onSuccess: (response) => {
             console.log({ response });
         },
@@ -90,7 +91,7 @@ export const useSetNewPassword = () => {
 
 export const useSendLoginOtp = () => {
     return useMutation<AuthResponse<{ otp: string }>, AuthResponse<ErrorResponse>, EmailData>({
-        mutationFn: authApi.sendLoginOtp,
+        mutationFn: authApiService.sendLoginOtp,
         onSuccess: (response) => {
             console.log({ response });
         },
@@ -105,7 +106,7 @@ export const useLoginUser = () => {
     const { setUser, setIsAuthenticated, setIsStaff } = useUserContext();
 
     return useMutation<AuthResponse<LoginResponse>, AuthResponse<ErrorResponse>, LoginData>({
-        mutationFn: authApi.login,
+        mutationFn: authApiService.login,
         onSuccess: (response) => {
             if (response.status === 'success' && response.data) {
                 const user = response.data.user
@@ -128,7 +129,7 @@ export const useGoogleLogin = () => {
     const { setUser, setIsAuthenticated, setIsStaff } = useUserContext();
 
     return useMutation<AuthResponse<LoginResponse>, AuthResponse<ErrorResponse>, GoogleLoginData>({
-        mutationFn: authApi.google,
+        mutationFn: authApiService.google,
         onSuccess: (response) => {
             if (response.status === 'success' && response.data) {
                 const user = response.data.user
@@ -151,7 +152,7 @@ export const useSignInWithOtp = () => {
     const { setUser, setIsAuthenticated, setIsStaff } = useUserContext();
 
     return useMutation<AuthResponse<LoginResponse>, AuthResponse<ErrorResponse>, SignInWithOtp>({
-        mutationFn: authApi.signInWithOtp,
+        mutationFn: authApiService.signInWithOtp,
         onSuccess: (response) => {
             if (response.status === 'success' && response.data) {
                 const user = response.data.user
@@ -174,7 +175,7 @@ export const useLogoutUser = () => {
     const { setUser, setIsAuthenticated } = useUserContext();
 
     return useMutation<AuthResponse<null>, AuthResponse<ErrorResponse>>({
-        mutationFn: authApi.logout,
+        mutationFn: authApiService.logout,
         onSuccess: (response) => {
             if (response.status === 'success') {
                 setIsAuthenticated(false);
@@ -190,6 +191,8 @@ export const useLogoutUser = () => {
 export const useGetUserSession = () => {
     return useQuery({
         queryKey: ['user-session'],
-        queryFn: authApi.validate,
+        queryFn: authApiService.validateUser,
+        retry: false,
+        refetchOnWindowFocus: false,
     });
-}
+};

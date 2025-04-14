@@ -1,7 +1,7 @@
 import { IUser } from '@/types';
 import Cookies from 'js-cookie';
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
-import { Navigate } from 'react-router-dom';
+import { IUserResponse, LoginData, LoginResponse, RegisterData, RegisterResponse, VerifyAccountData, EmailData, SetNewPasswordData, SignInWithOtp, GoogleLoginData } from './auth/types';
 
 // Generic response type
 export interface BaseResponse<T> {
@@ -19,7 +19,7 @@ export interface ErrorResponse {
 
 // Token response interface
 interface TokenResponse {
-    user: any;
+    user: IUser;
     access: string;
     refresh: string;
 }
@@ -44,6 +44,9 @@ class ApiClient {
         reject: (reason?: any) => void;
         config: AxiosRequestConfig;
     }> = [];
+
+    // Event system for auth state changes
+    private authStateListeners: Array<(isAuthenticated: boolean) => void> = [];
 
     constructor(options: ApiClientOptions) {
         this.options = {
@@ -77,7 +80,8 @@ class ApiClient {
         );
 
         // Add response interceptor for handling auth errors and token refresh
-        this.instance.interceptors.response.use((response) => response,
+        this.instance.interceptors.response.use(
+            (response) => response,
             async (error) => {
                 const originalRequest = error.config;
                 console.log({ originalRequest })
@@ -104,6 +108,7 @@ class ApiClient {
                     console.log({ refreshToken })
 
                     if (!refreshToken) {
+                        this.notifyAuthStateChange(false);
                         throw new Error('No refresh token available');
                     }
 
@@ -118,25 +123,39 @@ class ApiClient {
                     if (response.data.status === 'success' && response.data.data) {
                         // Process the queue of failed requests
                         this.processQueue(null, originalRequest);
+                        this.notifyAuthStateChange(true);
 
                         // Retry the original request
                         return this.instance(originalRequest);
                     } else {
-                        // If refresh failed, redirect to login
+                        // If refresh failed, notify about auth state change
                         this.processQueue(new Error('Refresh token failed'), null);
-                        this.redirectToLogin();
+                        this.notifyAuthStateChange(false);
                         return Promise.reject(error);
                     }
                 } catch (refreshError) {
                     //@ts-expect-error
                     this.processQueue(refreshError, null);
-                    this.redirectToLogin();
+                    this.notifyAuthStateChange(false);
                     return Promise.reject(refreshError);
                 } finally {
                     this.isRefreshing = false;
                 }
             }
         );
+    }
+
+    // Add listener for auth state changes
+    public onAuthStateChange(callback: (isAuthenticated: boolean) => void) {
+        this.authStateListeners.push(callback);
+        return () => {
+            this.authStateListeners = this.authStateListeners.filter(cb => cb !== callback);
+        };
+    }
+
+    // Notify listeners about auth state changes
+    private notifyAuthStateChange(isAuthenticated: boolean) {
+        this.authStateListeners.forEach(callback => callback(isAuthenticated));
     }
 
     // Process queued requests after refresh attempt
@@ -152,14 +171,11 @@ class ApiClient {
         this.failedQueue = [];
     }
 
-    // Redirect to login when auth completely fails
-    private redirectToLogin() {
-        // Clear auth cookies
+    // Clear auth tokens and notify about state change
+    public clearAuthTokens() {
         Cookies.remove(this.options.accessTokenName || 'accessToken');
         Cookies.remove(this.options.refreshTokenName || 'refreshToken');
-
-        console.warn('Authentication failed. Redirecting to login...');
-        Navigate({ to: "/auth/sign-in", replace: true })
+        this.notifyAuthStateChange(false);
     }
 
     // Generic error handler
@@ -189,7 +205,6 @@ class ApiClient {
                 params,
                 ...config
             });
-            console.log({ response })
             return response.data;
         } catch (error) {
             return this.handleError(error) as BaseResponse<T>;
@@ -236,3 +251,26 @@ class ApiClient {
         }
     }
 }
+
+// Create shared API client for auth
+const authApi = new ApiClient({ baseURL: '/api/v1/auth' });
+
+// Export the shared instance
+export const authApiService = {
+    register: (data: RegisterData) => authApi.post<RegisterResponse>('/register', data),
+    verifyAccount: (data: VerifyAccountData) => authApi.post<IUserResponse>('/verify-email', data),
+    login: (data: LoginData) => authApi.post<LoginResponse>('/login', data),
+    google: (data: GoogleLoginData) => authApi.post<LoginResponse>('/google', data),
+    logout: () => authApi.get<null>('/logout'),
+    validate: () => authApi.get<LoginResponse>('/validate'),
+    resendVerificationEmail: (data: EmailData) => authApi.post<{ otp: string }>('/resend-verification-email', data),
+    sendPasswordResetOtp: (data: EmailData) => authApi.post<{ otp: string }>('/send-password-reset-otp', data),
+    setNewPassword: (data: SetNewPasswordData) => authApi.post<null>('/set-new-password', data),
+    sendLoginOtp: (data: EmailData) => authApi.post<{ otp: string }>('/send-login-otp', data),
+    signInWithOtp: (data: SignInWithOtp) => authApi.post<LoginResponse>('/login-with-otp', data),
+
+    validateUser: () => authApi.get<any>('/validate'),
+    refreshToken: (refreshToken: string) => authApi.post<LoginResponse>('/refresh', { refresh: refreshToken }),
+    clearAuthTokens: () => authApi.clearAuthTokens(),
+    onAuthStateChange: authApi.onAuthStateChange.bind(authApi),
+};
