@@ -5,10 +5,11 @@ import { DataTableRowActions } from "./data-table-row-actions"
 import { ProductType } from "@/lib/validation"
 import { DataTableColumnHeader } from "../shared/data-table-column-header"
 import { X } from "lucide-react"
+import { TableCellViewer } from "./components/TableCellViewer"
 import { toast } from "sonner"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { useUpdateProductStock } from "@/api/queries/product"
+import { useUpdateProduct, useUpdateProductStock } from "@/api/queries/product"
 
 export const columns: ColumnDef<ProductType>[] = [
   {
@@ -61,16 +62,7 @@ export const columns: ColumnDef<ProductType>[] = [
       <DataTableColumnHeader column={column} title="Name" />
     ),
     cell: ({ row }) => {
-      const lowStock = Number(row.getValue("countInStock")) < 10
-
-      return (
-        <div className="flex items-center space-x-2">
-          {lowStock && <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-sm font-medium text-red-800 ring-1 ring-inset ring-red-600/20">Low Stock</span>}
-          <span className="max-w-[280px] truncate font-medium">
-            {row.getValue("name")}
-          </span>
-        </div>
-      )
+      return <TableCellViewer product={row.original} />
     },
   },
   {
