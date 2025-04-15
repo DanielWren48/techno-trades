@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { paginateRecords } from "../utils/paginators";
 import { CustomResponse } from "../config/utils";
-import { getFilteredProducts, getProductBySlug, getProducts, ProductFilterBody, updateProductDiscount, updateProductStock } from "../managers/products";
+import { getProductBySlug, getProducts, updateProductDiscount, updateProductStock } from "../managers/products";
 import { ErrorCode, NotFoundError, RequestError } from "../config/handlers";
 import { Product } from "../models/products";
 import { authMiddleware } from "../middlewares/auth";
 import { validationMiddleware } from "../middlewares/error";
 import { rateLimiter, RATE_CFG, rateLimiterSimple } from "../middlewares/rate_limitor";
 import { ProductCreateSchema, ProductSchema, ProductUpdateSchema, ReviewCreateSchema, ReviewSchema, UpdateProductDiscountSchema, UpdateProductStockSchema } from "../schemas/shop";
+import { getFilteredProducts } from "../utils/filterProducts";
 
 const shopRouter = Router();
 
