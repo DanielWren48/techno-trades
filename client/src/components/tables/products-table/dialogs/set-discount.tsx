@@ -10,12 +10,12 @@ import { toast } from "sonner";
 
 type EditProps = {
   product: ProductType;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function SetDiscount({ product, setOpen }: EditProps) {
   const [discount, setDiscount] = useState<number | undefined>(product.discountPercentage);
-  const { mutateAsync: setProductDiscount } = useSetProductDiscount()
+  const { mutateAsync: setProductDiscount } = useSetProductDiscount();
 
   const StatBox = ({ label, value }: { label: string; value: string }) => (
     <Button
@@ -34,43 +34,43 @@ export default function SetDiscount({ product, setOpen }: EditProps) {
   );
 
   async function handleRemoveDiscount() {
-    if (!discount) return;
+    if (!product.isDiscounted) return;
     const { status, message } = await setProductDiscount({
       id: product._id!,
       isDiscounted: false,
       discountedPrice: undefined,
-    })
-    status === "success" ? toast.info(message) : toast.error(message)
-    setOpen(false)
+    });
+    status === "success" ? toast.info(message) : toast.error(message);
+    setOpen?.(false);
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     const discountedPrice = discount && product.price - (product.price * discount) / 100;
     const { status, message } = await setProductDiscount({
       id: product._id!,
       isDiscounted: discount !== undefined,
       discountedPrice: discountedPrice,
-    })
-    status === "success" ? toast.info(message) : toast.error(message)
-    setOpen(false)
+    });
+    status === "success" ? toast.info(message) : toast.error(message);
+    setOpen?.(false);
   }
 
   return (
-    <div className="flex flex-col w-full max-w-[700px] mx-auto gap-5 my-5">
-
-      {product.isDiscounted && <div className="flex items-center p-4 mb-4 text-sm text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800" role="alert">
-        <span className="sr-only">Info</span>
-        <div className="flex flex-row w-full text-base items-center justify-between">
-          <div className="flex">
-            <AlertCircle className="w-6 h-6 mr-2" />
-            <span className="font-medium">Info alert!</span> This product is currenly on <span className="font-bold">{product.discountPercentage}%</span> discount!
+    <form id="discount-form" onSubmit={handleSubmit} className="flex flex-col w-full max-w-[700px] mx-auto gap-5 my-5">
+      {product.isDiscounted && (
+        <div className="flex items-center p-4 mb-4 text-sm text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800" role="alert">
+          <span className="sr-only">Info</span>
+          <div className="flex flex-row w-full text-base items-center justify-between">
+            <div className="flex">
+              <AlertCircle className="w-6 h-6 mr-2" />
+              <span className="font-medium">Info alert!</span> This product is currenly on <span className="font-bold">{product.discountPercentage}%</span> discount!
+            </div>
+            <Button type="button" onClick={handleRemoveDiscount}>Remove Discount</Button>
           </div>
-          <Button onClick={handleRemoveDiscount}>Remove Discount</Button>
         </div>
-      </div>
-      }
+      )}
 
-      <h1 className="body-bold">Set {product.name} for discount!</h1>
       <h1>Choose one of:</h1>
       <div>
         <ul className="grid grid-cols-4 gap-5">
@@ -94,10 +94,8 @@ export default function SetDiscount({ product, setOpen }: EditProps) {
         <span className="sr-only">Info</span>
         <h1>Old Price: {formatPrice(product.price, { currency: "GBP" })}</h1>
         {!!discount && <h1>Discount of: <span className="text-red-600 font-semibold">{formatPrice(product.price * discount / 100, { currency: "GBP" })}</span></h1>}
-        {!!discount && <h1>New Price:  <span className="text-blue-500 font-semibold">{formatPrice(product.price - product.price * discount / 100, { currency: "GBP" })}</span></h1>}
+        {!!discount && <h1>New Price: <span className="text-blue-500 font-semibold">{formatPrice(product.price - product.price * discount / 100, { currency: "GBP" })}</span></h1>}
       </div>
-
-      <Button onClick={handleSubmit}>Submit</Button>
-    </div>
+    </form>
   );
 }
