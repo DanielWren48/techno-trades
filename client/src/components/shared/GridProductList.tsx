@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Product } from "@/types/index";
 import AddToCartButton from "./AddToCartButton";
 import AddToFavoritesButton from "./AddToFavoritesButton";
-import { calculateDiscountPercentage, formatPrice } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils";
 
 type GridProductListProps = {
   products: Product[];
@@ -23,7 +23,7 @@ const GridProductList = ({ products }: GridProductListProps) => {
             <div className={`${product.isDiscounted && 'inline-flex h-full w-full items-center justify-center rounded-xl bg-background dark:bg-dark-4 transform transition duration-500 ease-in-out text-sm font-medium text-white backdrop-blur-3xl'}`}>
               {product.isDiscounted &&
                 <span className="absolute top-0 left-0 px-6 py-3 rounded-tl-xl rounded-br-xl bg-purple-100 text-lg font-medium text-purple-800 ring-1 ring-inset ring-purple-600/30">
-                  {calculateDiscountPercentage({ normalPrice: product.price, discountedPrice: product.discountedPrice })}%
+                  {product.discountPercentage}%
                 </span>
               }
               <div className="absolute top-0 right-0">

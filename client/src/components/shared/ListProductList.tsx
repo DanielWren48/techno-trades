@@ -9,7 +9,7 @@ import AddToCartButton from "./AddToCartButton";
 import { Card, CardContent } from "@/components/ui/card"
 import AddToFavoritesButton from "./AddToFavoritesButton";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
-import { calculateDiscountPercentage, cn, formatPrice, isProductAddedWithinNDays, ratingStyle } from "@/lib/utils";
+import { cn, formatPrice, isProductAddedWithinNDays, ratingStyle } from "@/lib/utils";
 
 type ListProductListProps = {
   products: Product[];
@@ -94,7 +94,7 @@ const ListProductList = ({ products }: ListProductListProps) => {
                     <>
                       <span className="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-base font-semibold text-purple-800 ring-1 ring-inset ring-purple-600/20">Epic Deal</span>
                       <span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-1 text-base font-semibold text-sky-800 ring-1 ring-inset ring-sky-600/20">
-                        {calculateDiscountPercentage({ normalPrice: product.price, discountedPrice: product.discountedPrice })}% off
+                        {product.discountPercentage}% off
                       </span>
                     </>
                   }
@@ -118,7 +118,7 @@ const ListProductList = ({ products }: ListProductListProps) => {
               </div>
 
               <div className="absolute top-0 right-0">
-                <AddToFavoritesButton product={product} variant="icon" theme={theme === "dark" ? "dark" : "light" } />
+                <AddToFavoritesButton product={product} variant="icon" theme={theme === "dark" ? "dark" : "light"} />
               </div>
 
             </div>

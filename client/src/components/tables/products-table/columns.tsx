@@ -5,7 +5,6 @@ import { DataTableRowActions } from "./data-table-row-actions"
 import { ProductType } from "@/lib/validation"
 import { DataTableColumnHeader } from "../shared/data-table-column-header"
 import { X } from "lucide-react"
-import { calculateDiscountPercentage } from "@/lib/utils"
 
 export const columns: ColumnDef<ProductType>[] = [
   {
@@ -75,25 +74,17 @@ export const columns: ColumnDef<ProductType>[] = [
     header: "Brand",
   },
   {
-    accessorKey: "discountedPrice",
+    accessorKey: "discountPercentage",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Discount" />
     ),
-    cell: ({ row }) => {
-      const discountedPrice = row.getValue("discountedPrice") as number || undefined;
-      const normalPrice = parseFloat(row.getValue("price"))
-      const discount = calculateDiscountPercentage({ normalPrice, discountedPrice })
-
-      // const formatted = discountedPrice && new Intl.NumberFormat("en-US", {
-      //   style: "currency",
-      //   currency: "GBP",
-      // }).format(discountedPrice)
+    cell: ({ row,  }) => {
+      const discount = row.getValue("discountPercentage") as number || undefined;
 
       return (
         <div className="flex space-x-2 ml-2">
-          {discountedPrice == undefined && <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-sm font-medium text-yellow-700 ring-1 ring-inset ring-yellow-700/10"><X /></span>}
-          {discountedPrice && <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-sm font-medium text-green-800 ring-1 ring-inset ring-green-600/20">{discount}%</span>}
-          {/* {discountedPrice && <span className="flex items-center">{formatted}</span>} */}
+          {discount === undefined && <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-sm font-medium text-yellow-700 ring-1 ring-inset ring-yellow-700/10"><X /></span>}
+          {discount && <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-sm font-medium text-green-800 ring-1 ring-inset ring-green-600/20">{discount}%</span>}
         </div>
       )
     },

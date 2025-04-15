@@ -69,21 +69,6 @@ export function formatPrice(
   }).format(numericPrice)
 }
 
-export const calculateDiscountPercentage = ({ normalPrice, discountedPrice }: { normalPrice: number, discountedPrice?: number }) => {
-  const discountAmount = discountedPrice !== undefined ? normalPrice - discountedPrice : 0;
-
-  const discountPercentage = discountedPrice !== undefined
-    ? (discountAmount / normalPrice) * 100
-    : 0;
-
-  const formatPercentage = (percentage: number): string => {
-    const roundedPercentage = Math.round(percentage);
-    return roundedPercentage % 1 === 0 ? roundedPercentage.toString() + '%' : percentage.toFixed(2) + '%';
-  };
-
-  return Math.round(discountPercentage);
-};
-
 export const isProductAddedWithinNDays = ({ product, nDays }: { product: Product, nDays: number }): boolean => {
   const currentDate = new Date();
   const nDaysAgo = new Date();

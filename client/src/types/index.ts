@@ -78,6 +78,7 @@ export type Product = {
     price: number;
     isDiscounted: boolean;
     discountedPrice?: number;
+    discountPercentage?: number;
     category: ProductCategory;
     brand: string;
     countInStock: number;
@@ -86,6 +87,21 @@ export type Product = {
     reviewsCount: number;
     avgRating: number;
     createdAt: string;
+};
+
+export type FilterdProduct = {
+    _id?: string;
+    name: string;
+    price: number;
+    isDiscounted: boolean;
+    category: ProductCategory;
+    brand: string;
+    image: ProductImage[];
+    slug: string;
+    discountedPrice?: number;
+    discountPercentage?: number;
+    reviewsCount: number;
+    avgRating: number;
 };
 
 export type INewProduct = {

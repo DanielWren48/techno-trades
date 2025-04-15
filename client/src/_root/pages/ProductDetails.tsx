@@ -14,7 +14,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import MarkdownDisplay from "@/_dashboard/components/product/MarkdownDisplay";
 import { AddToCartButton, AddToFavoritesButton } from "@/components/shared";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { calculateDiscountPercentage, cn, formatPrice, isProductAddedWithinNDays, ratingStyle } from "@/lib/utils";
+import { cn, formatPrice, isProductAddedWithinNDays, ratingStyle } from "@/lib/utils";
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
@@ -118,7 +118,7 @@ export default function ProductDetailPage() {
                   <>
                     <span className="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-base font-semibold text-purple-800 ring-1 ring-inset ring-purple-600/20">Epic Deal</span>
                     <span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-1 text-base font-semibold text-sky-800 ring-1 ring-inset ring-sky-600/20">
-                      {calculateDiscountPercentage({ normalPrice: product.price, discountedPrice: product.discountedPrice })}% off
+                      {product.discountPercentage}% off
                     </span>
                   </>
                 }

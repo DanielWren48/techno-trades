@@ -1,6 +1,6 @@
 //@ts-ignore
 import { Splide, SplideSlide, SplideTrack } from "@splidejs/react-splide";
-import { calculateDiscountPercentage, cn, formatPrice } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import { AutoScroll } from "@splidejs/splide-extension-auto-scroll";
 import "@splidejs/splide/dist/css/splide.min.css";
 import { buttonVariants } from "../ui/button";
@@ -65,7 +65,7 @@ const SplideCarousel = () => {
                         <SplideSlide key={product._id} className="splide__slide relative bg-white dark:bg-dark-4 border-2 rounded-xl font-jost">
                             {product.discountedPrice &&
                                 <span className="absolute top-0 left-0 px-6 py-3 rounded-tl-xl rounded-br-xl bg-purple-100 text-lg font-bold text-purple-800 ring-1 ring-inset ring-purple-600/30">
-                                    {calculateDiscountPercentage({ normalPrice: product.price, discountedPrice: product.discountedPrice })}%
+                                    {product.discountPercentage}%
                                 </span>
                             }
                             <div className="flex w-full flex-col self-center mt-10 gap-10">

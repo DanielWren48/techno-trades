@@ -53,6 +53,7 @@ export const productTableSchema = z.object({
     price: z.coerce.number().min(0, { message: "Price must be a non-negative number" }),
     countInStock: z.coerce.number().min(0, { message: "Stock must be a non-negative number" }),
     discountedPrice: z.coerce.number().min(0).optional(),
+    discountPercentage: z.coerce.number().min(0).optional(),
     isDiscounted: z.boolean(),
 })
 

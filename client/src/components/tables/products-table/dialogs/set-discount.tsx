@@ -1,7 +1,7 @@
 import { ProductType } from "@/lib/validation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { calculateDiscountPercentage, cn, formatPrice } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
@@ -14,8 +14,7 @@ type EditProps = {
 };
 
 export default function SetDiscount({ product, setOpen }: EditProps) {
-  const currProductDiscount = product.isDiscounted ? calculateDiscountPercentage({ normalPrice: product.price, discountedPrice: product.discountedPrice }) : undefined
-  const [discount, setDiscount] = useState<number | undefined>(currProductDiscount);
+  const [discount, setDiscount] = useState<number | undefined>(product.discountPercentage);
   const { mutateAsync: setProductDiscount } = useSetProductDiscount()
 
   const StatBox = ({ label, value }: { label: string; value: string }) => (
@@ -59,12 +58,12 @@ export default function SetDiscount({ product, setOpen }: EditProps) {
   return (
     <div className="flex flex-col w-full max-w-[700px] mx-auto gap-5 my-5">
 
-      {currProductDiscount && <div className="flex items-center p-4 mb-4 text-sm text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800" role="alert">
+      {product.isDiscounted && <div className="flex items-center p-4 mb-4 text-sm text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800" role="alert">
         <span className="sr-only">Info</span>
         <div className="flex flex-row w-full text-base items-center justify-between">
           <div className="flex">
             <AlertCircle className="w-6 h-6 mr-2" />
-            <span className="font-medium">Info alert!</span> This product is currenly on <span className="font-bold">{currProductDiscount}%</span> discount!
+            <span className="font-medium">Info alert!</span> This product is currenly on <span className="font-bold">{product.discountPercentage}%</span> discount!
           </div>
           <Button onClick={handleRemoveDiscount}>Remove Discount</Button>
         </div>
