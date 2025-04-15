@@ -6,7 +6,7 @@ import { CreateCheckout, NewOrder } from './types/stripe';
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
 import { UpdateUserEmail, UpdateUserPassword, UpdateUserProfile } from './types/user';
 import { IOrderResponse, IOrdersResponse, UpdateShippingStatus } from './types/order';
-import { AllProductsResponse, ProductQueryParams, ProductFilterBody, UpdateProductDiscount, UpdateProduct, CreateReview } from './types/product';
+import { AllProductsResponse, ProductQueryParams, ProductFilterBody, UpdateProductDiscount, UpdateProduct, CreateReview, UpdateProductStock } from './types/product';
 import { IUserResponse, LoginData, LoginResponse, RegisterData, RegisterResponse, VerifyAccountData, EmailData, SetNewPasswordData, SignInWithOtp, GoogleLoginData } from './types/auth';
 
 // Generic response type
@@ -292,6 +292,7 @@ export const shopApiEndpoints = {
     getProductBySlug: (slug: string) => shopApi.get<Product>(`/products/${slug}`),
     createProduct: (data: INewProduct) => shopApi.post<Product>('', data),
     updateDiscount: (data: UpdateProductDiscount) => shopApi.patch<Product>(`/products/${data.id}/discount`, data),
+    updateStock: (data: UpdateProductStock) => shopApi.patch<Product>(`/products/${data.id}/stock`, data),
     updateProductById: (data: UpdateProduct) => shopApi.patch<Product>(`/products/${data.id}/update`, data),
     createReview: (data: CreateReview) => shopApi.post<INewReview>(`/products/${data.slug}`, data)
 };

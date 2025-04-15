@@ -5,6 +5,10 @@ import { DataTableRowActions } from "./data-table-row-actions"
 import { ProductType } from "@/lib/validation"
 import { DataTableColumnHeader } from "../shared/data-table-column-header"
 import { X } from "lucide-react"
+import { toast } from "sonner"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { useUpdateProductStock } from "@/api/queries/product"
 
 export const columns: ColumnDef<ProductType>[] = [
   {
@@ -78,7 +82,7 @@ export const columns: ColumnDef<ProductType>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Discount" />
     ),
-    cell: ({ row,  }) => {
+    cell: ({ row }) => {
       const discount = row.getValue("discountPercentage") as number || undefined;
 
       return (
@@ -113,10 +117,34 @@ export const columns: ColumnDef<ProductType>[] = [
       <DataTableColumnHeader column={column} title="Stock" />
     ),
     cell: ({ row }) => {
-      const countInStock = parseFloat(row.getValue("countInStock"))
-      const formatted = new Intl.NumberFormat("en-US").format(countInStock)
+      const { mutateAsync } = useUpdateProductStock();
 
-      return <div className="max-w-[50px] truncate font-medium text-center">{formatted}</div>
+      const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        //@ts-expect-error
+        const newStock = Number(event.target.stock.value)
+
+        toast.promise(mutateAsync({ id: row.original._id!, stockChange: newStock }), {
+          loading: `Updating stock to ${newStock}`,
+          success: "Updated Succesfully",
+          error: "Error",
+        })
+      }
+
+      return (
+        <form onSubmit={handleSubmit}>
+          <Label htmlFor={`${row.original._id}-stock`} className="sr-only">
+            New Stock
+          </Label>
+          <Input
+            className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background"
+            defaultValue={row.original.countInStock}
+            id={`${row.original._id}-stock`}
+            type="number"
+            name="stock"
+          />
+        </form>
+      )
     },
   },
   {

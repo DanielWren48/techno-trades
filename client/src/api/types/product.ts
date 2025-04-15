@@ -42,6 +42,11 @@ export interface UpdateProductDiscount {
     discountedPrice?: number;
 }
 
+export interface UpdateProductStock {
+    id: string;
+    stockChange: number;
+}
+
 export interface UpdateProduct {
     id: string;
     name?: string;
