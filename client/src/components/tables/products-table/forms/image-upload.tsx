@@ -18,8 +18,7 @@ type MediaProps = {
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function MediaDialog({ product, setOpen }: MediaProps) {
-
+export default function ProductImageUploadForm({ product, setOpen }: MediaProps) {
   const imageUrls: string[] = product.image.map((image) => image.url);
   const [currentFileUrls, setCurentFileUrls] = useState<string[]>(imageUrls);
   const [newFileUrl, setNewFileUrls] = useState<string[]>([]);
@@ -95,7 +94,9 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
     setDeleteFileUrls(updatedDeleteFileUrls);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     let updatedProduct = { ...product };
 
     if (DeleteFileUrl.length > 0) {
@@ -156,6 +157,7 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
     const { status, message } = await updateProduct({ id: updatedProduct._id!, ...updatedProduct });
     if (status === "success") {
       toast.success(message)
+      setFiles([])
     } else if (status === "failure") {
       toast.error(message)
     } else {
@@ -165,7 +167,7 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
   };
 
   return (
-    <div className="flex justify-center items-center flex-col border rounded-xl m-1">
+    <form id="image-form" onSubmit={handleSubmit} className="flex justify-center items-center flex-col border rounded-xl m-1">
       <div
         {...getRootProps()}
         className="cursor-pointer max-h-[300px] w-full"
@@ -238,27 +240,7 @@ export default function MediaDialog({ product, setOpen }: MediaProps) {
         </div>
       }
 
-
       {isUploading && <Progress value={uploadProgress} />}
-      <Button
-        onClick={handleSubmit}
-        disabled={isUploading || false || (DeleteFileUrl.length === 0 && newFileUrl.length === 0)}
-        className={cn("w-full rounded-b-lg rounded-t-none h-12 text-lg")}
-      >
-        {isUploading ? (
-          <>
-            <Loader2 className="animate-spin h-5 w-5 mr-3" />
-            Uploading...
-          </>
-        ) : false ? (
-          <>
-            <Loader2 className="animate-spin h-5 w-5 mr-3" />
-            Updating...
-          </>
-        ) : (
-          <>Update Media</>
-        )}
-      </Button>
-    </div>
-  )
+    </form>
+  );
 }

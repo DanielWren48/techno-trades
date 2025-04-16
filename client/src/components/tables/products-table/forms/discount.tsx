@@ -13,7 +13,7 @@ type EditProps = {
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function SetDiscount({ product, setOpen }: EditProps) {
+export default function ProductDiscountForm({ product, setOpen }: EditProps) {
   const [discount, setDiscount] = useState<number | undefined>(product.discountPercentage);
   const { mutateAsync: setProductDiscount } = useSetProductDiscount();
 

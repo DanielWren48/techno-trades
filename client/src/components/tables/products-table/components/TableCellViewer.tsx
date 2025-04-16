@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { ProductType } from "@/lib/validation";
 import { ProductUpdateForm } from "../forms/update";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SetDiscount from "../dialogs/set-discount";
+import ProductDiscountForm from "../forms/discount";
+import ProductImageUploadForm from "../forms/image-upload";
 
 export function TableCellViewer({ product }: { product: ProductType; }) {
     const [activeTab, setActiveTab] = React.useState<string>('details');
@@ -54,13 +55,17 @@ export function TableCellViewer({ product }: { product: ProductType; }) {
                 <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="w-full">
                         <TabsTrigger className="w-full" value="details">Details</TabsTrigger>
+                        <TabsTrigger className="w-full" value="image">Images</TabsTrigger>
                         <TabsTrigger className="w-full" value="discount">Discount</TabsTrigger>
                     </TabsList>
                     <TabsContent value="details">
                         <ProductUpdateForm product={product} />
                     </TabsContent>
+                    <TabsContent value="image">
+                        <ProductImageUploadForm product={product} />
+                    </TabsContent>
                     <TabsContent value="discount">
-                        <SetDiscount product={product} />
+                        <ProductDiscountForm product={product} />
                     </TabsContent>
                 </Tabs>
                 <SheetFooter className="mt-auto flex gap-2 sm:flex-col sm:space-x-0">
