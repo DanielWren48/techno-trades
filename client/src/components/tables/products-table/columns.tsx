@@ -1,14 +1,15 @@
-import { ColumnDef } from "@tanstack/react-table"
-import { Checkbox } from "@/components/ui/checkbox"
-import { categories } from "./filters"
-import { DataTableRowActions } from "./data-table-row-actions"
-import { ProductType } from "@/lib/validation"
-import { DataTableColumnHeader } from "../shared/data-table-column-header"
-import { X } from "lucide-react"
-import { TableCellViewer } from "./components/TableCellViewer"
+import { useRef } from "react"
 import { toast } from "sonner"
+import { X } from "lucide-react"
+import { categories } from "./filters"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { ProductType } from "@/lib/validation"
+import { ColumnDef } from "@tanstack/react-table"
+import { Checkbox } from "@/components/ui/checkbox"
+import { DataTableRowActions } from "./data-table-row-actions"
+import { TableCellViewer } from "./components/TableCellViewer"
+import { DataTableColumnHeader } from "../shared/data-table-column-header"
 import { useUpdateProduct, useUpdateProductStock } from "@/api/queries/product"
 
 export const columns: ColumnDef<ProductType>[] = [
@@ -99,8 +100,38 @@ export const columns: ColumnDef<ProductType>[] = [
         style: "currency",
         currency: "GBP",
       }).format(amount)
+      const inputRef = useRef<HTMLInputElement>(null);
 
-      return <div className="font-medium">{formatted}</div>
+      const { mutateAsync } = useUpdateProduct();
+
+      const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        //@ts-expect-error
+        let raw = event.target.price.value.trim().replace(/[£,]/g, "");
+        let newPrice = Number(raw);
+
+        toast.promise(mutateAsync({ id: row.original._id!, ...row.original, price: newPrice }), {
+          loading: `Updating price to ${newPrice}`,
+          success: "Updated Succesfully",
+          error: "Error",
+        })
+        inputRef.current?.blur();
+      }
+
+      return (
+        <form onSubmit={handleSubmit}>
+          <Label htmlFor={`${row.original._id}-price`} className="sr-only">
+            New Price
+          </Label>
+          <Input
+            className="h-8 w-24 border-transparent bg-transparent text-center shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background"
+            defaultValue={formatted}
+            id={`${row.original._id}-price`}
+            ref={inputRef}
+            name="price"
+          />
+        </form>
+      )
     },
   },
   {
@@ -110,6 +141,7 @@ export const columns: ColumnDef<ProductType>[] = [
     ),
     cell: ({ row }) => {
       const { mutateAsync } = useUpdateProductStock();
+      const inputRef = useRef<HTMLInputElement>(null);
 
       const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -121,6 +153,7 @@ export const columns: ColumnDef<ProductType>[] = [
           success: "Updated Succesfully",
           error: "Error",
         })
+        inputRef.current?.blur();
       }
 
       return (
@@ -129,9 +162,10 @@ export const columns: ColumnDef<ProductType>[] = [
             New Stock
           </Label>
           <Input
-            className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background"
+            className="h-8 w-20 border-transparent bg-transparent text-center shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background"
             defaultValue={row.original.countInStock}
             id={`${row.original._id}-stock`}
+            ref={inputRef}
             type="number"
             name="stock"
           />
