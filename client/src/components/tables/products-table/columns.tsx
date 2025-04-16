@@ -1,7 +1,9 @@
 import { useRef } from "react"
 import { toast } from "sonner"
 import { X } from "lucide-react"
+import { ProductImage } from "@/types"
 import { categories } from "./filters"
+import { Icons } from "@/components/shared"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { ProductType } from "@/lib/validation"
@@ -78,15 +80,39 @@ export const columns: ColumnDef<ProductType>[] = [
     cell: ({ row }) => {
       const discount = row.getValue("discountPercentage") as number || undefined;
 
-      return (
-        <div className="flex space-x-2 ml-2">
-          {discount === undefined && <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-sm font-medium text-yellow-700 ring-1 ring-inset ring-yellow-700/10"><X /></span>}
-          {discount && <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-sm font-medium text-green-800 ring-1 ring-inset ring-green-600/20">{discount}%</span>}
-        </div>
-      )
+      return <TableCellViewer
+        product={row.original}
+        initialTab="discount"
+        trigger={
+          <div className="flex space-x-2 ml-2 cursor-pointer">
+            {discount === undefined && <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-sm font-medium text-yellow-700 ring-1 ring-inset ring-yellow-700/10"><X /></span>}
+            {discount && <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-sm font-medium text-green-800 ring-1 ring-inset ring-green-600/20">{discount}%</span>}
+          </div>
+        }
+      />
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
+    },
+  },
+  {
+    accessorKey: "image",
+    header: "Media",
+    cell: ({ row }) => {
+      const images = row.getValue("image") as ProductImage[];
+
+      return <TableCellViewer
+        product={row.original}
+        initialTab="image"
+        trigger={
+          <div className="relative select-none flex items-center justify-center w-fit cursor-pointer">
+            <span className="absolute -top-1 right-1 bg-gray-100 text-foreground text-xs font-semibold px-1.5 py-0.5 rounded-full">
+              {images.length}
+            </span>
+            <Icons.media className="w-14" />
+          </div>
+        }
+      />
     },
   },
   {
