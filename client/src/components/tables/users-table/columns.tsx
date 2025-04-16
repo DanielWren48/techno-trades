@@ -15,32 +15,32 @@ export const columns: ColumnDef<UserType>[] = [
     header: "Avatar",
     cell: ({ row }) => {
       const avatar = row.getValue("avatar") as string
-      const firstName = row.getValue("firstName") as string
-      const lastName = row.getValue("lastName") as string
+      const firstName = row.original.firstName
+      const lastName = row.original.lastName
       return (
-        avatar !== undefined ?
-          <Avatar className="h-10 w-10">
-            <AvatarImage
-              src={avatar}
-              alt="AR"
-              className="object-cover"
-            />
-            <AvatarFallback>{first(firstName)}{first(lastName)}</AvatarFallback>
-          </Avatar>
-          :
-          <Avatar>
-            <AvatarFallback>{first(firstName)}{first(lastName)}</AvatarFallback>
-          </Avatar>
+        <Avatar className="h-10 w-10">
+        <AvatarImage
+          src={avatar}
+          alt="AR"
+          className="object-cover"
+        />
+        <AvatarFallback>{first(firstName)}{first(lastName)}</AvatarFallback>
+      </Avatar>
       )
     },
   },
   {
     accessorKey: "firstName",
-    header: "First Name",
-  },
-  {
-    accessorKey: "lastName",
-    header: "LastName",
+    header: "Full Name",
+    cell: ({ row }) => {
+      const firstName = row.original.firstName
+      const lastName = row.original.lastName
+      return (
+        <div className="flex flex-row gap-3 text-center m-auto content-center items-center align-middle">
+          <h1>{firstName} {lastName}</h1>
+        </div>
+      )
+    },
   },
   {
     accessorKey: "email",

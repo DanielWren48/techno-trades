@@ -6,15 +6,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { first } from "lodash"
 import "@smastrom/react-rating/style.css";
 import { Rating } from "@smastrom/react-rating";
+import { TableCellViewer } from "./components/TableCellViewer"
 
 export const columns: ColumnDef<ReviewType>[] = [
   {
     accessorKey: "title",
     header: "Title",
-  },
-  {
-    accessorKey: "comment",
-    header: "Comment",
+    cell: ({ row }) => {
+      return <TableCellViewer review={row.original} />
+    },
   },
   {
     accessorKey: "rating",
@@ -42,28 +42,20 @@ export const columns: ColumnDef<ReviewType>[] = [
       const createdAt = row.getValue("createdAt") as string
       return (
         <div className="flex space-x-2 ml-2">
-          <span>{formatDate(createdAt, "year-month")}</span>
+          <span>{formatDate(createdAt, "long")}</span>
         </div>
       )
     },
   },
   {
-    accessorKey: "userFirstName",
-    header: "First Name",
-  },
-  {
-    accessorKey: "userLastName",
-    header: "Last Name",
-  },
-  {
     accessorKey: "userAvatar",
-    header: "Avatar",
+    header: "Created By",
     cell: ({ row }) => {
       const avatar = row.getValue("userAvatar") as string
-      const firstName = row.getValue("userFirstName") as string
-      const lastName = row.getValue("userLastName") as string
+      const firstName = row.original.userFirstName
+      const lastName = row.original.userLastName
       return (
-        avatar !== undefined ?
+        <div className="flex flex-row gap-3 text-center m-auto content-center items-center align-middle">
           <Avatar className="h-10 w-10">
             <AvatarImage
               src={avatar}
@@ -72,10 +64,8 @@ export const columns: ColumnDef<ReviewType>[] = [
             />
             <AvatarFallback>{first(firstName)}{first(lastName)}</AvatarFallback>
           </Avatar>
-          :
-          <Avatar>
-            <AvatarFallback>{first(firstName)}{first(lastName)}</AvatarFallback>
-          </Avatar>
+          <h1>{firstName} {lastName}</h1>
+        </div>
       )
     },
   },

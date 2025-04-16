@@ -298,7 +298,7 @@ export const shopApiEndpoints = {
 };
 
 export const usersAiEndpoints = {
-    getAllUsers: () => usersApi.get<IUserResponse>(''),
+    getAllUsers: () => usersApi.get<{ users: IUser[] }>(''),
     updateUserDetails: (data: UpdateUserProfile) => usersApi.patch<IUser>('/update-me', data),
     sendEmailChangeOtp: () => usersApi.post<number>('/send-email-change-otp', null),
     updateUserEmail: (data: UpdateUserEmail) => usersApi.patch<IUser>('/update-my-email', data),
