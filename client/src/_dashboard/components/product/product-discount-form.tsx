@@ -29,7 +29,7 @@ interface SetProductDiscountFormProps {
 
 export default function SetProductDiscountForm({ handleTabChange }: SetProductDiscountFormProps) {
     const [discountPercentage, setDiscountPercentage] = useState<number>(0);
-    const { productData, updateProductData } = useProductStore();
+    const { productData, updateProductData, markStepCompleted } = useProductStore();
 
     const form = useForm<NewProductSchemaType>({
         resolver: zodResolver(newProductSchema),
@@ -47,6 +47,7 @@ export default function SetProductDiscountForm({ handleTabChange }: SetProductDi
     const handleSubmit = (data: NewProductSchemaType) => {
         updateProductData(data);
         handleTabChange("description");
+        markStepCompleted('discount');
     };
 
     useEffect(() => {

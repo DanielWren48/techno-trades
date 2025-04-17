@@ -3,26 +3,37 @@ import { Shell } from "@/components/dashboard/shell";
 import useProductStore from '@/hooks/useProductStore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion"
 import { MarkdownDisplay, MarkdownEditor, NewProductForm, ProductCreateSteps, ProductDiscountForm, ProductImageUpload, ProductOverview } from '../components';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 export default function DashboardAccount() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { markdown, activeTab, setActiveTab } = useProductStore();
+  const { activeTab, setActiveTab, productData, markdown, canProceedToStep } = useProductStore();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
+
     if (tabParam && ["details", "discount", "description", "images", "overview"].includes(tabParam)) {
-      setActiveTab(tabParam);
+      if (tabParam === 'details' || canProceedToStep(tabParam)) {
+        setActiveTab(tabParam);
+      } else {
+        navigate(`/dashboard/new-product?tab=${activeTab}`);
+      }
     }
-  }, [location.search, setActiveTab]);
+  }, [location.search, setActiveTab, canProceedToStep, navigate, activeTab]);
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    navigate(`/dashboard/new-product?tab=${value}`);
+    if (value === 'details' || canProceedToStep(value)) {
+      setActiveTab(value);
+      navigate(`/dashboard/new-product?tab=${value}`);
+    } else {
+      toast.error(`Please complete the ${activeTab}`);
+    }
   };
 
   return (
@@ -44,40 +55,109 @@ export default function DashboardAccount() {
 
             <AccordionItem value="discount" className='border-none'>
               <AccordionContent className='px-1'>
-                <ProductDiscountForm handleTabChange={handleTabChange} />
+                {canProceedToStep('discount') ? (
+                  <ProductDiscountForm handleTabChange={handleTabChange} />
+                ) : (
+                  <div className="p-4 text-center">
+                    <p>Please complete the product details first</p>
+                    <Button
+                      onClick={() => handleTabChange('details')}
+                      variant="outline"
+                      className="mt-2"
+                    >
+                      Go to Details
+                    </Button>
+                  </div>
+                )}
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="description" className='border-none'>
               <AccordionContent className='px-1'>
-                <Tabs defaultValue="editor" className="w-full">
-                  <TabsList className='w-full'>
-                    <TabsTrigger className='w-full' value="editor">Editor</TabsTrigger>
-                    <TabsTrigger className='w-full' value="preview">Preview</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="editor">
-                    <MarkdownEditor handleTabChange={handleTabChange} />
-                  </TabsContent>
-                  <TabsContent value="preview">
-                    <MarkdownDisplay content={markdown} />
-                  </TabsContent>
-                </Tabs>
+                {canProceedToStep('description') ? (
+                  <Tabs defaultValue="editor" className="w-full">
+                    <TabsList className='w-full'>
+                      <TabsTrigger className='w-full' value="editor">Editor</TabsTrigger>
+                      <TabsTrigger className='w-full' value="preview">Preview</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="editor">
+                      <MarkdownEditor handleTabChange={handleTabChange} />
+                    </TabsContent>
+                    <TabsContent value="preview">
+                      <MarkdownDisplay content={markdown} />
+                    </TabsContent>
+                  </Tabs>
+                ) : (
+                  <div className="p-4 text-center">
+                    <p>Please complete the previous steps first</p>
+                    <Button
+                      onClick={() => handleTabChange('discount')}
+                      variant="outline"
+                      className="mt-2"
+                    >
+                      Go to Discount
+                    </Button>
+                  </div>
+                )}
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="images" className='border-none'>
               <AccordionContent className='px-1'>
-                <ProductImageUpload handleTabChange={handleTabChange} />
+                {canProceedToStep('images') ? (
+                  <ProductImageUpload handleTabChange={handleTabChange} />
+                ) : (
+                  <div className="p-4 text-center">
+                    <p>Please complete the product details first</p>
+                    <Button
+                      onClick={() => handleTabChange('details')}
+                      variant="outline"
+                      className="mt-2"
+                    >
+                      Go to Details
+                    </Button>
+                  </div>
+                )}
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="overview" className='border-none'>
               <AccordionContent className='px-1'>
-                <ProductOverview handleTabChange={handleTabChange} />
+                {canProceedToStep('overview') ? (
+                  <ProductOverview handleTabChange={handleTabChange} />
+                ) : (
+                  <div className="p-4 text-center">
+                    <p>Please complete the product details first</p>
+                    <Button
+                      onClick={() => handleTabChange('details')}
+                      variant="outline"
+                      className="mt-2"
+                    >
+                      Go to Details
+                    </Button>
+                  </div>
+                )}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
         </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (window.confirm("Are you sure you want to clear all progress?")) {
+                useProductStore.getState().resetStore();
+                navigate("/dashboard/new-product?tab=details");
+              }
+            }}
+          >
+            Clear Progress
+          </Button>
+
+          <div className="text-xs text-gray-500">
+            {productData ? "Progress saved" : "No saved progress"}
+          </div>
+        </CardFooter>
       </Card>
     </Shell>
   );

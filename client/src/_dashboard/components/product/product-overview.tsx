@@ -39,10 +39,7 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
       return navigate(-1)
     }
 
-    const response = await createProduct({
-      ...productData,
-      userId: user._id,
-    });
+    const response = await createProduct({ ...productData, userId: user._id });
 
     if (response && response.status === "success") {
       toast.success(response.message, {
@@ -56,7 +53,9 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
       resetStore();
       handleTabChange("details");
     } else if (response.status === "failure" && response.data) {
-      toast.error(response.message);
+      for (const key in response.data) {
+        toast.error("Error at: " + key, { description: response.data[key] });
+      }
     } else {
       toast.error('An Error occurred while creating product! Please try again.');
     }
@@ -124,7 +123,7 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
                   </div>
                 ) : (
                   <div className="text-xl font-bold">
-                    {formatPrice(price)}
+                    {formatPrice(price, { currency: "GBP" })}
                   </div>
                 )}
               </div>

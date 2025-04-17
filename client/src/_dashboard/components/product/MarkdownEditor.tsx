@@ -30,11 +30,12 @@ interface MarkdownEditorProps {
 }
 
 export default function MarkdownEditor({ handleTabChange }: MarkdownEditorProps) {
-    const { productData, updateProductData, markdown, setMarkdown } = useProductStore();
+    const { productData, updateProductData, markdown, setMarkdown, markStepCompleted } = useProductStore();
 
     function handleSubmit() {
         updateProductData({ ...productData, description: markdown });
         handleTabChange("images");
+        markStepCompleted("description")
     };
 
     return (

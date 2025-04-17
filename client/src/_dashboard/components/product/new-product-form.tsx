@@ -14,7 +14,7 @@ interface NewProductProps {
 }
 
 export default function NewProductCreateDetails({ handleTabChange }: NewProductProps) {
-    const { productData, updateProductData } = useProductStore();
+    const { productData, updateProductData, markStepCompleted } = useProductStore();
 
     const form = useForm<NewProductSchemaType>({
         resolver: zodResolver(newProductSchema),
@@ -32,13 +32,16 @@ export default function NewProductCreateDetails({ handleTabChange }: NewProductP
     useEffect(() => {
         if (productData) {
             Object.entries(productData).forEach(([key, value]) => {
-                form.setValue(key as any, value);
+                if (value !== undefined) {
+                    form.setValue(key as any, value);
+                }
             });
         }
     }, [form, productData]);
 
     const handleSubmit = async (data: NewProductSchemaType) => {
         updateProductData(data);
+        markStepCompleted('details');
         handleTabChange("discount");
     };
 

@@ -17,9 +17,9 @@ interface ProductImageUploadProps {
 }
 
 export default function ProductImageUpload({ handleTabChange }: ProductImageUploadProps) {
-    const { productData, updateProductData } = useProductStore();
+    const { productData, updateProductData, markStepCompleted } = useProductStore();
     let uploadedFiles: string[] = []
-    if(productData && !isEmpty(productData.image)){
+    if (productData && !isEmpty(productData.image)) {
         uploadedFiles = productData.image.map(i => i.url)
     }
 
@@ -59,7 +59,7 @@ export default function ProductImageUpload({ handleTabChange }: ProductImageUplo
         onDrop,
         accept: fileTypes ? generateClientDropzoneAccept(fileTypes) : undefined,
     });
-
+    
     function handleRemoveFile(index: number) {
         const updatedFiles = [...files];
         const removedFile = updatedFiles.splice(index, 1);
@@ -69,7 +69,7 @@ export default function ProductImageUpload({ handleTabChange }: ProductImageUplo
     }
 
     async function handleSubmit() {
-        if (files && isEmpty(uploadedFiles)) {
+        if (isEmpty(uploadedFiles) && !isEmpty(files)) {
             const UploadFileResponse = await startUpload(files)
             const productImages: ProductImage[] = UploadFileResponse!.map((imageData) => ({
                 key: imageData.key as string,
@@ -78,9 +78,9 @@ export default function ProductImageUpload({ handleTabChange }: ProductImageUplo
             }));
             updateProductData({ ...productData, image: productImages });
             setFiles([]);
-            setFileUrls([]);
         }
         handleTabChange("overview");
+        markStepCompleted("images")
     };
 
     return (

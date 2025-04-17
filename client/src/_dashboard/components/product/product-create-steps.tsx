@@ -1,7 +1,7 @@
 import { Icons } from '@/components/shared';
+import useProductStore from '@/hooks/useProductStore';
 import { cn } from '@/lib/utils'
-import { Image } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const STEPS = [
     {
@@ -29,23 +29,60 @@ const STEPS = [
         url: 'overview',
         icon: Icons.file
     },
-]
+];
 
-const Steps = () => {
+export const ProductCreateSteps = () => {
+    const navigate = useNavigate();
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const currentTab = params.get('tab') || 'details';
     const currentStepIndex = STEPS.findIndex(step => step.url === currentTab);
+    const { productData } = useProductStore();
+
+    const navigateToStep = (stepUrl: string, stepIndex: number) => {
+        if (stepIndex <= currentStepIndex || hasRequiredDataForStep(stepIndex)) {
+            navigate(`/dashboard/new-product?tab=${stepUrl}`);
+        }
+    };
+
+    const hasRequiredDataForStep = (stepIndex: number) => {
+        if (!productData) {
+            return stepIndex === 0;
+        }
+
+        switch (stepIndex) {
+            case 0: // Details - always accessible
+                return true;
+            case 1: // Discount - require basic product details
+                return !!(productData.name && productData.brand && productData.price);
+            case 2: // Description - require discount info to be set (even if not discounted)
+                return !!(productData.isDiscounted !== undefined);
+            case 3: // Images - require description to be set
+                return !!(productData.description);
+            case 4: // Overview - require images to be uploaded
+                return !!(productData.image);
+            default:
+                return false;
+        }
+    };
 
     return (
         <ol className='rounded-md bg-white lg:flex lg:rounded-none lg:border-l lg:border-r lg:border-gray-200'>
             {STEPS.map((step, i) => {
                 const isCurrent = currentTab === step.url;
                 const isCompleted = i < currentStepIndex;
+                const isClickable = i <= currentStepIndex || hasRequiredDataForStep(i);
                 const Icon = step.icon;
 
                 return (
-                    <li key={step.name} className='relative overflow-hidden lg:flex-1'>
+                    <li
+                        key={step.name}
+                        className={cn(
+                            'relative overflow-hidden lg:flex-1',
+                            isClickable ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'
+                        )}
+                        onClick={() => isClickable && navigateToStep(step.url, i)}
+                    >
                         <div>
                             <span
                                 className={cn(
@@ -61,7 +98,8 @@ const Steps = () => {
                             <span
                                 className={cn(
                                     i !== 0 ? 'lg:pl-9' : '',
-                                    'flex items-center px-6 py-4 text-sm font-medium'
+                                    'flex items-center px-6 py-4 text-sm font-medium',
+                                    isClickable ? 'hover:bg-gray-50' : ''
                                 )}>
                                 <Icon />
                                 <span className='ml-1 h-full mt-0.5 flex min-w-0 flex-col justify-center'>
@@ -92,10 +130,10 @@ const Steps = () => {
                             ) : null}
                         </div>
                     </li>
-                )
+                );
             })}
         </ol>
-    )
-}
+    );
+};
 
-export default Steps
+export default ProductCreateSteps;
