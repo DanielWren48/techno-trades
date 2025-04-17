@@ -1,5 +1,6 @@
 import { NewProductSchemaType } from '@/_dashboard/schemas/product';
 import { Button } from '@/components/ui/button';
+import useProductStore from '@/hooks/useProductStore';
 import {
     MDXEditor,
     toolbarPlugin,
@@ -25,17 +26,14 @@ import {
 import '@mdxeditor/editor/style.css';
 
 interface MarkdownEditorProps {
-    markdown: string
-    setMarkdown: React.Dispatch<React.SetStateAction<string>>
-    productData: NewProductSchemaType
     handleTabChange: (value: string) => void
-    setProductData: React.Dispatch<React.SetStateAction<NewProductSchemaType | undefined>>
 }
 
-export default function MarkdownEditor({ markdown, setMarkdown, productData, handleTabChange, setProductData }: MarkdownEditorProps) {
+export default function MarkdownEditor({ handleTabChange }: MarkdownEditorProps) {
+    const { productData, updateProductData, markdown, setMarkdown } = useProductStore();
 
     function handleSubmit() {
-        setProductData({ ...productData, description: markdown });
+        updateProductData({ ...productData, description: markdown });
         handleTabChange("images");
     };
 

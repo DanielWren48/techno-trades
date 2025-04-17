@@ -1,26 +1,30 @@
-import React from 'react'
+import { toast } from 'sonner';
+import { isEmpty } from 'lodash';
 import { ProductImage } from "@/types";
+import { Loader2, X } from "lucide-react";
 import { useCallback, useState } from "react";
+import { convertFileToUrl } from "@/lib/utils";
 import { useUploadThing } from "@/uploadthing";
 import { Button } from "@/components/ui/button";
 import { FileWithPath } from "@uploadthing/react";
-import { Loader2, X } from "lucide-react";
+import { Progress } from '@/components/ui/progress';
+import useProductStore from '@/hooks/useProductStore';
 import { useDropzone } from "@uploadthing/react/hooks";
 import { generateClientDropzoneAccept } from "uploadthing/client";
-import { convertFileToUrl } from "@/lib/utils";
-import { Progress } from '@/components/ui/progress';
-import { toast } from 'sonner';
-import { NewProductSchemaType } from '@/_dashboard/schemas/product';
 
 interface ProductImageUploadProps {
-    productData: NewProductSchemaType
     handleTabChange: (value: string) => void
-    setProductData: React.Dispatch<React.SetStateAction<NewProductSchemaType | undefined>>
 }
 
-export default function ProductImageUpload({ productData, handleTabChange, setProductData }: ProductImageUploadProps) {
+export default function ProductImageUpload({ handleTabChange }: ProductImageUploadProps) {
+    const { productData, updateProductData } = useProductStore();
+    let uploadedFiles: string[] = []
+    if(productData && !isEmpty(productData.image)){
+        uploadedFiles = productData.image.map(i => i.url)
+    }
+
     const [files, setFiles] = useState<FileWithPath[]>([]);
-    const [fileUrls, setFileUrls] = useState<string[]>([]);
+    const [fileUrls, setFileUrls] = useState<string[]>(uploadedFiles);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
 
     const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
@@ -65,17 +69,18 @@ export default function ProductImageUpload({ productData, handleTabChange, setPr
     }
 
     async function handleSubmit() {
-        const UploadFileResponse = await startUpload(files)
-        const productImages: ProductImage[] = UploadFileResponse!.map((imageData) => ({
-            key: imageData.key as string,
-            name: imageData.name as string,
-            url: imageData.url as string,
-        }));
-
-        setProductData({ ...productData, image: productImages });
+        if (files && isEmpty(uploadedFiles)) {
+            const UploadFileResponse = await startUpload(files)
+            const productImages: ProductImage[] = UploadFileResponse!.map((imageData) => ({
+                key: imageData.key as string,
+                name: imageData.name as string,
+                url: imageData.url as string,
+            }));
+            updateProductData({ ...productData, image: productImages });
+            setFiles([]);
+            setFileUrls([]);
+        }
         handleTabChange("overview");
-        setFiles([]);
-        setFileUrls([]);
     };
 
     return (

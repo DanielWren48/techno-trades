@@ -8,21 +8,36 @@ import { useUserContext } from '@/context/AuthContext';
 import { useCreateNewProduct } from '@/api/queries/product';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { NewProductSchemaType } from '@/_dashboard/schemas/product';
+import useProductStore from '@/hooks/useProductStore';
 
-interface ProductImageUploadProps {
-  productData: NewProductSchemaType
+interface ProductOverviewProps {
   handleTabChange: (value: string) => void
-  setProductData: React.Dispatch<React.SetStateAction<NewProductSchemaType | undefined>>
 }
 
-export default function ProductOverview({ productData, handleTabChange, setProductData }: ProductImageUploadProps) {
+export default function ProductOverview({ handleTabChange }: ProductOverviewProps) {
   const navigate = useNavigate();
   const { user } = useUserContext();
   const { mutateAsync: createProduct, isPending: isLoadingCreate } = useCreateNewProduct();
-  const { name, brand, category, description, price, countInStock, discountedPrice, isDiscounted, image } = productData
+  const { productData, resetStore } = useProductStore();
+
+  if (!productData) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6">
+        <h2 className="text-xl font-medium mb-4">Product information is missing</h2>
+        <p className="text-muted-foreground mb-4">Please complete the previous steps first.</p>
+        <Button onClick={() => handleTabChange("details")}>
+          Go to Details
+        </Button>
+      </div>
+    );
+  }
+
+  const { brand, category, description, price, countInStock, discountedPrice, isDiscounted, image } = productData;
 
   async function handleSubmit() {
+    if (!productData) {
+      return navigate(-1)
+    }
 
     const response = await createProduct({
       ...productData,
@@ -36,16 +51,16 @@ export default function ProductOverview({ productData, handleTabChange, setProdu
           onClick: () => navigate(`/products/${response.data?.slug}`)
         },
         duration: 5000,
-      })
+      });
 
+      resetStore();
       handleTabChange("details");
-      setProductData(undefined);
     } else if (response.status === "failure" && response.data) {
-      toast.error(response.message)
+      toast.error(response.message);
     } else {
-      toast.error('An Error occured while creating product! Please try again.')
+      toast.error('An Error occurred while creating product! Please try again.');
     }
-  };
+  }
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4 space-y-6">
@@ -56,7 +71,7 @@ export default function ProductOverview({ productData, handleTabChange, setProdu
             <div className="aspect-square relative overflow-hidden rounded-lg">
               <img
                 src={image[0]?.url || '/api/placeholder/400/400'}
-                alt={name}
+                alt={brand}
                 className="object-contain w-full h-full"
               />
             </div>
@@ -66,7 +81,7 @@ export default function ProductOverview({ productData, handleTabChange, setProdu
         {/* Product Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">{name}</CardTitle>
+            <CardTitle className="text-2xl font-bold">{brand}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center space-x-2">
@@ -98,10 +113,10 @@ export default function ProductOverview({ productData, handleTabChange, setProdu
                 {isDiscounted ? (
                   <div className="space-y-1">
                     <div className="text-xl font-bold text-green-600">
-                      {formatPrice(discountedPrice || 0)}
+                      {formatPrice(discountedPrice || 0, { currency: "GBP" })}
                     </div>
                     <div className="text-sm line-through text-muted-foreground">
-                      {formatPrice(price)}
+                      {formatPrice(price, { currency: "GBP" })}
                     </div>
                     <Badge variant="destructive">
                       {Math.round(((price - (discountedPrice || 0)) / price) * 100)}% OFF
@@ -137,6 +152,14 @@ export default function ProductOverview({ productData, handleTabChange, setProdu
         ) : (
           <>Create Product</>
         )}
+      </Button>
+
+      <Button
+        onClick={resetStore}
+        variant="outline"
+        className="w-full"
+      >
+        Clear Form
       </Button>
     </div>
   );

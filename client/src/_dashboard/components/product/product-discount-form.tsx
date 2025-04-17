@@ -7,14 +7,9 @@ import { Switch } from "@/components/ui/switch";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
+import useProductStore from "@/hooks/useProductStore";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { newProductSchema, NewProductSchemaType } from "@/_dashboard/schemas/product";
-
-interface SetProductDiscountFormProps {
-    productData: NewProductSchemaType;
-    handleTabChange: (value: string) => void
-    setProductData: React.Dispatch<React.SetStateAction<NewProductSchemaType | undefined>>;
-}
 
 interface DiscountDisplayProps {
     price: number;
@@ -28,16 +23,30 @@ interface DiscountOptionProps {
     originalPrice: number;
 }
 
-export default function SetProductDiscountForm({ productData, setProductData, handleTabChange }: SetProductDiscountFormProps) {
+interface SetProductDiscountFormProps {
+    handleTabChange: (value: string) => void
+}
+
+export default function SetProductDiscountForm({ handleTabChange }: SetProductDiscountFormProps) {
     const [discountPercentage, setDiscountPercentage] = useState<number>(0);
+    const { productData, updateProductData } = useProductStore();
+
     const form = useForm<NewProductSchemaType>({
         resolver: zodResolver(newProductSchema),
-        defaultValues: { ...productData },
+        defaultValues: productData || {},
     });
 
+    useEffect(() => {
+        if (productData) {
+            Object.entries(productData).forEach(([key, value]) => {
+                form.setValue(key as any, value);
+            });
+        }
+    }, [form, productData]);
+
     const handleSubmit = (data: NewProductSchemaType) => {
-        setProductData(data);
-        handleTabChange("description")
+        updateProductData(data);
+        handleTabChange("description");
     };
 
     useEffect(() => {

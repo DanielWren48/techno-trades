@@ -1,19 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Shell } from "@/components/dashboard/shell";
-import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { NewProductSchemaType } from '../schemas/product';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useProductStore from '@/hooks/useProductStore';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PS5_TEMPLATE, MarkdownDisplay, MarkdownEditor, NewProductForm, ProductCreateSteps, ProductDiscountForm, ProductImageUpload, ProductOverview } from '../components';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion"
+import { MarkdownDisplay, MarkdownEditor, NewProductForm, ProductCreateSteps, ProductDiscountForm, ProductImageUpload, ProductOverview } from '../components';
 
 export default function DashboardAccount() {
-  const [activeTab, setActiveTab] = useState<string>("details");
-  const [productData, setProductData] = useState<NewProductSchemaType | undefined>();
-  const [markdown, setMarkdown] = useState<string>(PS5_TEMPLATE);
-
+  const navigate = useNavigate();
   const location = useLocation();
-  const navigate = useNavigate()
+  const { markdown, activeTab, setActiveTab } = useProductStore();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -21,7 +18,7 @@ export default function DashboardAccount() {
     if (tabParam && ["details", "discount", "description", "images", "overview"].includes(tabParam)) {
       setActiveTab(tabParam);
     }
-  }, [location.search]);
+  }, [location.search, setActiveTab]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -41,20 +38,13 @@ export default function DashboardAccount() {
           <Accordion type="single" value={activeTab} onValueChange={handleTabChange}>
             <AccordionItem value="details" className='border-none'>
               <AccordionContent className='flex flex-col gap-6 px-1'>
-                <NewProductForm
-                  setProductData={setProductData}
-                  handleTabChange={handleTabChange}
-                />
+                <NewProductForm handleTabChange={handleTabChange} />
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="discount" className='border-none'>
               <AccordionContent className='px-1'>
-                <ProductDiscountForm
-                  productData={productData!}
-                  setProductData={setProductData}
-                  handleTabChange={handleTabChange}
-                />
+                <ProductDiscountForm handleTabChange={handleTabChange} />
               </AccordionContent>
             </AccordionItem>
 
@@ -66,13 +56,7 @@ export default function DashboardAccount() {
                     <TabsTrigger className='w-full' value="preview">Preview</TabsTrigger>
                   </TabsList>
                   <TabsContent value="editor">
-                    <MarkdownEditor
-                      markdown={markdown}
-                      setMarkdown={setMarkdown}
-                      productData={productData!}
-                      setProductData={setProductData}
-                      handleTabChange={handleTabChange}
-                    />
+                    <MarkdownEditor handleTabChange={handleTabChange} />
                   </TabsContent>
                   <TabsContent value="preview">
                     <MarkdownDisplay content={markdown} />
@@ -83,29 +67,18 @@ export default function DashboardAccount() {
 
             <AccordionItem value="images" className='border-none'>
               <AccordionContent className='px-1'>
-                <ProductImageUpload
-                  productData={productData!}
-                  setProductData={setProductData}
-                  handleTabChange={handleTabChange}
-                />
+                <ProductImageUpload handleTabChange={handleTabChange} />
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="overview" className='border-none'>
               <AccordionContent className='px-1'>
-                <ProductOverview
-                  productData={productData!}
-                  setProductData={setProductData}
-                  handleTabChange={handleTabChange}
-                />
+                <ProductOverview handleTabChange={handleTabChange} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
         </CardContent>
-        <CardFooter>
-          {JSON.stringify(productData)}
-        </CardFooter>
       </Card>
-    </Shell >
+    </Shell>
   );
 }

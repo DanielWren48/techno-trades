@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import useProductStore from "@/hooks/useProductStore";
 import { categories } from "@/components/tables/products-table/filters";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,14 +11,14 @@ import { newProductSchema, NewProductSchemaType } from "@/_dashboard/schemas/pro
 
 interface NewProductProps {
     handleTabChange: (value: string) => void
-    setProductData: React.Dispatch<React.SetStateAction<NewProductSchemaType | undefined>>
 }
 
-export default function NewProductCreateDetails({ setProductData, handleTabChange }: NewProductProps) {
+export default function NewProductCreateDetails({ handleTabChange }: NewProductProps) {
+    const { productData, updateProductData } = useProductStore();
 
     const form = useForm<NewProductSchemaType>({
         resolver: zodResolver(newProductSchema),
-        defaultValues: {
+        defaultValues: productData || {
             name: "",
             brand: "",
             description: "",
@@ -27,9 +29,17 @@ export default function NewProductCreateDetails({ setProductData, handleTabChang
         },
     });
 
+    useEffect(() => {
+        if (productData) {
+            Object.entries(productData).forEach(([key, value]) => {
+                form.setValue(key as any, value);
+            });
+        }
+    }, [form, productData]);
+
     const handleSubmit = async (data: NewProductSchemaType) => {
-        setProductData(data)
-        handleTabChange("discount")
+        updateProductData(data);
+        handleTabChange("discount");
     };
 
     return (
