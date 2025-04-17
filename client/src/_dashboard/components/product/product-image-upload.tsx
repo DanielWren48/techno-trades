@@ -79,8 +79,8 @@ export default function ProductImageUpload({ handleTabChange }: ProductImageUplo
             updateProductData({ ...productData, image: productImages });
             setFiles([]);
         }
-        handleTabChange("overview");
         markStepCompleted("images")
+        handleTabChange("overview");
     };
 
     return (

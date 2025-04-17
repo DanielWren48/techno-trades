@@ -46,8 +46,8 @@ export default function SetProductDiscountForm({ handleTabChange }: SetProductDi
 
     const handleSubmit = (data: NewProductSchemaType) => {
         updateProductData(data);
-        handleTabChange("description");
         markStepCompleted('discount');
+        handleTabChange("description");
     };
 
     useEffect(() => {

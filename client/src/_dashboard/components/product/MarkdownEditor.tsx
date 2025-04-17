@@ -34,8 +34,8 @@ export default function MarkdownEditor({ handleTabChange }: MarkdownEditorProps)
 
     function handleSubmit() {
         updateProductData({ ...productData, description: markdown });
-        handleTabChange("images");
         markStepCompleted("description")
+        handleTabChange("images");
     };
 
     return (
