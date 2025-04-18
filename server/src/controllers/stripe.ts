@@ -211,7 +211,7 @@ stripeRouter.post("/create-payment-intent", express.json(), authMiddleware, asyn
         },
     });
 
-    res.send({ clientSecret: paymentIntent.client_secret });
+    return res.status(200).json(CustomResponse.success('OK', { clientSecret: paymentIntent.client_secret }))
 }));
 
 stripeRouter.post('/webhook', express.raw({ type: 'application/json' }), asyncHandler(async (req: Request, res: Response) => {

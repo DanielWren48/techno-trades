@@ -22,6 +22,28 @@ const createProductAggregationPipeline = (matchCondition?: Record<string, any>):
                     then: { $avg: '$reviews.rating' }, else: 0,
                 },
             },
+            discountPercentage: {
+                $cond: {
+                    if: { $eq: ['$isDiscounted', true] },
+                    then: {
+                        $round: [
+                            {
+                                $multiply: [
+                                    {
+                                        $divide: [
+                                            { $subtract: ['$price', '$discountedPrice'] },
+                                            '$price'
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+                            0
+                        ]
+                    },
+                    else: "$$REMOVE"
+                }
+            }
         }
     } as PipelineStage.AddFields);
 
@@ -71,6 +93,7 @@ const createProductAggregationPipeline = (matchCondition?: Record<string, any>):
             price: { $first: '$price' },
             isDiscounted: { $first: '$isDiscounted' },
             discountedPrice: { $first: '$discountedPrice' },
+            discountPercentage: { $first: '$discountPercentage' },
             category: { $first: '$category' },
             brand: { $first: '$brand' },
             countInStock: { $first: '$countInStock' },
@@ -179,19 +202,18 @@ const updateProductDiscount = async (
     }
 }
 
-const updateProductStock = async (productId: string, stockChange: number): Promise<IProduct> => {
+const updateProductStock = async (productId: string, newStock: number): Promise<IProduct> => {
     try {
         const product = await Product.findById(productId);
         if (!product) {
             throw new RequestError("Product not found", 404, ErrorCode.NON_EXISTENT);
         }
 
-        const newStockCount = product.countInStock + stockChange;
-        if (newStockCount < 0) {
+        if (newStock < 0) {
             throw new RequestError("Stock cannot be negative", 400, ErrorCode.INVALID_VALUE);
         }
 
-        product.countInStock = newStockCount;
+        product.countInStock = newStock;
         await product.save();
         return product;
     } catch (err) {

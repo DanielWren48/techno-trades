@@ -4,11 +4,12 @@ import { CustomResponse } from "../config/utils";
 import { getProductBySlug, getProducts, updateProductDiscount, updateProductStock } from "../managers/products";
 import { ErrorCode, NotFoundError, RequestError } from "../config/handlers";
 import { Product } from "../models/products";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, staff } from "../middlewares/auth";
 import { validationMiddleware } from "../middlewares/error";
 import { rateLimiter, RATE_CFG, rateLimiterSimple } from "../middlewares/rate_limitor";
 import { ProductCreateSchema, ProductSchema, ProductUpdateSchema, ReviewCreateSchema, ReviewSchema, UpdateProductDiscountSchema, UpdateProductStockSchema } from "../schemas/shop";
 import { getFilteredProducts } from "../utils/filterProducts";
+import { utapi } from "../upload";
 
 const shopRouter = Router();
 
@@ -47,7 +48,7 @@ shopRouter.get('/products/:slug', rateLimiter(RATE_CFG.routes.getProducts), asyn
     }
 });
 
-shopRouter.post('/products/:slug', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, validationMiddleware(ReviewCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.post('/products/:slug', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, staff, validationMiddleware(ReviewCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
         const product = await Product.findOne({ slug: req.params.slug })
@@ -76,7 +77,27 @@ shopRouter.post('/products/:slug', rateLimiter(RATE_CFG.routes.setProducts), aut
     }
 });
 
-shopRouter.post('/', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, validationMiddleware(ProductCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.delete('/products/:slug/reviews/:id/delete', rateLimiter(RATE_CFG.default), authMiddleware, staff, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user
+        const { slug: productSlug, id: reviewId } = req.params
+
+        const updatedProduct = await Product.findOneAndUpdate(
+            { slug: productSlug },
+            { $pull: { reviews: { _id: reviewId } } },
+            { new: true }
+        );
+
+        if (!updatedProduct) {
+            throw new NotFoundError("Product review does not exist!")
+        }
+        return res.status(200).json(CustomResponse.success('Review Deleted Successfully'))
+    } catch (error) {
+        next(error)
+    }
+});
+
+shopRouter.post('/', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, staff, validationMiddleware(ProductCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
         const { name, description, price, isDiscounted, discountedPrice, category, brand, countInStock, image } = req.body
@@ -108,7 +129,7 @@ shopRouter.post('/', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, v
     }
 });
 
-shopRouter.patch('/products/:id/discount', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, validationMiddleware(UpdateProductDiscountSchema), async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.patch('/products/:id/discount', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, staff, validationMiddleware(UpdateProductDiscountSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
         const { id } = req.params;
@@ -130,7 +151,7 @@ shopRouter.patch('/products/:id/discount', rateLimiter(RATE_CFG.routes.setProduc
     }
 });
 
-shopRouter.patch('/products/:id/stock', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, validationMiddleware(UpdateProductStockSchema), async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.patch('/products/:id/stock', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, staff, validationMiddleware(UpdateProductStockSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user;
         const { id } = req.params;
@@ -143,18 +164,44 @@ shopRouter.patch('/products/:id/stock', rateLimiter(RATE_CFG.routes.setProducts)
     }
 });
 
-shopRouter.patch('/products/:id/update', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, validationMiddleware(ProductUpdateSchema), async (req: Request, res: Response, next: NextFunction) => {
+shopRouter.patch('/products/:id/update', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, staff, validationMiddleware(ProductUpdateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
         const { name, description, price, category, brand, countInStock, image } = req.body
 
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
-            { $set: { name, description, price, category, brand, countInStock, image } },
+            { $set: { name, description, price, category, brand, countInStock, image, isDiscounted: false } },
             { new: true }
         ).lean();
 
         return res.status(200).json(CustomResponse.success('Products Updated Successfully', updatedProduct))
+    } catch (error) {
+        next(error)
+    }
+});
+
+shopRouter.delete('/products/:id/delete', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, staff, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const product = await Product.findById(id);
+        if (!product) {
+            throw new NotFoundError('Product does not exist!');
+        }
+
+        const imageKeys = product.image.map(img => img.key);
+        if (imageKeys.length) {
+            const { success } = await utapi.deleteFiles(imageKeys);
+            if (success) {
+                await Product.findByIdAndDelete(id)
+                return res.status(200).json(CustomResponse.success('Products Deleted Successfully'))
+            }
+            return res.status(500).json(CustomResponse.error('Error Deleting Product', ErrorCode.SERVER_ERROR));
+        }
+        await Product.findByIdAndDelete(id)
+        return res.status(200).json(CustomResponse.success('Products Deleted Successfully'))
+
     } catch (error) {
         next(error)
     }
