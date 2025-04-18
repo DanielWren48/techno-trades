@@ -7,6 +7,7 @@ import { first } from "lodash"
 import "@smastrom/react-rating/style.css";
 import { Rating } from "@smastrom/react-rating";
 import { TableCellViewer } from "./components/TableCellViewer"
+import { DataTableRowActions } from "./data-table-row-actions"
 
 export const columns: ColumnDef<ReviewType>[] = [
   {
@@ -68,5 +69,9 @@ export const columns: ColumnDef<ReviewType>[] = [
         </div>
       )
     },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <DataTableRowActions row={row} />
   },
 ]

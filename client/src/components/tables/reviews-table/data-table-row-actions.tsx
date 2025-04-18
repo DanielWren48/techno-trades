@@ -21,8 +21,8 @@ import { Icons } from "@/components/shared";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
-import { productTableSchema } from "@/lib/validation";
-import { useDeleteProductById } from "@/api/queries/product";
+import { reviewsTableSchema } from "@/lib/validation";
+import { useDeleteProductReviewById } from "@/api/queries/product";
 import { toast } from "sonner";
 
 interface DataTableRowActionsProps<TData> {
@@ -32,16 +32,15 @@ interface DataTableRowActionsProps<TData> {
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
   const [open, setOpen] = useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
-  const product = productTableSchema.parse(row.original);
-
-  const { mutateAsync: archiveProduct } = useDeleteProductById();
+  const review = reviewsTableSchema.parse(row.original);
+  const { mutateAsync: deleteReview } = useDeleteProductReviewById();
 
   async function handleEvent() {
-    setShowDeleteDialog(false);
-    const { message, status } = await archiveProduct(product._id!)
-    if (status === "success") {
+    // setShowDeleteDialog(false);
+    const { data, code, status, message } = await deleteReview({ slug: review.productSlug, id: review._id })
+    if(status === "success"){
       toast.success(message)
-    } else {
+    }else{
       toast.error(message)
     }
   }
@@ -58,10 +57,16 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
         <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => navigator.clipboard.writeText(product._id!.toString())}
+          onClick={() => navigator.clipboard.writeText(review.productId.toString())}
           >
             <Icons.copy className='mr-2 h-4 w-4' />
             Copy Product ID
+          </DropdownMenuItem>
+          <DropdownMenuItem
+          onClick={() => navigator.clipboard.writeText(review._id.toString())}
+          >
+            <Icons.copy className='mr-2 h-4 w-4' />
+            Copy Review ID
           </DropdownMenuItem>
           <DropdownMenuSeparator />
 
@@ -70,7 +75,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
             className='text-red-400'
           >
             <Icons.delete className='mr-2 h-4 w-4' />
-            Delete Product
+            Delete Reivew
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -80,8 +85,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              You are about to delete the{" "}
-              <b>{product.name}</b>
+              This action can not be reversed!
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

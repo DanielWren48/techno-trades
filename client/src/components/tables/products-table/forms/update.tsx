@@ -34,12 +34,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useUpdateProduct } from "@/api/queries/product";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const updateProductSchema = z.object({
     name: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     brand: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     category: z.enum(["smartphones", "cameras", "computers", "televisions", "consoles", "audio", "mouse", "keyboard"]),
-    description: z.string().max(5000, { message: "Maximum 5000 characters for the description" }),
+    description: z.string().max(15000, { message: "Maximum 5000 characters for the description" }),
     price: z.coerce.number().min(0, { message: "Price must be a non-negative number" }),
     countInStock: z.coerce.number().min(0, { message: "Stock must be a non-negative number" }),
 });
@@ -183,56 +184,58 @@ export function ProductUpdateForm({ product }: { product: ProductType; }) {
                         <FormItem>
                             <FormLabel className="shad-form_label">Description</FormLabel>
                             <FormControl>
-                                <MDXEditor
-                                    markdown={field.value}
-                                    {...field}
-                                    plugins={[
-                                        toolbarPlugin({
-                                            toolbarContents: () => (
-                                                <>
-                                                    <UndoRedo />
-                                                    <Separator />
-                                                    <BoldItalicUnderlineToggles />
-                                                    <Separator />
-                                                    <ListsToggle />
-                                                    <Separator />
-                                                    <BlockTypeSelect />
-                                                    <Separator />
-                                                    <CreateLink />
-                                                </>
-                                            )
-                                        }),
-                                        headingsPlugin(),
-                                        listsPlugin(),
-                                        quotePlugin(),
-                                        linkPlugin(),
-                                        markdownShortcutPlugin(),
-                                        frontmatterPlugin(),
-                                        codeBlockPlugin(),
-                                        codeMirrorPlugin(),
-                                        diffSourcePlugin(),
-                                        directivesPlugin(),
-                                        linkDialogPlugin(),
-                                        tablePlugin(),
-                                    ]}
-                                    contentEditableClassName="outline-none min-h-[500px] max-w-none text-lg px-8 py-5 text-black caret-yellow-500 
-                                    prose 
-                                    prose-p:my-3 
-                                    prose-p:leading-relaxed 
-                                    prose-headings:my-4 
-                                    prose-blockquote:my-4 
-                                    prose-ul:my-2 
-                                    prose-li:my-0 
-                                    prose-code:px-1 
-                                    prose-code:text-red-500 
-                                    prose-code:before:content-[''] 
-                                    prose-code:after:content-['']
-                                    pro
-                                    "
-                                    className="border rounded-md"
-                                    spellCheck
-                                    placeholder={""}
-                                />
+                                <ScrollArea className="h-full w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[50vh]">
+                                    <MDXEditor
+                                        markdown={field.value}
+                                        {...field}
+                                        plugins={[
+                                            toolbarPlugin({
+                                                toolbarContents: () => (
+                                                    <>
+                                                        <UndoRedo />
+                                                        <Separator />
+                                                        <BoldItalicUnderlineToggles />
+                                                        <Separator />
+                                                        <ListsToggle />
+                                                        <Separator />
+                                                        <BlockTypeSelect />
+                                                        <Separator />
+                                                        <CreateLink />
+                                                    </>
+                                                )
+                                            }),
+                                            headingsPlugin(),
+                                            listsPlugin(),
+                                            quotePlugin(),
+                                            linkPlugin(),
+                                            markdownShortcutPlugin(),
+                                            frontmatterPlugin(),
+                                            codeBlockPlugin(),
+                                            codeMirrorPlugin(),
+                                            diffSourcePlugin(),
+                                            directivesPlugin(),
+                                            linkDialogPlugin(),
+                                            tablePlugin(),
+                                        ]}
+                                        contentEditableClassName="outline-none  text-lg px-8 py-5 text-black caret-yellow-500 
+                                            prose 
+                                            prose-p:my-3 
+                                            prose-p:leading-relaxed 
+                                            prose-headings:my-4 
+                                            prose-blockquote:my-4 
+                                            prose-ul:my-2 
+                                            prose-li:my-0 
+                                            prose-code:px-1 
+                                            prose-code:text-red-500 
+                                            prose-code:before:content-[''] 
+                                            prose-code:after:content-['']
+                                            pro
+                                            "
+                                        className="border rounded-md"
+                                        spellCheck
+                                        placeholder={""}
+                                    />
+                                </ScrollArea>
                             </FormControl>
                             <FormMessage className="shad-form_message" />
                         </FormItem>

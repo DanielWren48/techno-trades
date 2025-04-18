@@ -64,3 +64,8 @@ export interface CreateReview {
     comment: string
     slug: string
 }
+
+export interface DeleteReview {
+    slug: string
+    id: string;
+}
