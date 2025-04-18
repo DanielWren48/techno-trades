@@ -100,20 +100,21 @@ shopRouter.delete('/products/:slug/reviews/:id/delete', rateLimiter(RATE_CFG.def
 shopRouter.post('/', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, staff, validationMiddleware(ProductCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user
-        const { name, description, price, isDiscounted, discountedPrice, category, brand, countInStock, image } = req.body
+        const { name, description, price, isDiscounted, discountedPrice, category, brand, countInStock, image, specifications } = req.body;
 
         // Create a new product
         const newProduct = new Product({
             user: user,
-            name: name,
-            description: description,
-            price: price,
-            isDiscounted: isDiscounted,
+            name,
+            description,
+            price,
+            isDiscounted,
             discountedPrice: isDiscounted ? discountedPrice : undefined,
-            category: category,
-            brand: brand,
-            countInStock: countInStock,
-            image: image
+            category,
+            brand,
+            countInStock,
+            image,
+            specifications
         });
 
         // Save the product
@@ -167,11 +168,11 @@ shopRouter.patch('/products/:id/stock', rateLimiter(RATE_CFG.routes.setProducts)
 shopRouter.patch('/products/:id/update', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, staff, validationMiddleware(ProductUpdateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const { name, description, price, category, brand, countInStock, image } = req.body
+        const { name, description, price, category, brand, countInStock, image, specifications } = req.body
 
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
-            { $set: { name, description, price, category, brand, countInStock, image, isDiscounted: false } },
+            { $set: { name, description, price, category, brand, countInStock, image, specifications, isDiscounted: false } },
             { new: true }
         ).lean();
 

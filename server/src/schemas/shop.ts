@@ -28,6 +28,18 @@ class ImageSchema {
     url?: string;
 }
 
+class SpecificationSchema {
+    @Expose()
+    @IsString()
+    @IsNotEmpty({ message: 'Specification key is required' })
+    key!: string;
+
+    @Expose()
+    @IsString()
+    @IsNotEmpty({ message: 'Specification value is required' })
+    value!: string;
+}
+
 export class ProductCreateSchema {
     @Expose()
     @IsString()
@@ -77,6 +89,13 @@ export class ProductCreateSchema {
     @Type(() => ImageSchema)
     image?: ImageSchema[];
 
+    @Expose()
+    @IsArray()
+    @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => SpecificationSchema)
+    specifications?: SpecificationSchema[];
+
     validate() {
         if (this.isDiscounted && (!this.discountedPrice || this.discountedPrice >= this.price!)) {
             throw new Error('Discounted price must be less than the original price when isDiscounted is true');
@@ -122,6 +141,13 @@ export class ProductUpdateSchema {
     @ValidateNested({ each: true })
     @Type(() => ImageSchema)
     image?: ImageSchema[];
+
+    @Expose()
+    @IsArray()
+    @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => SpecificationSchema)
+    specifications?: SpecificationSchema[];
 }
 
 export class ProductSchema {

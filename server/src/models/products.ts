@@ -36,6 +36,10 @@ interface IProduct extends Document {
         name: string;
         url: string;
     }>;
+    specifications?: Array<{
+        key: string;
+        value: string;
+    }>;
     reviews: IReview[];
     reviewsCount: number;
     avgRating: number;
@@ -91,6 +95,12 @@ const ProductSchema = new Schema<IProduct>({
             name: { type: String, required: true },
             url: { type: String, required: true },
         },
+    ],
+    specifications: [
+        {
+            key: { type: String, required: true },
+            value: { type: String, required: true }
+        }
     ],
     reviews: [reviewSchema],
 }, { timestamps: true });

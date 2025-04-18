@@ -98,6 +98,7 @@ const createProductAggregationPipeline = (matchCondition?: Record<string, any>):
             brand: { $first: '$brand' },
             countInStock: { $first: '$countInStock' },
             image: { $first: '$image' },
+            specifications: { $first: '$specifications' },
             reviews: { $push: '$reviews' },
             reviewsCount: { $first: '$reviewsCount' },
             avgRating: { $first: '$avgRating' },
