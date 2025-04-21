@@ -1,8 +1,7 @@
 import { INewProduct, INewReview, Product } from '@/types';
-import { shopApiEndpoints } from '../client';
+import { BaseResponse, ErrorResponse, shopApiEndpoints } from '../client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { BaseShopResponse, CreateReview, DeleteReview, ProductFilterBody, ProductQueryParams, UpdateProduct, UpdateProductDiscount, UpdateProductStock } from '../types/product';
-import { ErrorResponse } from 'react-router-dom';
+import { CreateReview, DeleteReview, ProductFilterBody, ProductQueryParams, UpdateProduct, UpdateProductDiscount, UpdateProductStock } from '../types/product';
 
 enum QUERY_KEYS {
     GET_PRODUCTS = "getProducts",
@@ -64,7 +63,7 @@ export const useFilterProducts = ({ params, filters }: { params?: ProductQueryPa
 };
 
 export const useCreateNewProduct = () => {
-    return useMutation<BaseShopResponse<Product>, BaseShopResponse<ErrorResponse>, INewProduct>({
+    return useMutation<BaseResponse<Product>, BaseResponse<ErrorResponse>, INewProduct>({
         mutationFn: shopApiEndpoints.createProduct,
         onSuccess: (response) => {
             console.log({ response });
@@ -77,7 +76,7 @@ export const useCreateNewProduct = () => {
 
 export const useSetProductDiscount = () => {
     const queryClient = useQueryClient();
-    return useMutation<BaseShopResponse<Product>, BaseShopResponse<ErrorResponse>, UpdateProductDiscount>({
+    return useMutation<BaseResponse<Product>, BaseResponse<ErrorResponse>, UpdateProductDiscount>({
         mutationFn: shopApiEndpoints.updateDiscount,
         onSuccess: (data) => {
             queryClient.invalidateQueries({
@@ -92,7 +91,7 @@ export const useSetProductDiscount = () => {
 
 export const useUpdateProductStock = () => {
     const queryClient = useQueryClient();
-    return useMutation<BaseShopResponse<Product>, BaseShopResponse<ErrorResponse>, UpdateProductStock>({
+    return useMutation<BaseResponse<Product>, BaseResponse<ErrorResponse>, UpdateProductStock>({
         mutationFn: shopApiEndpoints.updateStock,
         onSuccess: (data) => {
             queryClient.invalidateQueries({
@@ -107,7 +106,7 @@ export const useUpdateProductStock = () => {
 
 export const useUpdateProduct = () => {
     const queryClient = useQueryClient();
-    return useMutation<BaseShopResponse<Product>, BaseShopResponse<ErrorResponse>, UpdateProduct>({
+    return useMutation<BaseResponse<Product>, BaseResponse<ErrorResponse>, UpdateProduct>({
         mutationFn: shopApiEndpoints.updateProductById,
         onSuccess: (data) => {
             queryClient.invalidateQueries({
@@ -122,7 +121,7 @@ export const useUpdateProduct = () => {
 
 export const useCreateProductReview = () => {
     const queryClient = useQueryClient();
-    return useMutation<BaseShopResponse<INewReview>, BaseShopResponse<ErrorResponse>, CreateReview>({
+    return useMutation<BaseResponse<INewReview>, BaseResponse<ErrorResponse>, CreateReview>({
         mutationFn: shopApiEndpoints.createReview,
         onSuccess: (response) => {
             if (response.status === 'success' && response.data) {
@@ -140,7 +139,7 @@ export const useCreateProductReview = () => {
 
 export const useDeleteProductReviewById = () => {
     const queryClient = useQueryClient();
-    return useMutation<BaseShopResponse<null>, BaseShopResponse<ErrorResponse>, DeleteReview>({
+    return useMutation<BaseResponse<null>, BaseResponse<ErrorResponse>, DeleteReview>({
         mutationFn: shopApiEndpoints.deleteReviewById,
         onSuccess: (response) => {
             queryClient.invalidateQueries({
@@ -155,7 +154,7 @@ export const useDeleteProductReviewById = () => {
 
 export const useDeleteProductById = () => {
     const queryClient = useQueryClient();
-    return useMutation<BaseShopResponse<null>, BaseShopResponse<ErrorResponse>, string>({
+    return useMutation<BaseResponse<null>, BaseResponse<ErrorResponse>, string>({
         mutationFn: shopApiEndpoints.deleteProductById,
         onSuccess: (response) => {
             queryClient.invalidateQueries({

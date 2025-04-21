@@ -8,13 +8,6 @@ export interface TokensResponse {
     refresh: string;
 }
 
-export interface AuthResponse<T> {
-    status: 'success' | 'failure';
-    message: string;
-    code?: string;
-    data?: T;
-}
-
 export interface LoginResponse {
     user: IUserResponse;
     tokens: TokensResponse;

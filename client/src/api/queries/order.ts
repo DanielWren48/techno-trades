@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ordersApiEndpoints } from "../client";
-import { BaseResponse, ErrorResponse, UpdateShippingStatus } from "../types/order";
+import { BaseResponse, ErrorResponse, ordersApiEndpoints } from "../client";
+import { UpdateShippingStatus } from "../types/order";
 import { Order } from "@/types/order";
 
 export enum QUERY_KEYS {
