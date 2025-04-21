@@ -1,5 +1,5 @@
-import { Expose, Type } from "class-transformer";
-import { Example } from "./utils";
+import { Expose, Transform, Type } from "class-transformer";
+import { Example, transformToNumber } from "./utils";
 import {
     IsString,
     IsNumber,
@@ -11,8 +11,11 @@ import {
     ValidateNested,
     IsOptional,
     ValidateIf,
+    Max,
+    Length,
 } from 'class-validator';
 import { UserSchema } from "./base";
+import { IsMongoId } from "../middlewares/error";
 
 class ImageSchema {
     @IsString()
@@ -31,29 +34,41 @@ class ImageSchema {
 class SpecificationSchema {
     @Expose()
     @IsString()
+    @Length(1, 300)
+    @Example("colour")
     @IsNotEmpty({ message: 'Specification key is required' })
-    key!: string;
+    key?: string;
 
     @Expose()
     @IsString()
+    @Length(1, 300)
+    @Example("black")
     @IsNotEmpty({ message: 'Specification value is required' })
-    value!: string;
+    value?: string;
 }
 
 export class ProductCreateSchema {
     @Expose()
-    @IsString()
-    @IsNotEmpty({ message: 'Name is required' })
+    @Example("Gaming chair")
+    @Length(3, 300)
     name?: string;
 
     @Expose()
-    @IsString()
-    @IsNotEmpty({ message: 'Description is required' })
+    @Example("QWE123")
+    @Length(0, 300)
+    model?: string;
+
+    @Expose()
+    @Example("This product is a waste of money tbh")
+    @Length(30, 15000)
     description?: string;
 
     @Expose()
+    @Example(1000)
     @IsNumber()
-    @Min(0, { message: 'Price must be a positive number' })
+    @Min(1)
+    @Max(100000000000)
+    @Transform(transformToNumber)
     price?: number;
 
     @Expose()
@@ -61,14 +76,18 @@ export class ProductCreateSchema {
     isDiscounted?: boolean;
 
     @Expose()
+    @Example(950)
     @IsNumber()
+    @Min(0)
+    @Max(100000000000)
     @IsOptional()
-    @Min(0, { message: 'Discounted price must be a positive number' })
+    @Transform(transformToNumber)
     discountedPrice?: number;
 
     @Expose()
-    @IsString()
-    @IsNotEmpty({ message: 'Category is required' })
+    @IsNotEmpty()
+    @Example("category")
+    @IsMongoId({ message: 'Category must be a valid MongoDB ObjectId' })
     category?: string;
 
     @Expose()
@@ -77,13 +96,16 @@ export class ProductCreateSchema {
     brand?: string;
 
     @Expose()
+    @Example(10)
     @IsNumber()
-    @Min(0, { message: 'Count in stock must be a non-negative number' })
-    countInStock?: number;
+    @Transform(transformToNumber)
+    @Min(0)
+    @Max(1000000)
+    @IsOptional()
+    stock?: number;
 
     @Expose()
     @IsArray()
-    @IsOptional()
     @ArrayNotEmpty({ message: 'At least one image is required' })
     @ValidateNested({ each: true })
     @Type(() => ImageSchema)
@@ -105,39 +127,56 @@ export class ProductCreateSchema {
 
 export class ProductUpdateSchema {
     @Expose()
-    @IsString()
-    @IsNotEmpty({ message: 'Name is required' })
+    @Example("Gaming chair")
+    @Length(3, 300)
+    @IsOptional()
     name?: string;
 
     @Expose()
-    @IsString()
-    @IsNotEmpty({ message: 'Description is required' })
+    @Example("QWE123")
+    @Length(3, 300)
+    @IsOptional()
+    model?: string;
+
+    @Expose()
+    @Example("This product is a waste of money tbh")
+    @Length(30, 15000)
+    @IsOptional()
     description?: string;
 
     @Expose()
+    @Example(1000)
+    @IsOptional()
+    @Min(1)
+    @Max(100000000000)
     @IsNumber()
-    @Min(0, { message: 'Price must be a positive number' })
+    @Transform(transformToNumber)
     price?: number;
 
     @Expose()
-    @IsString()
-    @IsNotEmpty({ message: 'Category is required' })
+    @Example("category")
+    @IsOptional()
+    @IsMongoId({ message: 'Category must be a valid MongoDB ObjectId' })
     category?: string;
 
     @Expose()
-    @IsString()
-    @IsNotEmpty({ message: 'Brand is required' })
+    @Example("Logitech")
+    @Length(3, 300)
+    @IsOptional()
     brand?: string;
 
     @Expose()
+    @Example(10)
     @IsNumber()
-    @Min(0, { message: 'Count in stock must be a non-negative number' })
-    countInStock?: number;
+    @Transform(transformToNumber)
+    @Min(0)
+    @Max(1000000)
+    @IsOptional()
+    stock?: number;
 
     @Expose()
     @IsArray()
     @IsOptional()
-    @ArrayNotEmpty({ message: 'At least one image is required' })
     @ValidateNested({ each: true })
     @Type(() => ImageSchema)
     image?: ImageSchema[];
@@ -185,7 +224,7 @@ export class ProductSchema {
 
     @Expose()
     @Example(10)
-    countInStock?: number;
+    stock?: number;
 
     @Expose()
     @IsArray()

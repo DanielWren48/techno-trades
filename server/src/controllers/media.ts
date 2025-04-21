@@ -34,7 +34,7 @@ mediaRouter.delete('/', authMiddleware, validationMiddleware(DeleteFileByKey), a
         if (success) {
             return res.status(201).json(CustomResponse.success('OK'))
         } else {
-            return res.status(200).json(CustomResponse.error('Error Deleting File', ErrorCode.SERVER_ERROR));
+            return res.status(400).json(CustomResponse.error('Error Deleting File', ErrorCode.SERVER_ERROR));
         }
     } catch (error) {
         next(error)

@@ -1,6 +1,7 @@
 import mongoose, { model, Model, Query, Schema, Types } from 'mongoose';
 import slugify from 'slugify'
 import { IUser } from './users';
+import { ICategory } from './category';
 
 enum RATING_CHOICES {
     ONE = 1,
@@ -23,14 +24,15 @@ interface IReview {
 interface IProduct extends Document {
     user: Types.ObjectId | IUser;
     name: string;
+    model: string;
     slug: string;
     description?: string;
     price: number;
     isDiscounted: boolean;
     discountedPrice?: number;
-    category?: string;
+    category?: Types.ObjectId | ICategory;
     brand?: string;
-    countInStock: number;
+    stock: number;
     image: Array<{
         key: string;
         name: string;
@@ -63,6 +65,7 @@ const ProductSchema = new Schema<IProduct>({
         ref: 'User',
     },
     name: { type: String, required: true, maxlength: 500 },
+    model: { type: String, required: true, maxlength: 500 },
     slug: { type: String },
     description: { type: String },
     price: { type: Number, required: true, default: 0 },
@@ -86,9 +89,9 @@ const ProductSchema = new Schema<IProduct>({
             }
         }
     },
-    category: { type: String },
+    category: { type: Schema.Types.ObjectId, ref: 'Category' },
     brand: { type: String },
-    countInStock: { type: Number, required: true, default: 0 },
+    stock: { type: Number, default: 1 },
     image: [
         {
             key: { type: String, required: true },

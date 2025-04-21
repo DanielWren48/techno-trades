@@ -56,7 +56,7 @@ export const getFilteredProducts = async (filters: ProductFilterBody | undefined
                         reviews: 0,
                         description: 0,
                         user: 0,
-                        countInStock: 0,
+                        stock: 0,
                         createdAt: 0,
                         updatedAt: 0,
                         slug: 0,
@@ -110,7 +110,7 @@ export const getFilteredProducts = async (filters: ProductFilterBody | undefined
 
                     // Stock filter
                     filters?.hideOutOfStock
-                        ? { countInStock: { $gt: 0 } }
+                        ? { stock: { $gt: 0 } }
                         : {},
 
                     // Stock filter
@@ -198,7 +198,7 @@ export const getFilteredProducts = async (filters: ProductFilterBody | undefined
                 reviews: 0,
                 description: 0,
                 user: 0,
-                countInStock: 0,
+                stock: 0,
                 createdAt: 0,
                 updatedAt: 0,
                 __v: 0,

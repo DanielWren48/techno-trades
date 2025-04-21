@@ -88,6 +88,7 @@ const createProductAggregationPipeline = (matchCondition?: Record<string, any>):
             _id: '$_id',
             user: { $first: '$user' },
             name: { $first: '$name' },
+            model: { $first: '$model' },
             slug: { $first: '$slug' },
             description: { $first: '$description' },
             price: { $first: '$price' },
@@ -96,7 +97,7 @@ const createProductAggregationPipeline = (matchCondition?: Record<string, any>):
             discountPercentage: { $first: '$discountPercentage' },
             category: { $first: '$category' },
             brand: { $first: '$brand' },
-            countInStock: { $first: '$countInStock' },
+            stock: { $first: '$stock' },
             image: { $first: '$image' },
             specifications: { $first: '$specifications' },
             reviews: { $push: '$reviews' },
@@ -123,6 +124,23 @@ const createProductAggregationPipeline = (matchCondition?: Record<string, any>):
         }
     } as PipelineStage.Unwind);
 
+    // Populate category - lookup category data
+    baseAggregationStages.push({
+        $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'category'
+        }
+    } as PipelineStage.Lookup);
+
+    // Replace the category array with its first (and only) element
+    baseAggregationStages.push({
+        $addFields: {
+            category: { $arrayElemAt: ['$category', 0] }
+        }
+    } as PipelineStage.AddFields);
+
     return baseAggregationStages;
 };
 
@@ -133,7 +151,23 @@ const getProducts = async () => {
         // Explicitly type the full pipeline
         const fullAggregationPipeline: PipelineStage[] = [
             ...aggregateData,
-            { $sort: { createdAt: -1 } } as PipelineStage.Sort
+            { $sort: { createdAt: -1 } } as PipelineStage.Sort,
+            {
+                $project: {
+                    updatedAt: 0,
+                    createdAt: 0,
+                    'user': 0,
+                    'reviews': 0,
+                    'description': 0,
+                    'category._id': 0,
+                    'category.createdAt': 0,
+                    'category.updatedAt': 0,
+                    'category.__v': 0,
+                    'category.description': 0,
+                    'category.image': 0,
+                    'category.isActive': 0,
+                }
+            } as PipelineStage.Project
         ];
 
         const products = await Product.aggregate(fullAggregationPipeline);
@@ -214,7 +248,7 @@ const updateProductStock = async (productId: string, newStock: number): Promise<
             throw new RequestError("Stock cannot be negative", 400, ErrorCode.INVALID_VALUE);
         }
 
-        product.countInStock = newStock;
+        product.stock = newStock;
         await product.save();
         return product;
     } catch (err) {
@@ -260,7 +294,7 @@ const updateMultipleProductStocks = async (updates: ProductStockUpdate[]): Promi
             }
 
             // Calculate new stock count
-            const newStockCount = product.countInStock + update.stockChange;
+            const newStockCount = product.stock + update.stockChange;
 
             // Prevent negative stock
             if (newStockCount < 0) {
@@ -268,7 +302,7 @@ const updateMultipleProductStocks = async (updates: ProductStockUpdate[]): Promi
             }
 
             // Update stock
-            product.countInStock = newStockCount;
+            product.stock = newStockCount;
 
             // Save the product
             await product.save({ session });

@@ -37,7 +37,7 @@ stripeRouter.post("/create-checkout-session", express.json(), asyncHandler(async
                 console.error(`Product not found for id: ${item.productId}`);
                 return null;
             }
-            if (item.quantity > product.countInStock) {
+            if (item.quantity > product.stock) {
                 console.error(`Insufficient stock for product: ${product.name}`);
                 return res.status(400).send({ error: `Insufficient stock for product: ${product.name}` });
             }
@@ -165,7 +165,7 @@ stripeRouter.post("/create-payment-intent", express.json(), authMiddleware, asyn
             errors.push(`Product not found for id: ${item.productId}`);
             return;
         }
-        if (item.quantity > product.countInStock) {
+        if (item.quantity > product.stock) {
             errors.push(`Insufficient stock for product: ${product.name}`);
             return;
         }

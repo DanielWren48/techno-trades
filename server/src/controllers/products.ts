@@ -10,6 +10,7 @@ import { rateLimiter, RATE_CFG, rateLimiterSimple } from "../middlewares/rate_li
 import { ProductCreateSchema, ProductSchema, ProductUpdateSchema, ReviewCreateSchema, ReviewSchema, UpdateProductDiscountSchema, UpdateProductStockSchema } from "../schemas/shop";
 import { getFilteredProducts } from "../utils/filterProducts";
 import { utapi } from "../upload";
+import { Category } from "../models/category";
 
 const shopRouter = Router();
 
@@ -99,20 +100,26 @@ shopRouter.delete('/products/:slug/reviews/:id/delete', rateLimiter(RATE_CFG.def
 
 shopRouter.post('/', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, staff, validationMiddleware(ProductCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const user = req.user
-        const { name, description, price, isDiscounted, discountedPrice, category, brand, countInStock, image, specifications } = req.body;
+        const user = req.user;
+        const { name, model, description, price, isDiscounted, discountedPrice, category, brand, stock, image, specifications } = req.body;
+
+        const categoryExists = await Category.findById(category);
+        if (!categoryExists) {
+            throw new RequestError("Invalid category ID", 400, ErrorCode.INVALID_VALUE);
+        }
 
         // Create a new product
         const newProduct = new Product({
             user: user,
             name,
+            model,
             description,
             price,
             isDiscounted,
             discountedPrice: isDiscounted ? discountedPrice : undefined,
             category,
             brand,
-            countInStock,
+            stock,
             image,
             specifications
         });
@@ -124,7 +131,9 @@ shopRouter.post('/', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, s
             throw new RequestError("Error creating product", 400, ErrorCode.SERVER_ERROR)
         }
 
-        return res.status(200).json(CustomResponse.success('Products Created Successfully', newProduct))
+        const populatedProduct = await Product.findById(newProduct._id).populate('category');
+
+        return res.status(200).json(CustomResponse.success('Products Created Successfully', populatedProduct || newProduct));
     } catch (error) {
         next(error)
     }
@@ -168,13 +177,18 @@ shopRouter.patch('/products/:id/stock', rateLimiter(RATE_CFG.routes.setProducts)
 shopRouter.patch('/products/:id/update', rateLimiter(RATE_CFG.routes.setProducts), authMiddleware, staff, validationMiddleware(ProductUpdateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const { name, description, price, category, brand, countInStock, image, specifications } = req.body
+        const { name, model, description, price, category, brand, stock, image, specifications } = req.body
+
+        const categoryExists = await Category.findById(category);
+        if (!categoryExists) {
+            throw new RequestError("Invalid category ID", 400, ErrorCode.INVALID_VALUE);
+        }
 
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
-            { $set: { name, description, price, category, brand, countInStock, image, specifications, isDiscounted: false } },
-            { new: true }
-        ).lean();
+            { $set: { name, model, description, price, category, brand, stock, image, specifications, isDiscounted: false } },
+            { new: true, populate: { path: 'category' }, lean: true }
+        )
 
         return res.status(200).json(CustomResponse.success('Products Updated Successfully', updatedProduct))
     } catch (error) {
