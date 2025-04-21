@@ -20,6 +20,7 @@ import shopRouter from "./controllers/products";
 import orderRouter from "./controllers/order";
 import stripeRouter from "./controllers/stripe";
 import mediaRouter from "./controllers/media";
+import categoryRouter from "./controllers/category";
 
 connectDB()
 
@@ -46,6 +47,7 @@ app.use("/api/v1/shop", shopRouter)
 app.use("/api/v1/media", mediaRouter)
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/orders', orderRouter)
+app.use("/api/v1/category", categoryRouter)
 app.use("/api/uploadthing", createUploadthingExpressHandler({ router: uploadRouter }));
 
 app.use(handleError)
