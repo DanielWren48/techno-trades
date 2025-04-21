@@ -1,5 +1,5 @@
 import { JSX } from 'react';
-import { Dashboard, Account, Orders, Notifications, Appearance, Favourites, Tables, ProductCreateForm, Categories, Archive } from '@/_dashboard/pages';
+import { Dashboard, Account, Orders, Notifications, Appearance, Favourites, Tables, ProductCreateForm, Categories } from '@/_dashboard/pages';
 import { ACCOUNT_TYPE } from '@/types';
 
 export interface dashboardRoutesProps {
@@ -54,14 +54,6 @@ const dashboardRoutes: dashboardRoutesProps[] = [
   {
     path: '/dashboard/data-tables',
     outlet: <Tables />,
-    allowedAccountTypes: [ACCOUNT_TYPE.STAFF],
-    additionalProps: {
-      redirectPath: '/dashboard'
-    },
-  },
-  {
-    path: '/dashboard/archive',
-    outlet: <Archive />,
     allowedAccountTypes: [ACCOUNT_TYPE.STAFF],
     additionalProps: {
       redirectPath: '/dashboard'

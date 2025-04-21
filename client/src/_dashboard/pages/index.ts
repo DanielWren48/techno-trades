@@ -1,7 +1,6 @@
 export {default as Orders } from './Orders'
 export {default as Tables } from './Tables'
 export {default as Account } from './Account'
-export {default as Archive } from './Archive'
 export {default as Dashboard } from './Dashboard'
 export {default as Categories } from './Categories'
 export {default as Appearance } from './Appearance'
