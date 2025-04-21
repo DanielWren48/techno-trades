@@ -43,6 +43,11 @@ export const ProductCreateValidation = z.object({
     isDiscounted: z.boolean(),
 });
 
+const specificationSchema = z.object({
+    key: z.string().min(1, { message: 'Key is required' }),
+    value: z.string().min(1, { message: 'Value is required' }),
+});
+
 export const productTableSchema = z.object({
     _id: z.string().optional(),
     name: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
@@ -55,6 +60,7 @@ export const productTableSchema = z.object({
     discountedPrice: z.coerce.number().min(0).optional(),
     discountPercentage: z.coerce.number().min(0).optional(),
     isDiscounted: z.boolean(),
+    specifications: z.array(specificationSchema).nullable(),
 })
 
 export type ProductType = z.infer<typeof productTableSchema>

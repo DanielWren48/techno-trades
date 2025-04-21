@@ -1,32 +1,9 @@
 "use client"
-
-import {
-    MDXEditor,
-    toolbarPlugin,
-    headingsPlugin,
-    listsPlugin,
-    quotePlugin,
-    linkPlugin,
-    markdownShortcutPlugin,
-    frontmatterPlugin,
-    codeBlockPlugin,
-    codeMirrorPlugin,
-    diffSourcePlugin,
-    directivesPlugin,
-    linkDialogPlugin,
-    BoldItalicUnderlineToggles,
-    CreateLink,
-    UndoRedo,
-    ListsToggle,
-    Separator,
-    BlockTypeSelect,
-    tablePlugin,
-} from '@mdxeditor/editor';
-import '@mdxeditor/editor/style.css';
 import { z } from "zod";
 import { toast } from "sonner";
+import '@mdxeditor/editor/style.css';
 import { categories } from "../filters";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { ProductType } from "@/lib/validation";
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -35,19 +12,26 @@ import { useUpdateProduct } from "@/api/queries/product";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Plus, Trash2 } from 'lucide-react';
+
+const specificationSchema = z.object({
+    key: z.string().min(1, { message: 'Key is required' }),
+    value: z.string().min(1, { message: 'Value is required' }),
+});
 
 const updateProductSchema = z.object({
     name: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     brand: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     category: z.enum(["smartphones", "cameras", "computers", "televisions", "consoles", "audio", "mouse", "keyboard"]),
-    description: z.string().max(15000, { message: "Maximum 5000 characters for the description" }),
     price: z.coerce.number().min(0, { message: "Price must be a non-negative number" }),
     countInStock: z.coerce.number().min(0, { message: "Stock must be a non-negative number" }),
+    specifications: z.array(specificationSchema).nullable(),
 });
 
 type UpdateProductSchemaType = z.infer<typeof updateProductSchema>
 
-export function ProductUpdateForm({ product }: { product: ProductType; }) {
+export function ProductDetailsUpdateForm({ product }: { product: ProductType; }) {
     const isMobile = useIsMobile()
 
     const { mutateAsync: updateProduct } = useUpdateProduct();
@@ -58,15 +42,21 @@ export function ProductUpdateForm({ product }: { product: ProductType; }) {
             name: product.name,
             brand: product.brand,
             category: product.category,
-            description: product.description,
             price: product.price,
             countInStock: product.countInStock,
+            specifications: product.specifications
         },
+    });
+
+    const { fields, append, remove, replace } = useFieldArray({
+        control: form.control,
+        name: "specifications",
     });
 
     const handleSubmit = async (value: UpdateProductSchemaType) => {
         const { message, status } = await updateProduct({
             id: product._id!,
+            description: product.description,
             ...value,
         })
         if (status === "success") {
@@ -76,6 +66,19 @@ export function ProductUpdateForm({ product }: { product: ProductType; }) {
             toast.error(message)
         }
     }
+
+    const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+        const pastedText = event.clipboardData.getData("text");
+        const lines = pastedText.split("\n").filter(Boolean);
+
+        const parsed = lines.map(line => {
+            const [key, ...rest] = line.split("\t");
+            return { key: key.trim(), value: rest.join("\t").trim() };
+        });
+
+        event.preventDefault();
+        replace(parsed);
+    };
 
     return (
         <Form {...form}>
@@ -91,7 +94,7 @@ export function ProductUpdateForm({ product }: { product: ProductType; }) {
                         <FormItem>
                             <FormLabel>Name</FormLabel>
                             <FormControl>
-                                <Input type="text" {...field} />
+                                <Input type="text" className="h-12" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -177,70 +180,69 @@ export function ProductUpdateForm({ product }: { product: ProductType; }) {
                     />
                 </div>
 
-                <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="shad-form_label">Description</FormLabel>
-                            <FormControl>
-                                <ScrollArea className="h-full w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[50vh]">
-                                    <MDXEditor
-                                        markdown={field.value}
-                                        {...field}
-                                        plugins={[
-                                            toolbarPlugin({
-                                                toolbarContents: () => (
-                                                    <>
-                                                        <UndoRedo />
-                                                        <Separator />
-                                                        <BoldItalicUnderlineToggles />
-                                                        <Separator />
-                                                        <ListsToggle />
-                                                        <Separator />
-                                                        <BlockTypeSelect />
-                                                        <Separator />
-                                                        <CreateLink />
-                                                    </>
-                                                )
-                                            }),
-                                            headingsPlugin(),
-                                            listsPlugin(),
-                                            quotePlugin(),
-                                            linkPlugin(),
-                                            markdownShortcutPlugin(),
-                                            frontmatterPlugin(),
-                                            codeBlockPlugin(),
-                                            codeMirrorPlugin(),
-                                            diffSourcePlugin(),
-                                            directivesPlugin(),
-                                            linkDialogPlugin(),
-                                            tablePlugin(),
-                                        ]}
-                                        contentEditableClassName="outline-none  text-lg px-8 py-5 text-black caret-yellow-500 
-                                            prose 
-                                            prose-p:my-3 
-                                            prose-p:leading-relaxed 
-                                            prose-headings:my-4 
-                                            prose-blockquote:my-4 
-                                            prose-ul:my-2 
-                                            prose-li:my-0 
-                                            prose-code:px-1 
-                                            prose-code:text-red-500 
-                                            prose-code:before:content-[''] 
-                                            prose-code:after:content-['']
-                                            pro
-                                            "
-                                        className="border rounded-md"
-                                        spellCheck
-                                        placeholder={""}
-                                    />
-                                </ScrollArea>
-                            </FormControl>
-                            <FormMessage className="shad-form_message" />
-                        </FormItem>
-                    )}
-                />
+                <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                        <FormLabel className="text-base font-medium">Specifications</FormLabel>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => append({ key: "", value: "" })}
+                        >
+                            <Plus className="w-4 h-4 mr-1" /> Add Specification
+                        </Button>
+                    </div>
+
+                    <ScrollArea className="h-full w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[30vh]">
+                        {fields.map((field, index) => (
+                            <div key={field.id} className="grid grid-cols-12 gap-3 items-end p-1">
+                                <FormField
+                                    control={form.control}
+                                    name={`specifications.${index}.key`}
+                                    render={({ field }) => (
+                                        <FormItem className="col-span-5">
+                                            {index === 0 && <FormLabel className="shad-form_label">Key</FormLabel>}
+                                            <FormControl>
+                                                <Input
+                                                    {...field}
+                                                    className="h-12"
+                                                    onPaste={(index === 0) ? handlePaste : undefined}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name={`specifications.${index}.value`}
+                                    render={({ field }) => (
+                                        <FormItem className="col-span-6">
+                                            {index === 0 && <FormLabel className="shad-form_label">Value</FormLabel>}
+                                            <FormControl>
+                                                <Input
+                                                    {...field}
+                                                    className="h-12"
+                                                    onPaste={(index === 0) ? handlePaste : undefined}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="col-span-1 mt-2"
+                                    onClick={() => remove(index)}
+                                >
+                                    <Trash2 className="w-5 h-5 text-red-500" />
+                                </Button>
+                            </div>
+                        ))}
+                    </ScrollArea>
+                </div>
             </form>
         </Form>
     )

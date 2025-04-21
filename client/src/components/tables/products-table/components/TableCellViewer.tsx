@@ -13,12 +13,13 @@ import {
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ProductType } from "@/lib/validation";
-import { ProductUpdateForm } from "../forms/update";
+import { ProductDetailsUpdateForm } from "../forms/update-details";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductDiscountForm from "../forms/discount";
 import ProductImageUploadForm from "../forms/image-upload";
+import { ProductDescriptionUpdateForm } from "../forms/update-description";
 
-type ProductTabType = 'details' | 'image' | 'discount';
+type ProductTabType = 'details' | 'description' | 'image' | 'discount';
 
 type TableCellViewerProps = {
     product: ProductType;
@@ -28,6 +29,7 @@ type TableCellViewerProps = {
 
 const formMappings = {
     'details': 'details-form',
+    'description': 'description-form',
     'image': 'image-form',
     'discount': 'discount-form'
 };
@@ -57,7 +59,7 @@ export function TableCellViewer({ product, trigger, initialTab = 'details' }: Ta
                     </Button>
                 }
             </SheetTrigger>
-            <SheetContent side="right" className="flex flex-col w-3/5 sm:max-w-2xl">
+            <SheetContent side="right" className="flex flex-col w-1/2 sm:max-w-2xl">
                 <SheetHeader className="gap-1">
                     <SheetTitle>{product.name}</SheetTitle>
                     <SheetDescription>Update product <span className="italic font-medium">{activeTab}</span></SheetDescription>
@@ -66,11 +68,15 @@ export function TableCellViewer({ product, trigger, initialTab = 'details' }: Ta
                 <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="w-full">
                         <TabsTrigger className="w-full" value="details">Details</TabsTrigger>
+                        <TabsTrigger className="w-full" value="description">Description</TabsTrigger>
                         <TabsTrigger className="w-full" value="image">Images</TabsTrigger>
                         <TabsTrigger className="w-full" value="discount">Discount</TabsTrigger>
                     </TabsList>
                     <TabsContent value="details">
-                        <ProductUpdateForm product={product} />
+                        <ProductDetailsUpdateForm product={product} />
+                    </TabsContent>
+                    <TabsContent value="description">
+                        <ProductDescriptionUpdateForm product={product} />
                     </TabsContent>
                     <TabsContent value="image">
                         <ProductImageUploadForm product={product} />
