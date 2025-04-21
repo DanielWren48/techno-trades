@@ -6,15 +6,17 @@ import { Rating } from "@smastrom/react-rating";
 import { Button } from "@/components/ui/button";
 import { Shell } from "@/components/dashboard/shell";
 import { ArrowLeft, Fullscreen } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, useParams } from "react-router-dom";
 import SimilarProducts from "../components/SimilarProducts";
 import { useGetProductBySlug } from "@/api/queries/product";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import MarkdownDisplay from "@/_dashboard/components/product/MarkdownDisplay";
 import { AddToCartButton, AddToFavoritesButton } from "@/components/shared";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
+import MarkdownDisplay from "@/_dashboard/components/product/MarkdownDisplay";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, formatPrice, isProductAddedWithinNDays, ratingStyle } from "@/lib/utils";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
@@ -30,13 +32,15 @@ export default function ProductDetailPage() {
 
   const { data, isLoading } = useGetProductBySlug(slug || '');
   const product = data?.data;
-  const [mainImage, setMainImage] = useState<ProductImage | undefined>(product?.image[0]);
+  const [mainImage, setMainImage] = useState<ProductImage | undefined>();
   const [open, setOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (data && !data.data && !isLoading) {
       navigate(-1);
       setRedirected(true);
+    } else {
+      setMainImage(product?.image[0])
     }
   }, [data, isLoading, navigate]);
 
@@ -81,7 +85,7 @@ export default function ProductDetailPage() {
         <ArrowLeft className="mr-2 w-6 h-6" />
         Back
       </Button >
-      <div className="flex flex-wrap mb-24 -mx-4 ">
+      <div className="flex flex-wrap -mx-4">
         <div className="w-full px-4 mb-8 md:w-1/2 md:mb-0">
           <div className="sticky top-0 overflow-hidden">
             <div onClick={() => setOpen(true)} className="relative mb-6 lg:mb-10 lg:h-96 border-2 rounded-xl bg-white cursor-pointer">
@@ -191,14 +195,54 @@ export default function ProductDetailPage() {
             </Dialog>
           </div>
         </div>
-        <Card className="w-full m-4 p-5 mt-[5rem]">
-          <CardContent className="prose prose-sm max-w-none">
-            <MarkdownDisplay content={product.description} />
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="overview" className="w-full m-4 mt-[5rem]">
+          <TabsList className='h-12 p-3'>
+            <TabsTrigger className='px-8 py-1 font-medium text-xl font-jost' value="overview">Overview</TabsTrigger>
+            <TabsTrigger className='px-8 py-1 font-medium text-xl font-jost' value="specifications">Specifications</TabsTrigger>
+            <TabsTrigger className='px-8 py-1 font-medium text-xl font-jost' value="reviews">Reviews</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">
+            <Card className="w-ful">
+              <CardHeader>
+                <CardTitle className="my-2 font-medium text-3xl font-jost">{product.name} Overview</CardTitle>
+              </CardHeader>
+              <CardContent className="prose prose-sm max-w-none">
+                <MarkdownDisplay content={product.description} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="specifications">
+            <Card>
+              <CardHeader>
+                <CardTitle className="my-2 font-medium text-3xl font-jost">{product.name} Specifications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableBody className="[&>*:nth-child(odd)]:bg-accent">
+                    {product.specifications?.map(({ key, value }, idx) => (
+                      <TableRow key={idx} >
+                        <TableCell className="w-1/3">{key}</TableCell>
+                        <TableCell>{value}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="reviews">
+            <Card className="w-ful">
+              <CardHeader>
+                <CardTitle className="my-2 font-medium text-3xl font-jost">{product.name} Reviews</CardTitle>
+              </CardHeader>
+              <CardContent className="prose prose-sm max-w-none">
+                <ProductReviews product={product} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
       <SimilarProducts id={product._id} category={product.category} />
-      <ProductReviews product={product} />
     </Shell >
   );
 };

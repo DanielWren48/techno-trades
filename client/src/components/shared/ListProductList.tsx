@@ -53,7 +53,7 @@ const ListProductList = ({ products }: ListProductListProps) => {
               </div>
 
               <div className="col-span-8 flex flex-col gap-5 w-full h-full py-5">
-                <Link to={`/products/${product.slug}`} className="text-2xl font-medium tracking-wide">
+                <Link to={`/products/${product.slug}`} className="text-2xl font-medium tracking-wide max-w-[400px] line-clamp-1">
                   {product.name}
                 </Link>
                 <div className="flex items-center">
@@ -66,13 +66,9 @@ const ListProductList = ({ products }: ListProductListProps) => {
                   <h1 className="ml-2">({product.reviewsCount || 0})</h1>
                 </div>
                 <ul className="max-w-md space-y-2 font-medium list-disc list-inside dark:text-light-2/90">
-                  <li>Capacity: 10.4 litres</li>
-                  <li>Dual baskets</li>
-                  <li>7 preset functions</li>
-                  <li>2 independent cooking zones</li>
-                  <li>Touchscreen controls</li>
-                  <li>Dishwasher safe parts</li>
-                  <li>2 year guarantee</li>
+                  {product.specifications?.filter((i) => i.value.length < 30).slice(0, 6).map(({ key, value }, idx) => (
+                    <li key={idx} className="text-muted-foreground">{key}: <span className="text-foreground">{value}</span></li>
+                  ))}
                 </ul>
               </div>
 

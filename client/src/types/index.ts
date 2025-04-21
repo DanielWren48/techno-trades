@@ -83,6 +83,10 @@ export type Product = {
     brand: string;
     countInStock: number;
     image: ProductImage[];
+    specifications: Array<{
+        key: string;
+        value: string;
+    }> | null;
     reviews?: Review[];
     reviewsCount: number;
     avgRating: number;
@@ -97,6 +101,10 @@ export type FilterdProduct = {
     category: ProductCategory;
     brand: string;
     image: ProductImage[];
+    specifications: Array<{
+        key: string;
+        value: string;
+    }> | null;
     slug: string;
     discountedPrice?: number;
     discountPercentage?: number;

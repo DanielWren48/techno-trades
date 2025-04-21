@@ -56,6 +56,10 @@ export interface UpdateProduct {
     description?: string;
     price?: number;
     countInStock?: number;
+    specifications: Array<{
+        key: string;
+        value: string;
+    }> | null;
 }
 
 export interface CreateReview {
