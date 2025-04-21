@@ -1,8 +1,9 @@
 import express, { NextFunction, Request, Response } from "express";
 import { ClassConstructor, plainToInstance } from "class-transformer";
-import { validate, ValidationError } from 'class-validator';
+import { registerDecorator, validate, ValidationArguments, ValidationError, ValidationOptions } from 'class-validator';
 import { ErrorCode, RequestError } from "../config/handlers"
 import { CustomResponse } from "../config/utils"
+import { Types } from "mongoose";
 
 export const validationMiddleware = <T extends object>(type: ClassConstructor<T>) =>
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -23,6 +24,25 @@ export const validationMiddleware = <T extends object>(type: ClassConstructor<T>
         }
         next();
     };
+
+export function IsMongoId(validationOptions?: ValidationOptions) {
+    return function (object: Object, propertyName: string) {
+        registerDecorator({
+            name: 'isMongoId',
+            target: object.constructor,
+            propertyName: propertyName,
+            options: validationOptions,
+            validator: {
+                validate(value: any, args: ValidationArguments) {
+                    return typeof value === 'string' && Types.ObjectId.isValid(value);
+                },
+                defaultMessage(args: ValidationArguments) {
+                    return `${args.property} must be a valid MongoDB ObjectId`;
+                },
+            },
+        });
+    };
+}
 
 export const handleError = (err: RequestError, req: Request, res: Response, next: NextFunction) => {
     const status = err.status || 500;
