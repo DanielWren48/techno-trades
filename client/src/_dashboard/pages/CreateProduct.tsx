@@ -8,11 +8,12 @@ import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/acco
 import { MarkdownDisplay, MarkdownEditor, NewProductForm, ProductCreateSteps, ProductDiscountForm, ProductImageUpload, ProductOverview } from '../components';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { mediaApiEndpoints } from '@/api/client';
 
 export default function DashboardAccount() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { activeTab, setActiveTab, productData, markdown, canProceedToStep } = useProductStore();
+  const { activeTab, setActiveTab, productData, markdown, canProceedToStep, completedSteps } = useProductStore();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -35,6 +36,34 @@ export default function DashboardAccount() {
       toast.error(`Please complete the ${activeTab}`);
     }
   };
+
+  const clearFormProgress = async () => {
+    if (window.confirm("Are you sure you want to clear all progress?")) {
+      if (productData && productData.image.length > 0) {
+        const fileKeys = productData.image.flatMap(i => i.key)
+
+        toast.promise(mediaApiEndpoints.deleteFiles(fileKeys),
+          {
+            id: "delete-file",
+            loading: 'Removing file...',
+            success: ({ message, status, code }) => {
+              if (status === "success" && code === "201") {
+                return toast.info('message')
+              } else if (status === "failure" && code === "400") {
+                return toast.error('Error deleting file')
+              } else {
+                return toast.error(message)
+              }
+            },
+            error: () => 'Error deleting files.',
+          }
+        );
+      }
+      useProductStore.getState().resetStore();
+      toast.info("Progress renewd")
+      navigate("/dashboard/new-product?tab=details");
+    }
+  }
 
   return (
     <Shell variant={'default'} className='max-w-5xl'>
@@ -142,15 +171,7 @@ export default function DashboardAccount() {
           </Accordion>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={() => {
-              if (window.confirm("Are you sure you want to clear all progress?")) {
-                useProductStore.getState().resetStore();
-                navigate("/dashboard/new-product?tab=details");
-              }
-            }}
-          >
+          <Button variant="outline" onClick={() => clearFormProgress()} >
             Clear Progress
           </Button>
 

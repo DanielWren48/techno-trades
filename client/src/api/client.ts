@@ -310,7 +310,7 @@ export const usersAiEndpoints = {
 export const mediaApiEndpoints = {
     getAllFiles: () => mediaApi.get<null>(''),
     getFileByKey: (key: string) => mediaApi.get<File[]>(`/:${key}`),
-    deleteFiles: (fileKeys: string[]) => mediaApi.delete<null>('/', { data: fileKeys })
+    deleteFiles: (fileKeys: string[]) => mediaApi.delete<null>('/', { data: { fileKeys } })
 };
 
 export const ordersApiEndpoints = {

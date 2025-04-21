@@ -59,7 +59,7 @@ export default function ProductImageUpload({ handleTabChange }: ProductImageUplo
         onDrop,
         accept: fileTypes ? generateClientDropzoneAccept(fileTypes) : undefined,
     });
-    
+
     function handleRemoveFile(index: number) {
         const updatedFiles = [...files];
         const removedFile = updatedFiles.splice(index, 1);
@@ -70,7 +70,14 @@ export default function ProductImageUpload({ handleTabChange }: ProductImageUplo
 
     async function handleSubmit() {
         if (isEmpty(uploadedFiles) && !isEmpty(files)) {
-            const UploadFileResponse = await startUpload(files)
+            const renamedFiles = files.map((file) => {
+                const randomIndex = Math.floor(Math.random() * 1000);
+                const fileExtension = file.name.split('.').pop();
+                const newFileName = `${productData?.name.replace(/\s/g, '_')}_${randomIndex}.${fileExtension}`;
+                return new File([file], newFileName, { type: file.type });
+            });
+
+            const UploadFileResponse = await startUpload(renamedFiles)
             const productImages: ProductImage[] = UploadFileResponse!.map((imageData) => ({
                 key: imageData.key as string,
                 name: imageData.name as string,
