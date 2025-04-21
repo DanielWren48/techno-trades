@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,6 +8,7 @@ import { categories } from "@/components/tables/products-table/filters";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { newProductSchema, NewProductSchemaType } from "@/_dashboard/schemas/product";
+import { Plus, Trash2 } from "lucide-react";
 
 interface NewProductProps {
     handleTabChange: (value: string) => void
@@ -25,8 +26,14 @@ export default function NewProductCreateDetails({ handleTabChange }: NewProductP
             price: 0,
             countInStock: 0,
             isDiscounted: false,
-            discountedPrice: undefined
+            discountedPrice: undefined,
+            specifications: [],
         },
+    });
+
+    const { fields, append, remove, replace } = useFieldArray({
+        control: form.control,
+        name: "specifications",
     });
 
     useEffect(() => {
@@ -43,6 +50,19 @@ export default function NewProductCreateDetails({ handleTabChange }: NewProductP
         updateProductData(data);
         markStepCompleted('details');
         handleTabChange("discount");
+    };
+
+    const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+        const pastedText = event.clipboardData.getData("text");
+        const lines = pastedText.split("\n").filter(Boolean);
+
+        const parsed = lines.map(line => {
+            const [key, ...rest] = line.split("\t");
+            return { key: key.trim(), value: rest.join("\t").trim() };
+        });
+
+        event.preventDefault();
+        replace(parsed);
     };
 
     return (
@@ -151,6 +171,68 @@ export default function NewProductCreateDetails({ handleTabChange }: NewProductP
                                 </FormItem>
                             )}
                         />
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between">
+                            <FormLabel className="text-base font-medium">Specifications</FormLabel>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => append({ key: "", value: "" })}
+                            >
+                                <Plus className="w-4 h-4 mr-1" /> Add Spec
+                            </Button>
+                        </div>
+
+                        {fields.map((field, index) => (
+                            <div key={field.id} className="grid grid-cols-12 gap-3 items-end">
+                                <FormField
+                                    control={form.control}
+                                    name={`specifications.${index}.key`}
+                                    render={({ field }) => (
+                                        <FormItem className="col-span-5">
+                                            {index === 0 && <FormLabel className="shad-form_label">Key</FormLabel>}
+                                            <FormControl>
+                                                <Input
+                                                    {...field}
+                                                    className="h-12"
+                                                    onPaste={(index === 0) ? handlePaste : undefined}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name={`specifications.${index}.value`}
+                                    render={({ field }) => (
+                                        <FormItem className="col-span-6">
+                                            {index === 0 && <FormLabel className="shad-form_label">Value</FormLabel>}
+                                            <FormControl>
+                                                <Input
+                                                    {...field}
+                                                    className="h-12"
+                                                    onPaste={(index === 0) ? handlePaste : undefined}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="col-span-1 mt-2"
+                                    onClick={() => remove(index)}
+                                >
+                                    <Trash2 className="w-5 h-5 text-red-500" />
+                                </Button>
+                            </div>
+                        ))}
                     </div>
 
                     <Button type="submit" variant={"default"}>Continue</Button>

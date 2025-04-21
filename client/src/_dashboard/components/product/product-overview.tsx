@@ -9,6 +9,7 @@ import { useCreateNewProduct } from '@/api/queries/product';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import useProductStore from '@/hooks/useProductStore';
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 
 interface ProductOverviewProps {
   handleTabChange: (value: string) => void
@@ -32,7 +33,7 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
     );
   }
 
-  const { brand, category, description, price, countInStock, discountedPrice, isDiscounted, image } = productData;
+  const { name, brand, category, description, price, countInStock, discountedPrice, isDiscounted, image, specifications } = productData;
 
   async function handleSubmit() {
     if (!productData) {
@@ -80,7 +81,7 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
         {/* Product Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">{brand}</CardTitle>
+            <CardTitle className="text-2xl font-bold">{name}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center space-x-2">
@@ -142,6 +143,25 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
         </CardContent>
       </Card>
 
+      {/* Specifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Specifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableBody>
+              {specifications?.map(({ key, value }, idx) => (
+                <TableRow key={idx}>
+                  <TableCell>{key}</TableCell>
+                  <TableCell>{value}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
       <Button onClick={handleSubmit} disabled={isLoadingCreate} className='w-full my-5' variant={'default'}>
         {isLoadingCreate ? (
           <>
@@ -151,14 +171,6 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
         ) : (
           <>Create Product</>
         )}
-      </Button>
-
-      <Button
-        onClick={resetStore}
-        variant="outline"
-        className="w-full"
-      >
-        Clear Form
       </Button>
     </div>
   );
