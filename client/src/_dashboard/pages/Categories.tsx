@@ -1,70 +1,61 @@
-import { useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { PlusSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Shell } from "@/components/dashboard/shell";
-import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/dashboard/header";
-import { useGetProducts } from "@/api/queries/product";
-import { categories } from "@/components/tables/products-table/filters";
+import { useGetCategories } from "@/api/queries/category";
+import CreateCategoryDialog from "../components/category/create-category-form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const Categories = () => {
-  const { data, isLoading: allProductsLoading } = useGetProducts();
+    const { data, isLoading, refetch } = useGetCategories();
 
-  const products = data?.data?.items
-
-    const getProductCountByCategory = useMemo(() => {
-        if (!products) {
-            return {};
-        }
-
-        return products.reduce((countByCategory: { [x: string]: any; }, product: { category: string; }) => {
-            const category = product.category;
-            countByCategory[category] = (countByCategory[category] || 0) + 1;
-            return countByCategory;
-        }, {} as Record<string, number>);
-    }, [products]);
+    const categories = data?.data
 
     return (
         <Shell>
             <Header title="Categories" size="default" />
+
+            <CreateCategoryDialog
+                successCallback={() => refetch()}
+                trigger={
+                    <Button className="gap-2 text-sm max-w-sm">
+                        <PlusSquare className="h-4 w-4" />
+                        Create category
+                    </Button>
+                } />
+
             <div className="grid gap-10">
-                <Separator />
                 {categories && (
                     <Table>
                         <TableHeader>
                             <TableRow className={cn("bg-accent")}>
-                                <TableHead className="text-center text-base text-dark-1 dark:text-white/90 font-thin">
+                                <TableHead className="text-center">
                                     Image
                                 </TableHead>
-                                <TableHead className="text-center text-base text-dark-1 dark:text-white/90 font-thin">
+                                <TableHead className="text-center">
                                     Name
                                 </TableHead>
-                                <TableHead className="text-center text-base text-dark-1 dark:text-white/90 font-thin">
-                                    Number of Products
-                                </TableHead>
-                                <TableHead className="text-left text-base text-dark-1 dark:text-white/90 font-thin">
+                                <TableHead className="text-center">
                                     Icon
                                 </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {categories.map((category) => (
-                                <TableRow key={category.value} className={cn("")}>
+                                <TableRow key={category._id} className={cn("")}>
                                     <TableCell className="flex justify-center items-center">
                                         <img
-                                            className="w-20 h-20 object-cover"
-                                            src={category.image}
-                                            alt={category.value}
+                                            className="w-20 h-14 object-cover"
+                                            src={category.image ?? ""}
+                                            alt={category.slug}
                                         />
                                     </TableCell>
                                     <TableCell className="text-lg text-center">
-                                        {category.label}
+                                        {category.name}
                                     </TableCell>
-                                    <TableCell className="text-lg text-center">
-                                        {getProductCountByCategory[category.value] || 0}
-                                    </TableCell>
-                                    <TableCell className="">
-                                        <category.icon className="h-10 w-10 text-muted-foreground" />
+                                    <TableCell className="text-3xl text-center">
+                                        {category.icon}
                                     </TableCell>
                                 </TableRow>
                             ))}
