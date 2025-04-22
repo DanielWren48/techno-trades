@@ -8,6 +8,7 @@ import { UpdateUserEmail, UpdateUserPassword, UpdateUserProfile } from './types/
 import { IOrderResponse, IOrdersResponse, UpdateShippingStatus } from './types/order';
 import { AllProductsResponse, ProductQueryParams, ProductFilterBody, UpdateProductDiscount, UpdateProduct, CreateReview, UpdateProductStock, DeleteReview } from './types/product';
 import { IUserResponse, LoginData, LoginResponse, RegisterData, RegisterResponse, VerifyAccountData, EmailData, SetNewPasswordData, SignInWithOtp, GoogleLoginData } from './types/auth';
+import { CreateCategory, ICategory, UpdateCategory } from './types/category';
 
 // Generic response type
 export interface BaseResponse<T> {
@@ -75,7 +76,6 @@ class ApiClient {
             (config) => {
                 if (this.options.useTokenAuth) {
                     const accessToken = Cookies.get(this.options.accessTokenName || 'accessToken');
-                    console.log({ accessToken })
                     if (accessToken) {
                         config.headers.Authorization = `Bearer ${accessToken}`;
                     }
@@ -90,11 +90,9 @@ class ApiClient {
             (response) => response,
             async (error) => {
                 const originalRequest = error.config;
-                console.log({ originalRequest })
 
                 // If error is not 401 or we've already tried to refresh, reject the promise
                 if (!error.response || error.response.status !== 401 || originalRequest._retry) {
-                    console.log({ error })
                     return Promise.reject(error);
                 }
 
@@ -111,7 +109,6 @@ class ApiClient {
                 try {
                     // Get refresh token from cookies
                     const refreshToken = Cookies.get(this.options.refreshTokenName || 'refreshToken');
-                    console.log({ refreshToken })
 
                     if (!refreshToken) {
                         this.notifyAuthStateChange(false);
@@ -124,7 +121,6 @@ class ApiClient {
                         { refresh: refreshToken },
                         { withCredentials: true }
                     );
-                    console.log({ response })
 
                     if (response.data.status === 'success' && response.data.data) {
                         // Process the queue of failed requests
@@ -261,6 +257,7 @@ class ApiClient {
 // Create shared API client for auth
 const authApi = new ApiClient({ baseURL: '/api/v1/auth' });
 const shopApi = new ApiClient({ baseURL: '/api/v1/shop' });
+const categoryApi = new ApiClient({ baseURL: '/api/v1/category' });
 const usersApi = new ApiClient({ baseURL: '/api/v1/users' })
 const mediaApi = new ApiClient({ baseURL: '/api/v1/media' });
 const ordersApi = new ApiClient({ baseURL: '/api/v1/orders' });
@@ -299,6 +296,15 @@ export const shopApiEndpoints = {
     deleteReviewById: (data: DeleteReview) => shopApi.delete<null>(`/products/${data.slug}/reviews/${data.id}/delete`)
 };
 
+export const categoryApiEndpoints = {
+    getAllCategories: () => categoryApi.get<ICategory[]>(''),
+    getCategoryById: (id: string) => categoryApi.get<ICategory>(`/id/${id}`),
+    getCategoryBySlug: (slug: string) => categoryApi.get<ICategory>(`/slug/${slug}`),
+    createCategory: (data: CreateCategory) => categoryApi.post<ICategory>('', data),
+    updateCategory: (data: UpdateCategory) => categoryApi.patch<ICategory>(`/${data.id}`, data),
+    deleteCategoryById: (id: string) => shopApi.delete<null>(`/${id}`)
+};
+
 export const usersAiEndpoints = {
     getAllUsers: () => usersApi.get<{ users: IUser[] }>(''),
     updateUserDetails: (data: UpdateUserProfile) => usersApi.patch<IUser>('/update-me', data),
@@ -307,6 +313,7 @@ export const usersAiEndpoints = {
     updateUserPassword: (data: UpdateUserPassword) => usersApi.patch<IUser>('/update-my-password', data),
     closeUserAccount: () => usersApi.delete<null>('/deactivate-me')
 };
+
 export const mediaApiEndpoints = {
     getAllFiles: () => mediaApi.get<null>(''),
     getFileByKey: (key: string) => mediaApi.get<File[]>(`/:${key}`),
