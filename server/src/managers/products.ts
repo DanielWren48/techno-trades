@@ -158,14 +158,12 @@ const getProducts = async () => {
                     createdAt: 0,
                     'user': 0,
                     'reviews': 0,
-                    'description': 0,
-                    'category._id': 0,
-                    'category.createdAt': 0,
-                    'category.updatedAt': 0,
+                    // 'description': 0,
+                    // 'category._id': 0,
+                    // 'category.createdAt': 0,
+                    // 'category.updatedAt': 0,
+                    // 'category.image': 0,
                     'category.__v': 0,
-                    'category.description': 0,
-                    'category.image': 0,
-                    'category.isActive': 0,
                 }
             } as PipelineStage.Project
         ];

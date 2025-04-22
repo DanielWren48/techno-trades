@@ -1,4 +1,4 @@
-import { PipelineStage } from "mongoose";
+import { PipelineStage, Types } from "mongoose";
 import { Product } from "../models/products";
 
 interface ProductFilterBody {
@@ -89,6 +89,12 @@ export const getFilteredProducts = async (filters: ProductFilterBody | undefined
             }
         } as PipelineStage.AddFields;
 
+        // Convert category string IDs to ObjectIds if categories filter is present
+        let categoryIds: Types.ObjectId[] = [];
+        if (filters?.categories && filters.categories.length > 0) {
+            categoryIds = filters.categories.map(id => new Types.ObjectId(id));
+        }
+
         // Then apply the filters
         const matchStage = {
             $match: {
@@ -98,9 +104,9 @@ export const getFilteredProducts = async (filters: ProductFilterBody | undefined
                         ? { name: { $regex: filters.name, $options: 'i' } }
                         : {},
 
-                    // Categories filter
-                    filters?.categories && filters.categories.length > 0
-                        ? { category: { $in: filters.categories } }
+                    // Categories filter (now using ObjectIds)
+                    categoryIds.length > 0
+                        ? { category: { $in: categoryIds } }
                         : {},
 
                     // Brands filter
@@ -113,7 +119,7 @@ export const getFilteredProducts = async (filters: ProductFilterBody | undefined
                         ? { stock: { $gt: 0 } }
                         : {},
 
-                    // Stock filter
+                    // Discounted filter
                     filters?.discounted
                         ? { isDiscounted: true }
                         : {},
@@ -192,7 +198,25 @@ export const getFilteredProducts = async (filters: ProductFilterBody | undefined
         // Create sort stage with determined sort options
         const sortStage = { $sort: sortOptions };
 
-        // Project stage to exclude reviews
+        // Optional: Add a lookup stage to populate category information if needed
+        const lookupCategoryStage = {
+            $lookup: {
+                from: 'categories',
+                localField: 'category',
+                foreignField: '_id',
+                as: 'category'
+            }
+        } as PipelineStage.Lookup;
+
+        // Optional: Unwind the categoryInfo array (if you want it as an object rather than array)
+        const unwindCategoryStage = {
+            $unwind: {
+                path: '$category',
+                preserveNullAndEmptyArrays: true
+            }
+        } as PipelineStage.Unwind;
+
+        // Project stage to exclude reviews and shape the final output
         const projectStage = {
             $project: {
                 reviews: 0,
@@ -202,6 +226,11 @@ export const getFilteredProducts = async (filters: ProductFilterBody | undefined
                 createdAt: 0,
                 updatedAt: 0,
                 __v: 0,
+
+                'category.createdAt': 0,
+                'category.updatedAt': 0,
+                'category.parent': 0,
+                'category.__v': 0,
             }
         } as PipelineStage.Project;
 
@@ -237,6 +266,8 @@ export const getFilteredProducts = async (filters: ProductFilterBody | undefined
             calculateFieldsStage,
             formatRatingStage,
             matchStage,
+            lookupCategoryStage,
+            unwindCategoryStage,
             //@ts-expect-error
             sortStage,
             projectStage,
