@@ -14,6 +14,14 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
+import { useCallback } from "react";
+import CategoryPicker from "@/_dashboard/components/category/category-picker";
+import { Label } from "@/components/ui/label"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 const specificationSchema = z.object({
     key: z.string().min(1, { message: 'Key is required' }),
@@ -23,9 +31,18 @@ const specificationSchema = z.object({
 const updateProductSchema = z.object({
     name: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     brand: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
-    category: z.enum(["smartphones", "cameras", "computers", "televisions", "consoles", "audio", "mouse", "keyboard"]),
+    model: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
+    category: z.object({
+        _id: z.string(),
+        name: z.string(),
+        slug: z.string(),
+        icon: z.string(),
+        image: z.string().nullable(),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+    }),
     price: z.coerce.number().min(0, { message: "Price must be a non-negative number" }),
-    countInStock: z.coerce.number().min(0, { message: "Stock must be a non-negative number" }),
+    stock: z.coerce.number().min(0, { message: "Stock must be a non-negative number" }),
     specifications: z.array(specificationSchema).nullable(),
 });
 
@@ -40,10 +57,11 @@ export function ProductDetailsUpdateForm({ product }: { product: ProductType; })
         resolver: zodResolver(updateProductSchema),
         defaultValues: {
             name: product.name,
+            model: product.model,
             brand: product.brand,
             category: product.category,
             price: product.price,
-            countInStock: product.countInStock,
+            stock: product.stock,
             specifications: product.specifications
         },
     });
@@ -53,11 +71,16 @@ export function ProductDetailsUpdateForm({ product }: { product: ProductType; })
         name: "specifications",
     });
 
+    const handleCategoryChange = useCallback((value: string) => {
+        form.setValue("category._id", value);
+    }, [form]);
+
     const handleSubmit = async (value: UpdateProductSchemaType) => {
         const { message, status } = await updateProduct({
             id: product._id!,
-            description: product.description,
             ...value,
+            description: product.description,
+            category: value.category._id,
         })
         if (status === "success") {
             toast.success(message)
@@ -87,19 +110,36 @@ export function ProductDetailsUpdateForm({ product }: { product: ProductType; })
                 onSubmit={form.handleSubmit(handleSubmit)}
                 className="flex flex-col gap-6 w-full max-w-5xl"
             >
-                <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Name</FormLabel>
-                            <FormControl>
-                                <Input type="text" className="h-12" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-8">
+
+                    <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                    <Input type="text" className="h-12" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="model"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Model</FormLabel>
+                                <FormControl>
+                                    <Input type="text" className="h-12" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-8">
                     <FormField
@@ -119,31 +159,11 @@ export function ProductDetailsUpdateForm({ product }: { product: ProductType; })
                         control={form.control}
                         name="category"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col mt-2.5">
                                 <FormLabel className="shad-form_label">Category</FormLabel>
-
-                                <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                >
-                                    <FormControl>
-                                        <SelectTrigger className="h-12">
-                                            <SelectValue placeholder="Select a Category" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            {categories.map((status, index) => (
-                                                <SelectItem key={index} value={status.value}>
-                                                    <span className="flex items-center">
-                                                        <status.icon className="mr-2 h-5 w-5 text-muted-foreground" />
-                                                        {status.label}
-                                                    </span>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                <FormControl>
+                                    <CategoryPicker defValue={field.value._id} onChange={handleCategoryChange} />
+                                </FormControl>
                                 <FormMessage className="shad-form_message" />
                             </FormItem>
                         )}
@@ -167,7 +187,7 @@ export function ProductDetailsUpdateForm({ product }: { product: ProductType; })
 
                     <FormField
                         control={form.control}
-                        name="countInStock"
+                        name="stock"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="shad-form_label">Stock</FormLabel>

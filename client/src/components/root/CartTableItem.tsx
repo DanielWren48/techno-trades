@@ -21,7 +21,7 @@ const CartTableItem = ({ product, qty }: CartTableItemProps) => {
 
     if (e.target.value === '' || re.test(e.target.value)) {
       const updatedQty = Number(e.target.value);
-      if (updatedQty <= product.countInStock) {
+      if (updatedQty <= product.stock) {
         setQuantity(updatedQty);
         updateQuantity(product._id!, updatedQty);
       }
@@ -35,7 +35,7 @@ const CartTableItem = ({ product, qty }: CartTableItemProps) => {
   };
 
   const incrementQty = () => {
-    if (product.countInStock >= quantity + 1) {
+    if (product.stock >= quantity + 1) {
       const updatedQty = quantity + 1;
       setQuantity(updatedQty);
       updateQuantity(product._id!, updatedQty);

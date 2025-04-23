@@ -33,7 +33,7 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
     );
   }
 
-  const { name, brand, category, description, price, countInStock, discountedPrice, isDiscounted, image, specifications } = productData;
+  const { name, brand, category, description, price, stock, discountedPrice, isDiscounted, image, specifications } = productData;
 
   async function handleSubmit() {
     if (!productData) {
@@ -55,6 +55,7 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
       handleTabChange("details");
     } else if (response.status === "failure" && response.data) {
       for (const key in response.data) {
+        //@ts-expect-error
         toast.error("Error at: " + key, { description: response.data[key] });
       }
     } else {
@@ -101,7 +102,7 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
             <div className="flex items-center space-x-2">
               <Package className="h-4 w-4" />
               <span className="font-medium">Stock:</span>
-              <span>{countInStock} units</span>
+              <span>{stock} units</span>
             </div>
 
             <div className="space-y-2">

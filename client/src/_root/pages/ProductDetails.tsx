@@ -126,10 +126,10 @@ export default function ProductDetailPage() {
                     </span>
                   </>
                 }
-                {product.countInStock === 0 &&
+                {product.stock === 0 &&
                   <span className="inline-flex items-center rounded-md bg-red-50 px-3 py-1 text-base font-semibold text-red-800 ring-1 ring-inset ring-red-600/20">Out of Stock</span>
                 }
-                {(product.countInStock <= 5 && product.countInStock !== 0) &&
+                {(product.stock <= 5 && product.stock !== 0) &&
                   <span className="inline-flex items-center rounded-md bg-red-50 px-3 py-1 text-base font-semibold text-red-800 ring-1 ring-inset ring-red-600/20">Low Stock</span>
                 }
                 {isProductAddedWithinNDays({ product, nDays: 14 }) &&
@@ -242,7 +242,7 @@ export default function ProductDetailPage() {
           </TabsContent>
         </Tabs>
       </div>
-      <SimilarProducts id={product._id} category={product.category} />
+      <SimilarProducts id={product._id} category={product.category._id} />
     </Shell >
   );
 };

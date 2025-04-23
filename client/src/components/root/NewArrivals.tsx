@@ -28,7 +28,7 @@ const NewArrivals: FC = () => {
                     />
                   </div>
                   <div className="transform origin-center group-hover:scale-125 group-hover:translate-x-14 transition-transform duration-700 ease-out">
-                    <h3 className="mt-6 text-sm text-gray-500 dark:text-white/80 capitalize">{product.category}</h3>
+                    <h3 className="mt-6 text-sm text-gray-500 dark:text-white/80 capitalize">{product.category.name}</h3>
                     <p className="text-base font-semibold text-gray-900 dark:text-white/90">{product.name}</p>
                   </div>
                 </div>

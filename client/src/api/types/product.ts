@@ -15,7 +15,7 @@ export interface ProductFilterBody {
         max: number;
     };
     brands?: string[];
-    categories?: ProductCategory[];
+    categories?: string[];
     ratings?: number;
     name?: string;
     sort?: SortCategory["value"]
@@ -50,13 +50,14 @@ export interface UpdateProductStock {
 export interface UpdateProduct {
     id: string;
     name?: string;
+    model?: string;
     image?: ProductImage[];
     brand?: string;
-    category?: ProductCategory;
+    category?: ProductCategory["_id"];
     description?: string;
     price?: number;
-    countInStock?: number;
-    specifications: Array<{
+    stock?: number;
+    specifications?: Array<{
         key: string;
         value: string;
     }> | null;

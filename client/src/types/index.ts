@@ -59,20 +59,21 @@ export type ProductImage = {
     url: string;
 };
 
-export type ProductCategory =
-    | "smartphones"
-    | "cameras"
-    | "computers"
-    | "televisions"
-    | "consoles"
-    | "audio"
-    | "mouse"
-    | "keyboard";
+export type ProductCategory = {
+    _id: string;
+    name: string;
+    slug: string;
+    icon: string;
+    image: string | null;
+    parent?: ProductCategory["_id"] | ProductCategory | null;
+    createdAt: string;
+}
 
 export type Product = {
     _id?: string;
     user: IUser;
     name: string;
+    model: string;
     slug: string;
     description: string;
     price: number;
@@ -81,7 +82,7 @@ export type Product = {
     discountPercentage?: number;
     category: ProductCategory;
     brand: string;
-    countInStock: number;
+    stock: number;
     image: ProductImage[];
     specifications: Array<{
         key: string;
@@ -96,6 +97,7 @@ export type Product = {
 export type FilterdProduct = {
     _id?: string;
     name: string;
+    model: string;
     price: number;
     isDiscounted: boolean;
     category: ProductCategory;
@@ -115,12 +117,13 @@ export type FilterdProduct = {
 export type INewProduct = {
     userId: string;
     name: string;
+    model: string;
     image: ProductImage[];
     brand: string;
-    category: ProductCategory;
+    category: ProductCategory["_id"];
     description: string;
     price: number;
-    countInStock: number;
+    stock: number;
     isDiscounted: boolean;
     discountedPrice?: number;
 };
@@ -129,12 +132,13 @@ export type IUpdateProduct = {
     _id?: string;
     userId: string;
     name: string;
+    model: string;
     image: ProductImage[];
     brand: string;
     category: ProductCategory;
     description: string;
     price: number;
-    countInStock: number;
+    stock: number;
 };
 
 //-------------NAV TYPES----------------------------------

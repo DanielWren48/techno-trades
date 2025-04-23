@@ -1,10 +1,10 @@
 import { isEmpty } from "lodash";
-import { Product } from "@/types";
+import { Product, ProductCategory } from "@/types";
 import { Link } from "react-router-dom";
 import "@smastrom/react-rating/style.css";
 import { useGetSimimarProducts } from "@/api/queries/product";
 
-export default function SimilarProducts({ id, category }: { id: Product["_id"], category: Product["category"] }) {
+export default function SimilarProducts({ id, category }: { id: Product["_id"], category: ProductCategory["_id"] }) {
     const { data, isLoading } = useGetSimimarProducts(
         {
             params: { limit: 4 },
@@ -42,7 +42,7 @@ export default function SimilarProducts({ id, category }: { id: Product["_id"], 
                                             />
                                         </div>
                                         <div className="transform origin-center text-dark-4 dark:text-white/80 group-hover:scale-125 group-hover:translate-x-14 transition-transform duration-700 ease-out">
-                                            <h3 className="mt-6 text-sm  capitalize">{product.category}</h3>
+                                            <h3 className="mt-6 text-sm capitalize">{product.category.name}</h3>
                                             <p className="text-base font-semibold">{product.name}</p>
                                         </div>
                                     </div>

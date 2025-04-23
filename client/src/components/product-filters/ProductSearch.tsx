@@ -34,7 +34,7 @@ const ProductSearch: React.FC = () => {
                                         <h1 className='text-base font-medium'>{result.name}</h1>
                                     </div>
                                     <div>
-                                        <h1 className=''>Available in: <span className='text-base font-medium capitalize'>{result.category}</span></h1>
+                                        <h1 className=''>Available in: <span className='text-base font-medium capitalize'>{result.category.name}</span></h1>
                                     </div>
                                 </div>
                             </Link>
