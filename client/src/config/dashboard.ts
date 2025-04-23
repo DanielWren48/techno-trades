@@ -73,6 +73,10 @@ export const dashboardConfig: DashboardConfig = {
           href: "/dashboard/data-tables?tab=products",
         },
         {
+          title: "Categories",
+          href: "/dashboard/data-tables?tab=categories",
+        },
+        {
           title: "Orders",
           href: "/dashboard/data-tables?tab=orders",
         },

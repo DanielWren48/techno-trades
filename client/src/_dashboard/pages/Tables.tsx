@@ -6,6 +6,7 @@ import OrdersTable from '@/components/tables/orders-table/data'
 import ProductsTable from '@/components/tables/products-table/data'
 import ReviewTable from '@/components/tables/reviews-table/data'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CategoriesTable from "@/components/tables/categories-table/data";
 
 export default function Dashboard() {
   const location = useLocation();
@@ -15,7 +16,7 @@ export default function Dashboard() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
-    if (tabParam && ['products', 'orders', 'users', 'reviews'].includes(tabParam)) {
+    if (tabParam && ['products', 'categories', 'orders', 'users', 'reviews'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [location.search]);
@@ -30,12 +31,16 @@ export default function Dashboard() {
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="w-full">
           <TabsTrigger className="w-full" value="products">Products</TabsTrigger>
+          <TabsTrigger className="w-full" value="categories">Categories</TabsTrigger>
           <TabsTrigger className="w-full" value="orders">Orders</TabsTrigger>
           <TabsTrigger className="w-full" value="users">Users</TabsTrigger>
           <TabsTrigger className="w-full" value="reviews">Reviews</TabsTrigger>
         </TabsList>
         <TabsContent value="products">
           <ProductsTable />
+        </TabsContent>
+        <TabsContent value="categories">
+          <CategoriesTable />
         </TabsContent>
         <TabsContent value="orders">
           <OrdersTable />
