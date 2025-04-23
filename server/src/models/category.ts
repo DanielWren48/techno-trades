@@ -7,6 +7,7 @@ interface ICategory extends Document {
     icon: string;
     image: string | null;
     parent?: Types.ObjectId | ICategory | null;
+    productCount?: number;
 }
 
 const CategorySchema = new Schema<ICategory>({
@@ -19,7 +20,26 @@ const CategorySchema = new Schema<ICategory>({
         ref: 'Category',
         default: null
     },
-}, { timestamps: true });
+}, {
+    timestamps: true,
+    toJSON: {
+        virtuals: true,
+        transform: function (doc, ret) {
+            // Remove id and __v
+            if (ret.id) delete ret.id;
+            if (ret.__v !== undefined) delete ret.__v;
+            return ret;
+        }
+    },
+    toObject: {
+        virtuals: true,
+        transform: function (doc, ret) {
+            if (ret.id) delete ret.id;
+            if (ret.__v !== undefined) delete ret.__v;
+            return ret;
+        }
+    }
+});
 
 CategorySchema.pre('save', async function (next) {
     try {
@@ -31,6 +51,13 @@ CategorySchema.pre('save', async function (next) {
     } catch (error: any) {
         next(error);
     }
+});
+
+CategorySchema.virtual('productCount', {
+    ref: 'Product',
+    localField: '_id',
+    foreignField: 'category',
+    count: true
 });
 
 CategorySchema.methods.getChildren = async function (): Promise<ICategory[]> {

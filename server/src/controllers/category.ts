@@ -10,7 +10,7 @@ const categoryRouter = Router();
 
 categoryRouter.get('', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const categories = await Category.find({}).populate('parent');
+        const categories = await Category.find({}).populate('parent').populate({ path: 'productCount' });;
         if (!categories) {
             throw new NotFoundError("Categories not found")
         }
