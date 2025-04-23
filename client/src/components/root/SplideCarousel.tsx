@@ -73,7 +73,7 @@ const SplideCarousel = () => {
                                     <img className="w-44 h-44 object-scale-down" src={product.image[0].url} alt="post" />
                                 </div>
                                 <div className="flex flex-col px-5 pb-5 gap-4">
-                                    <h5 className="text-2xl font-medium tracking-tight text-dark-3 dark:text-white/80">{product.name}</h5>
+                                    <h5 className="text-2xl font-medium tracking-tight line-clamp-1 text-dark-3 dark:text-white/80">{product.name}</h5>
                                     <div className="mb-5 flex items-center justify-between text-dark-3 dark:text-white/80">
                                         <span className="text-2xl font-semibold">
                                             <span>{product && formatPrice(product.discountedPrice ?? product.price, { currency: "GBP" })}</span>

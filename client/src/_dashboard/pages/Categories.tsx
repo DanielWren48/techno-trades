@@ -37,6 +37,9 @@ const Categories = () => {
                                     Name
                                 </TableHead>
                                 <TableHead className="text-center">
+                                    Product Count
+                                </TableHead>
+                                <TableHead className="text-center">
                                     Icon
                                 </TableHead>
                             </TableRow>
@@ -51,8 +54,11 @@ const Categories = () => {
                                             alt={category.slug}
                                         />
                                     </TableCell>
-                                    <TableCell className="text-lg text-center">
+                                    <TableCell className="text-lg text-center capitalize">
                                         {category.name}
+                                    </TableCell>
+                                    <TableCell className="text-lg text-center">
+                                        {category.productCount ?? 0}
                                     </TableCell>
                                     <TableCell className="text-3xl text-center">
                                         {category.icon}

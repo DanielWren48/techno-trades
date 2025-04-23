@@ -22,7 +22,7 @@ export default function Explore() {
         hideOutOfStock: hideOutOfStock,
         prices: { min: debouncedMin, max: debouncedMax },
         brands: selectedBrands,
-        categories: [...selectedCategories as ProductCategory[]],
+        categories: [...selectedCategories],
         ratings: Math.max(...selectedRatings),
         sort: selectedSort
       }

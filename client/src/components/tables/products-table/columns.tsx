@@ -38,20 +38,9 @@ export const columns: ColumnDef<ProductType>[] = [
     accessorKey: "category",
     header: "Category",
     cell: ({ row }) => {
-      const category = categories.find(
-        (category) => category.value === row.getValue("category")
-      )
-
-      if (!category) {
-        return null
-      }
-
       return (
-        <div className="flex w-[130px] items-center pl-1">
-          {category.icon && (
-            <category.icon className="mr-2 h-6 w-6 text-muted-foreground" />
-          )}
-          <span>{category.label}</span>
+        <div className="flex w-[130px] items-center pl-1 text-lg capitalize">
+          <span>{row.original.category.name}</span>
         </div>
       )
     },
@@ -71,6 +60,10 @@ export const columns: ColumnDef<ProductType>[] = [
   {
     accessorKey: "brand",
     header: "Brand",
+  },
+  {
+    accessorKey: "model",
+    header: "Model",
   },
   {
     accessorKey: "discountPercentage",
@@ -136,7 +129,7 @@ export const columns: ColumnDef<ProductType>[] = [
         let raw = event.target.price.value.trim().replace(/[£,]/g, "");
         let newPrice = Number(raw);
 
-        toast.promise(mutateAsync({ id: row.original._id!, ...row.original, price: newPrice }), {
+        toast.promise(mutateAsync({ id: row.original._id!, price: newPrice }), {
           loading: `Updating price to ${newPrice}`,
           success: "Updated Succesfully",
           error: "Error",
@@ -161,7 +154,7 @@ export const columns: ColumnDef<ProductType>[] = [
     },
   },
   {
-    accessorKey: "countInStock",
+    accessorKey: "stock",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Stock" />
     ),
@@ -189,7 +182,7 @@ export const columns: ColumnDef<ProductType>[] = [
           </Label>
           <Input
             className="h-8 w-20 border-transparent bg-transparent text-center shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background"
-            defaultValue={row.original.countInStock}
+            defaultValue={row.original.stock}
             id={`${row.original._id}-stock`}
             ref={inputRef}
             type="number"

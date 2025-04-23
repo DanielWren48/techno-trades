@@ -35,7 +35,7 @@ export function TableCellViewer({ review }: TableCellViewerProps) {
                         <div className="flex flex-row gap-3 text-center m-auto content-center items-center align-middle">
                             <Avatar className="h-10 w-10">
                                 <AvatarImage
-                                    src={review.userAvatar}
+                                    src={review.userAvatar ?? undefined}
                                     alt="AR"
                                     className="object-cover"
                                 />

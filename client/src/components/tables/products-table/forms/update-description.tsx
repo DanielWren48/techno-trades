@@ -51,11 +51,7 @@ export function ProductDescriptionUpdateForm({ product }: { product: ProductType
 
     const handleSubmit = async (value: UpdateProductSchemaType) => {
         console.log(value)
-        const { message, status } = await updateProduct({
-            id: product._id!,
-            ...product,
-            description: value.description
-        })
+        const { message, status } = await updateProduct({ id: product._id!, description: value.description })
         if (status === "success") {
             toast.success(message)
         }

@@ -154,7 +154,7 @@ export default function ProductImageUploadForm({ product, setOpen }: MediaProps)
     }
 
     // Add the logic to update the product in the database
-    const { status, message } = await updateProduct({ id: updatedProduct._id!, ...updatedProduct });
+    const { status, message } = await updateProduct({ id: product._id!, image: updatedProduct.image });
     if (status === "success") {
       toast.success(message)
       setFiles([])

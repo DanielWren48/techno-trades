@@ -5,6 +5,7 @@ export type ICategory = {
     icon: string;
     image: string;
     parent?: ICategory["_id"] | ICategory | null;
+    productCount?: number
     createdAt: string;
 }
 
