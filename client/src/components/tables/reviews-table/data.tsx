@@ -1,14 +1,12 @@
 import { useGetProducts } from "@/api/queries/product";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
+import { Fragment } from "react";
+import { Header } from "@/components/dashboard/header";
 
 export default function ProductsTable() {
   const { data, isLoading } = useGetProducts();
   const products = data?.data?.items
-
-  if (isLoading && !products) {
-    return <div>Loading...</div>
-  }
 
   const allReviews = products!
     .filter(product =>
@@ -26,6 +24,14 @@ export default function ProductsTable() {
     );
 
   return (
-    <DataTable columns={columns} data={allReviews} loading={isLoading} />
+    <Fragment>
+      <Header
+        title="Reviews"
+        description="Manage all existing product reviews."
+        size="default"
+        className="flex flex-row justify-between items-center bg-accent rounded-lg px-8 py-4 mt-6"
+      />
+      <DataTable columns={columns} data={allReviews} loading={isLoading} />
+    </Fragment>
   );
 }

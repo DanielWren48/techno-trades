@@ -2,7 +2,6 @@ import { useRef } from "react"
 import { toast } from "sonner"
 import { X } from "lucide-react"
 import { ProductImage } from "@/types"
-import { categories } from "./filters"
 import { Icons } from "@/components/shared"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -39,7 +38,7 @@ export const columns: ColumnDef<ProductType>[] = [
     header: "Category",
     cell: ({ row }) => {
       return (
-        <div className="flex w-[130px] items-center pl-1 text-lg capitalize">
+        <div className="flex w-[130px] items-center pl-1 text-lg">
           <span>{row.original.category.name}</span>
         </div>
       )

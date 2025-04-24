@@ -24,23 +24,51 @@ import {
 } from "@/components/ui/table"
 import { DataTableToolbar } from "./data-table-toolbar"
 import { DataTablePagination } from "../shared/pagination"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  loading: boolean
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, loading }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+
+  const tableData = React.useMemo(() => (loading ? Array(30).fill({}) : data), [loading, data]);
+  const tableColumns = React.useMemo<ColumnDef<TData, TValue>[]>(
+    () =>
+      loading
+        ? columns.map((column) => {
+          if ('columns' in column) {
+            return {
+              ...column,
+              columns: column.columns?.map((nestedColumn) => ({
+                ...nestedColumn,
+                cell: () => (
+                  <Skeleton className="h-[20px] w-[80%] rounded-lg" />
+                ),
+              })),
+            }
+          }
+
+          return {
+            ...column,
+            cell: () => (
+              <Skeleton className="h-[20px] w-[80%] rounded-lg" />
+            ),
+          }
+        })
+        : columns,
+    [loading]
+  )
+
   const table = useReactTable({
-    data,
-    columns,
+    data: tableData,
+    columns: tableColumns,
     state: {
       sorting,
       columnVisibility,
@@ -65,7 +93,7 @@ export function DataTable<TData, TValue>({
       <DataTableToolbar table={table} />
       <div className="rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-sidebar">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -74,16 +102,16 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   )
                 })}
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="text-muted-foreground">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
