@@ -302,7 +302,7 @@ export const categoryApiEndpoints = {
     getCategoryBySlug: (slug: string) => categoryApi.get<ICategory>(`/slug/${slug}`),
     createCategory: (data: CreateCategory) => categoryApi.post<ICategory>('', data),
     updateCategory: (data: UpdateCategory) => categoryApi.patch<ICategory>(`/${data.id}`, data),
-    deleteCategoryById: (id: string) => shopApi.delete<null>(`/${id}`)
+    deleteCategoryById: (id: string) => categoryApi.delete<null>(`/${id}`)
 };
 
 export const usersAiEndpoints = {

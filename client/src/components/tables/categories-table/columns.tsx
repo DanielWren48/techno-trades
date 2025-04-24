@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useUpdateProduct, useUpdateProductStock } from "@/api/queries/product"
 import { formatDate } from "@/lib/utils"
 import { TableCellViewer } from "./components/TableCellViewer"
+import { DataTableRowActions } from "./data-table-row-actions"
 
 export const columns: ColumnDef<CategoryType>[] = [
   {
@@ -98,5 +99,9 @@ export const columns: ColumnDef<CategoryType>[] = [
         </Avatar>
       )
     },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <DataTableRowActions row={row} />
   },
 ]

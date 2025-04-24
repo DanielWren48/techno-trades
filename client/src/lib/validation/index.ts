@@ -54,7 +54,7 @@ export const categorySchema = z.object({
     slug: z.string(),
     icon: z.string(),
     image: z.string(),
-    productCount: z.string().optional(),
+    productCount: z.number().optional(),
     createdAt: z.string(),
     updatedAt: z.string(),
 });
