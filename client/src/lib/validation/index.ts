@@ -48,12 +48,13 @@ const specificationSchema = z.object({
     value: z.string().min(1, { message: 'Value is required' }),
 });
 
-const categorySchema = z.object({
+export const categorySchema = z.object({
     _id: z.string(),
     name: z.string(),
     slug: z.string(),
     icon: z.string(),
-    image: z.string().nullable(),
+    image: z.string(),
+    productCount: z.string().optional(),
     createdAt: z.string(),
     updatedAt: z.string(),
 });
@@ -74,6 +75,7 @@ export const productTableSchema = z.object({
     specifications: z.array(specificationSchema).nullable(),
 })
 
+export type CategoryType = z.infer<typeof categorySchema>
 export type ProductType = z.infer<typeof productTableSchema>
 
 // ============================================================

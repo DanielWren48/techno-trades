@@ -46,7 +46,7 @@ export function formatDate(input: string | number | Date, formatType: 'long' | '
       throw new Error('Invalid format type');
   }
 
-  return date.toLocaleDateString("en-US", options);
+  return date.toLocaleDateString("en-GB", options);
 }
 
 export function formatPrice(

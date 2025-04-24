@@ -12,11 +12,17 @@ import { DataTableColumnHeader } from "../shared/data-table-column-header"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useUpdateProduct, useUpdateProductStock } from "@/api/queries/product"
 import { formatDate } from "@/lib/utils"
+import { TableCellViewer } from "./components/TableCellViewer"
 
 export const columns: ColumnDef<CategoryType>[] = [
   {
     accessorKey: "name",
-    header: "Name",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Name" />
+    ),
+    cell: ({ row }) => {
+      return <TableCellViewer category={row.original} />
+    },
   },
   {
     accessorKey: "slug",
@@ -24,9 +30,11 @@ export const columns: ColumnDef<CategoryType>[] = [
   },
   {
     accessorKey: "productCount",
-    header: "Products",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Products" />
+    ),
     cell: ({ row }) => {
-      const productCount = row.getValue("productCount") as string;
+      const productCount = row.getValue("productCount") as number;
       return (
         <div className="flex space-x-2 ml-2 cursor-pointer text-center">
           <span className="inline-flex items-center rounded-md bg-yellow-50 py-2 px-4 text-xl font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">{productCount}</span>
@@ -54,7 +62,7 @@ export const columns: ColumnDef<CategoryType>[] = [
       <DataTableColumnHeader column={column} title="Date updated" />
     ),
     cell: ({ row }) => {
-      const createdAt = row.getValue("createdAt") as string
+      const createdAt = row.getValue("updatedAt") as string
       return (
         <div className="flex space-x-2 ml-2">
           <span>{formatDate(createdAt, "long")}</span>

@@ -1,48 +1,51 @@
 import { z } from "zod";
+import { last } from "lodash";
 import { toast } from "sonner";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { useUploadThing } from "@/uploadthing";
+import { useCallback, useState } from "react";
 import { convertFileToUrl } from "@/lib/utils";
+import { useUploadThing } from "@/uploadthing";
+import { CategoryType } from "@/lib/validation";
+import { mediaApiEndpoints } from "@/api/client";
 import { Button } from "@/components/ui/button";
-import { ICategory } from "@/api/types/category";
 import { FileWithPath } from "@uploadthing/react";
 import { Progress } from "@/components/ui/progress";
+import { CircleOff, Loader2, PlusSquare, X } from "lucide-react";
 import { useDropzone } from "@uploadthing/react/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ReactNode, useCallback, useState } from "react";
-import { useCreateNewCategory } from "@/api/queries/category";
-import { CircleOff, Loader2, PlusSquare, X } from "lucide-react";
+import { useUpdateCategory } from "@/api/queries/category";
 import { generateClientDropzoneAccept } from "uploadthing/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-interface Props {
-    trigger?: ReactNode;
-    successCallback: (category: ICategory) => void;
-}
+type TableCellViewerProps = {
+    category: CategoryType;
+    trigger?: React.ReactNode;
+};
 
-export const newCategorySchema = z.object({
+export const updateCategorySchema = z.object({
     name: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     icon: z.string({ required_error: "This field is required" }).max(20),
     image: z.string({ required_error: "This field is required" })
 });
 
-export type NewCategorySchemaType = z.infer<typeof newCategorySchema>;
+export type UpdateCategorySchemaType = z.infer<typeof updateCategorySchema>;
 
-export default function CreateCategoryDialog({ successCallback, trigger }: Props) {
+export function TableCellViewer({ category, trigger }: TableCellViewerProps) {
     const [open, setOpen] = useState(false);
     const [file, setFile] = useState<FileWithPath | null>();
-    const [fileUrl, setFileUrl] = useState<string | undefined>(undefined);
+    const [fileUrl, setFileUrl] = useState<string | undefined>(category.image);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
-    const { mutateAsync: createCategory, isPending } = useCreateNewCategory()
-    const form = useForm<NewCategorySchemaType>({ resolver: zodResolver(newCategorySchema) });
+    const { mutateAsync: updateCategory, isPending } = useUpdateCategory()
+    const form = useForm<UpdateCategorySchemaType>({ resolver: zodResolver(updateCategorySchema), defaultValues: { ...category } });
 
     const { startUpload, isUploading, permittedFileInfo } = useUploadThing("videoAndImage", {
-        onClientUploadComplete: (res) => {
+        onClientUploadComplete: async (res) => {
             if (res && res.length > 0) {
                 form.setValue("image", res[0].url);
                 toast.success("Image uploaded successfully!", { id: "image-upload" });
@@ -62,7 +65,6 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
     const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
         if (acceptedFiles.length > 0) {
             setFile(acceptedFiles[0]);
-            form.setValue("image", convertFileToUrl(acceptedFiles[0]))
             setFileUrl(convertFileToUrl(acceptedFiles[0]));
         }
     }, []);
@@ -79,29 +81,34 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
         form.setValue("image", "");
     };
 
-    const onSubmit = async (values: NewCategorySchemaType) => {
-        if (file) {
-            const renamedFile = new File([file], `${values.name}.png`, { type: file.type });
+    const onSubmit = async (values: UpdateCategorySchemaType) => {
+        const hasImageChnaged = category.image === form.getValues("image")
+        const fileKey = last(category.image.split('/'))
+        if (fileKey && !hasImageChnaged) {
+            toast.promise(() => mediaApiEndpoints.deleteFiles([fileKey]),
+                {
+                    id: "image-upload",
+                    loading: 'Removing file...',
+                    success: () => 'File deleted succesfully',
+                    error: () => 'Error deleting files.',
+                }
+            );
+        }
+        if (file && hasImageChnaged) {
+            const renamedFile = new File([file], `${category.slug}.png`, { type: file.type });
             await startUpload([renamedFile]);
         }
 
         values = { ...values, image: form.getValues("image") }
-        const { data, code, status, message } = await createCategory(values);
-        if (code === "201" || status === "success") {
+        const { code, status, message } = await updateCategory({ id: category._id, ...values })
+        if (code === "200" || status === "success") {
             toast.success(message);
-            console.log(data)
-            data && successCallback(data);
-
-            form.reset();
-            setFile(null);
-            setFileUrl(undefined);
-            setOpen(false);
         } else if (code === "400" || status === "failure") {
             toast.error(message);
         } else {
             toast.info(message);
         }
-    }
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -109,24 +116,20 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
                 {trigger ? (
                     trigger
                 ) : (
-                    <Button
-                        variant={"ghost"}
-                        className="flex border-separate items-center justify-start roudned-none border-b px-3 py-3 text-muted-foreground"
-                    >
-                        <PlusSquare className="mr-2 h-4 w-4" />
-                        Create new
+                    <Button variant="link" className="w-fit px-0 text-right text-foreground capitalize">
+                        {category.name}
                     </Button>
                 )}
             </DialogTrigger>
             <DialogContent className="max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Create category</DialogTitle>
+                    <DialogTitle>Update {category.name} category</DialogTitle>
                     <DialogDescription>
-                        Categories are used to group your transactions
+                        Update product <span className="italic font-medium">{category.name} category</span>
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" id="category-update-form">
                         <FormField
                             control={form.control}
                             name="name"
@@ -134,7 +137,7 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
                                 <FormItem>
                                     <FormLabel className="shad-form_label">Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Cameras (Plural)" {...field} />
+                                        <Input className="h-12" placeholder="Cameras (Plural)" {...field} />
                                     </FormControl>
                                     <FormMessage className="shad-form_message" />
                                     <FormDescription>
@@ -250,10 +253,11 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
                                 </FormItem>
                             )}
                         />
+
                     </form>
                 </Form>
 
-                <DialogFooter className="flex sm:flex-col gap-5">
+                <DialogFooter className="mt-auto flex gap-2 sm:flex-col sm:space-x-0">
                     {isUploading && <Progress value={uploadProgress} className="my-2" />}
                     <div className="w-full flex flex-row justify-between gap-5">
                         <DialogClose asChild>
@@ -270,20 +274,23 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
                                 Cancel
                             </Button>
                         </DialogClose>
-                        <Button
-                            className="w-full"
-                            onClick={form.handleSubmit(onSubmit)}
-                            disabled={isUploading || form.formState.isSubmitting || isPending}
-                        >
-                            {(isUploading || form.formState.isSubmitting || isPending) ? (
-                                <>
-                                    <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                                    {isUploading ? "Uploading..." : "Creating..."}
-                                </>
-                            ) : (
-                                "Create Category"
-                            )}
-                        </Button>
+                        <DialogClose asChild>
+                            <Button
+                                form="category-update-form"
+                                type="submit"
+                                className="w-full"
+                                disabled={isUploading || form.formState.isSubmitting || isPending}
+                            >
+                                {(isUploading || form.formState.isSubmitting || isPending) ? (
+                                    <>
+                                        <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                                        {isUploading ? "Uploading..." : "Creating..."}
+                                    </>
+                                ) : (
+                                    "Update Category"
+                                )}
+                            </Button>
+                        </DialogClose>
                     </div>
                 </DialogFooter>
             </DialogContent>

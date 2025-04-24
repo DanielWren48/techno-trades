@@ -7,6 +7,7 @@ export type ICategory = {
     parent?: ICategory["_id"] | ICategory | null;
     productCount?: number
     createdAt: string;
+    updatedAt: string;
 }
 
 export type CreateCategory = {
