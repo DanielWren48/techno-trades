@@ -1,22 +1,25 @@
 import { z } from "zod";
 import { toast } from "sonner";
 import data from "@emoji-mart/data";
+import { ICategory } from "@/types";
 import Picker from "@emoji-mart/react";
 import { useForm } from "react-hook-form";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useUploadThing } from "@/uploadthing";
 import { convertFileToUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ICategory } from "@/api/types/category";
 import { FileWithPath } from "@uploadthing/react";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useDropzone } from "@uploadthing/react/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ReactNode, useCallback, useState } from "react";
-import { useCreateNewCategory } from "@/api/queries/category";
 import { CircleOff, Loader2, PlusSquare, X } from "lucide-react";
 import { generateClientDropzoneAccept } from "uploadthing/client";
+import { ReactNode, useCallback, useState } from "react";
+import { useCreateNewCategory, useGetCategories } from "@/api/queries/category";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -28,7 +31,8 @@ interface Props {
 export const newCategorySchema = z.object({
     name: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     icon: z.string({ required_error: "This field is required" }).max(20),
-    image: z.string({ required_error: "This field is required" })
+    image: z.string({ required_error: "This field is required" }),
+    parent: z.string().optional(),
 });
 
 export type NewCategorySchemaType = z.infer<typeof newCategorySchema>;
@@ -38,8 +42,11 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
     const [file, setFile] = useState<FileWithPath | null>();
     const [fileUrl, setFileUrl] = useState<string | undefined>(undefined);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
-    const { mutateAsync: createCategory, isPending } = useCreateNewCategory()
+    const [isSubcategory, setIsSubcategory] = useState(false);
+    
     const form = useForm<NewCategorySchemaType>({ resolver: zodResolver(newCategorySchema) });
+    const { mutateAsync: createCategory, isPending } = useCreateNewCategory();
+    const { data: categoriesData } = useGetCategories();
 
     const { startUpload, isUploading, permittedFileInfo } = useUploadThing("videoAndImage", {
         onClientUploadComplete: (res) => {
@@ -65,7 +72,7 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
             form.setValue("image", convertFileToUrl(acceptedFiles[0]))
             setFileUrl(convertFileToUrl(acceptedFiles[0]));
         }
-    }, []);
+    }, [form]);
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
@@ -85,7 +92,12 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
             await startUpload([renamedFile]);
         }
 
-        values = { ...values, image: form.getValues("image") }
+        values = {
+            ...values,
+            image: form.getValues("image"),
+            parent: isSubcategory ? values.parent : undefined
+        };
+
         const { data, code, status, message } = await createCategory(values);
         if (code === "201" || status === "success") {
             toast.success(message);
@@ -95,6 +107,7 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
             form.reset();
             setFile(null);
             setFileUrl(undefined);
+            setIsSubcategory(false);
             setOpen(false);
         } else if (code === "400" || status === "failure") {
             toast.error(message);
@@ -118,7 +131,7 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>Create category</DialogTitle>
                     <DialogDescription>
@@ -143,6 +156,58 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
                                 </FormItem>
                             )}
                         />
+
+                        <div className="flex items-center space-x-2">
+                            <Checkbox
+                                id="subcategory"
+                                checked={isSubcategory}
+                                onCheckedChange={(checked) => {
+                                    setIsSubcategory(!!checked);
+                                    if (!checked) {
+                                        form.setValue("parent", undefined);
+                                    }
+                                }}
+                            />
+                            <Label
+                                htmlFor="subcategory"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                                Create as subcategory
+                            </Label>
+                        </div>
+
+                        {isSubcategory && (
+                            <FormField
+                                control={form.control}
+                                name="parent"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="shad-form_label">Parent Category</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value} >
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a parent category" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {categoriesData?.data?.map((category: ICategory) => (
+                                                    <SelectItem key={category._id} value={category._id} className="cursor-pointer">
+                                                        <div className="flex items-center gap-2">
+                                                            <span role="img" className="text-lg">{category.icon}</span>
+                                                            <span className="capitalize">{category.name}</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage className="shad-form_message" />
+                                        <FormDescription>
+                                            Select the parent category this will be nested under
+                                        </FormDescription>
+                                    </FormItem>
+                                )}
+                            />
+                        )}
 
                         <FormField
                             control={form.control}
@@ -265,6 +330,7 @@ export default function CreateCategoryDialog({ successCallback, trigger }: Props
                                     form.reset();
                                     setFile(null);
                                     setFileUrl(undefined);
+                                    setIsSubcategory(false);
                                 }}
                             >
                                 Cancel
