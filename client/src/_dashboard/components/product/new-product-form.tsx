@@ -1,15 +1,15 @@
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useProductStore from "@/hooks/useProductStore";
-import { categories } from "@/components/tables/products-table/filters";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { newProductSchema, NewProductSchemaType } from "@/_dashboard/schemas/product";
 import { Plus, Trash2 } from "lucide-react";
 import CategoryPicker from "../category/category-picker";
+import SubCategoryPicker from "../category/sub-category-picker";
+import SkeletonWrapper from "@/components/root/SkeletonWrapper";
 
 interface NewProductProps {
     handleTabChange: (value: string) => void
@@ -25,6 +25,7 @@ export default function NewProductCreateDetails({ handleTabChange }: NewProductP
             model: "",
             brand: "",
             category: "",
+            sub_category: "",
             description: "",
             price: 0,
             stock: 0,
@@ -48,10 +49,6 @@ export default function NewProductCreateDetails({ handleTabChange }: NewProductP
             });
         }
     }, [form, productData]);
-
-    const handleCategoryChange = useCallback((value: string) => {
-        form.setValue("category", value);
-    }, [form]);
 
     const handleSubmit = async (data: NewProductSchemaType) => {
         updateProductData(data);
@@ -79,21 +76,20 @@ export default function NewProductCreateDetails({ handleTabChange }: NewProductP
                     onSubmit={form.handleSubmit(handleSubmit)}
                     className="flex flex-col gap-5 w-full font-jost"
                 >
+                    <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="shad-form_label">Product Name</FormLabel>
+                                <FormControl>
+                                    <Input type="text" className="h-12" {...field} />
+                                </FormControl>
+                                <FormMessage className="shad-form_message" />
+                            </FormItem>
+                        )}
+                    />
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-8">
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="shad-form_label">Product Name</FormLabel>
-                                    <FormControl>
-                                        <Input type="text" className="h-12" {...field} />
-                                    </FormControl>
-                                    <FormMessage className="shad-form_message" />
-                                </FormItem>
-                            )}
-                        />
-
                         <FormField
                             control={form.control}
                             name="model"
@@ -107,9 +103,7 @@ export default function NewProductCreateDetails({ handleTabChange }: NewProductP
                                 </FormItem>
                             )}
                         />
-                    </div>
 
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-8">
                         <FormField
                             control={form.control}
                             name="brand"
@@ -125,6 +119,9 @@ export default function NewProductCreateDetails({ handleTabChange }: NewProductP
                                 </FormItem>
                             )}
                         />
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-8">
                         <FormField
                             control={form.control}
                             name="category"
@@ -132,7 +129,22 @@ export default function NewProductCreateDetails({ handleTabChange }: NewProductP
                                 <FormItem className="flex flex-col mt-1.5">
                                     <FormLabel className="shad-form_label">Category</FormLabel>
                                     <FormControl>
-                                        <CategoryPicker onChange={handleCategoryChange} />
+                                        <CategoryPicker defValue={field.value} onChange={field.onChange} />
+                                    </FormControl>
+                                    <FormMessage className="shad-form_message" />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="sub_category"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col mt-1.5">
+                                    <FormLabel className="shad-form_label">Subcategory</FormLabel>
+                                    <FormControl>
+                                        <SkeletonWrapper isLoading={!form.watch("category")}>
+                                            <SubCategoryPicker categoryId={form.watch("category")} onChange={field.onChange} />
+                                        </SkeletonWrapper>
                                     </FormControl>
                                     <FormMessage className="shad-form_message" />
                                 </FormItem>

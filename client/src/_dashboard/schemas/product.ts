@@ -12,6 +12,7 @@ export const newProductSchema = z.object({
     brand: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     model: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     category: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
+    sub_category: z.string().max(1000, { message: "Maximum 1000 characters." }).optional(),
     description: z.string().max(5000, { message: "Maximum 5000 characters for the description" }),
     price: z.coerce.number().min(0, { message: "Price must be a non-negative number" }),
     stock: z.coerce.number().min(0, { message: "Stock must be a non-negative number" }),

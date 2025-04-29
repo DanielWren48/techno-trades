@@ -3,58 +3,61 @@ import { Button } from "@/components/ui/button";
 import { Check, ChevronsUpDown } from "lucide-react";
 import React, { useCallback, useEffect } from "react";
 import CreateCategoryDialog from "./create-category-form";
-import { useGetCategories } from "@/api/queries/category";
+import { useGetCategories, useGetCategoryById } from "@/api/queries/category";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { ICategory } from "@/types";
+import { Icons } from "@/components/shared";
+import { isEmpty } from "lodash";
+import SkeletonWrapper from "@/components/root/SkeletonWrapper";
+import CreateSubCategoryDialog from "./create-sub-category-form";
 
 interface Props {
+    categoryId: ICategory["_id"]
     onChange: (value: string) => void;
-    defValue?: string;
 }
 
-export default function CategoryPicker({ onChange, defValue = "" }: Props) {
+export default function SubCategoryPicker({ categoryId, onChange }: Props) {
     const [open, setOpen] = React.useState(false);
-    const [value, setValue] = React.useState(defValue);
+    const [value, setValue] = React.useState<string | undefined>();
+
+    const { data, isLoading, refetch } = useGetCategoryById(categoryId)
+    const categories = data?.data?.subcategories || undefined
 
     useEffect(() => {
         if (!value) return;
-        // when the value changes, call onChange callback
         onChange(value);
     }, [onChange, value]);
 
-    const { data } = useGetCategories()
-
-    const selectedCategory = data?.data?.find(
+    const selectedSubCategory = categories?.find(
         (category: ICategory) => category._id === value
     );
 
-    const successCallback = useCallback((category: ICategory) => {
-        setValue(category._id!);
+    const successCallback = useCallback(async (category: ICategory) => {
+        await refetch()
+        setValue(category._id);
         setOpen((prev) => !prev);
     }, [setValue, setOpen]);
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant={"outline"}
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full h-12 justify-between"
-                >
-                    {selectedCategory ? (
-                        <CategoryRow category={selectedCategory} />
-                    ) : (
-                        "Select category"
-                    )}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-            </PopoverTrigger>
+            <SkeletonWrapper isLoading={isLoading}>
+                <PopoverTrigger disabled={!categoryId} asChild>
+                    <Button
+                        variant={"outline"}
+                        role="combobox"
+                        aria-expanded={open}
+                        className="w-full h-12 justify-between"
+                    >
+                        {selectedSubCategory ? <CategoryRow category={selectedSubCategory} /> : !categories ? "No subcategories found" : "Select subcategory"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                </PopoverTrigger>
+            </SkeletonWrapper>
             <PopoverContent className="w-full p-0" style={{ pointerEvents: "auto" }}>
                 <Command onSubmit={(e) => { e.preventDefault() }}  >
                     <CommandInput placeholder="Search category..." />
-                    <CreateCategoryDialog successCallback={successCallback} />
+                    <CreateSubCategoryDialog parentCategoryId={categoryId} successCallback={successCallback} />
                     <CommandEmpty>
                         <p>Category not found</p>
                         <p className="text-xs text-muted-foreground">
@@ -63,8 +66,8 @@ export default function CategoryPicker({ onChange, defValue = "" }: Props) {
                     </CommandEmpty>
                     <CommandGroup>
                         <CommandList>
-                            {data &&
-                                data.data?.map((category: ICategory) => (
+                            {categories &&
+                                categories.map((category: ICategory) => (
                                     <CommandItem
                                         key={category.name}
                                         onSelect={() => {
@@ -81,11 +84,25 @@ export default function CategoryPicker({ onChange, defValue = "" }: Props) {
                                         />
                                     </CommandItem>
                                 ))}
+                            {selectedSubCategory &&
+                                <CommandItem
+                                    className="bg-red-400/40"
+                                    onSelect={() => {
+                                        setValue(undefined);
+                                        setOpen((prev) => !prev);
+                                    }}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span role="img" className="w-7 text-lg text-center"><Icons.X /></span>
+                                        <span className="capitalize text-md">Deselect Item</span>
+                                    </div>
+                                </CommandItem>
+                            }
                         </CommandList>
                     </CommandGroup>
                 </Command>
             </PopoverContent>
-        </Popover>
+        </Popover >
     );
 }
 
