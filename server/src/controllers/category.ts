@@ -5,49 +5,75 @@ import { Category } from "../models/category";
 import { Product } from "../models/products";
 import { validationMiddleware } from "../middlewares/error";
 import { CategoryCreateSchema, CategoryUpdateSchema } from "../schemas/category";
+import { authMiddleware, staff } from "middlewares/auth";
+import { RATE_CFG, rateLimiter } from "middlewares/rate_limitor";
 
 const categoryRouter = Router();
 
-categoryRouter.get('', async (req: Request, res: Response, next: NextFunction) => {
+categoryRouter.get('', rateLimiter(RATE_CFG.default), async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const categories = await Category.find({}).populate('parent').populate({ path: 'productCount' });;
-        if (!categories) {
+        const parentCategories = await Category.find({ parent: null })
+            .populate({
+                path: 'subcategories',
+                populate: {
+                    path: 'subcategories'
+                }
+            }).populate({ path: 'productCount' });
+
+        if (!parentCategories.length) {
             throw new NotFoundError("Categories not found")
         }
-        return res.status(200).json(CustomResponse.success("OK", categories))
+
+        return res.status(200).json(CustomResponse.success("OK", parentCategories))
     } catch (error) {
         next(error)
     }
 });
 
-categoryRouter.get('/id/:id', async (req: Request, res: Response, next: NextFunction) => {
+categoryRouter.get('/id/:id', rateLimiter(RATE_CFG.default), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params
-        const category = await Category.findById(id).populate('parent');
+        const category = await Category.findById(id)
+            .populate({
+                path: 'subcategories',
+                populate: {
+                    path: 'subcategories'
+                }
+            });
+
         if (!category) {
             throw new NotFoundError("Category not found")
         }
+
         return res.status(200).json(CustomResponse.success("OK", category))
     } catch (error) {
         next(error)
     }
 });
 
-categoryRouter.get('/slug/:slug', async (req: Request, res: Response, next: NextFunction) => {
+categoryRouter.get('/slug/:slug', rateLimiter(RATE_CFG.default), async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const category = await Category.findOne({ slug: req.params.slug }).populate('parent');
+        const category = await Category.findOne({ slug: req.params.slug })
+            .populate({
+                path: 'subcategories',
+                populate: {
+                    path: 'subcategories'
+                }
+            });
+
         if (!category) {
             throw new NotFoundError("Category not found!")
         }
+
         return res.status(200).json(CustomResponse.success("OK", category))
     } catch (error) {
         next(error)
     }
 });
 
-categoryRouter.post('/', validationMiddleware(CategoryCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
+categoryRouter.post('/', rateLimiter(RATE_CFG.default), authMiddleware, staff, validationMiddleware(CategoryCreateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, icon, image, parent } = req.body;
+        const { name, icon, desc, image, parent, display } = req.body as CategoryCreateSchema;
 
         // Check if parent category exists if provided
         if (parent) {
@@ -63,18 +89,14 @@ categoryRouter.post('/', validationMiddleware(CategoryCreateSchema), async (req:
             throw new RequestError("Category with this name already exists", 400, ErrorCode.INVALID_VALUE);
         }
 
-        // Check if category with same icon already exists
-        const existingIcon = await Category.findOne({ icon });
-        if (existingIcon) {
-            throw new RequestError("Category with this icon already exists", 400, ErrorCode.INVALID_VALUE);
-        }
-
         // Create a new category
         const newCategory = new Category({
             name,
             icon,
-            image: image || null,
+            desc,
+            image: image,
             parent: parent || null,
+            display,
         });
 
         const savedCategory = await newCategory.save();
@@ -84,7 +106,7 @@ categoryRouter.post('/', validationMiddleware(CategoryCreateSchema), async (req:
     }
 });
 
-categoryRouter.patch('/:id', validationMiddleware(CategoryUpdateSchema), async (req: Request, res: Response, next: NextFunction) => {
+categoryRouter.patch('/:id', rateLimiter(RATE_CFG.default), authMiddleware, staff, validationMiddleware(CategoryUpdateSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
         const { name, icon, image, parent } = req.body;
@@ -130,16 +152,7 @@ categoryRouter.patch('/:id', validationMiddleware(CategoryUpdateSchema), async (
             category.name = name;
         }
 
-        if (icon) {
-            // Check if another category with this icon exists
-            const existingIcon = await Category.findOne({ icon, _id: { $ne: id } });
-            if (existingIcon) {
-                throw new RequestError("Category with this icon already exists", 400, ErrorCode.INVALID_VALUE);
-            }
-
-            category.icon = icon;
-        }
-
+        category.icon = icon;
         if (image !== undefined) category.image = image;
         if (parent !== undefined) category.parent = parent;
 
@@ -152,7 +165,7 @@ categoryRouter.patch('/:id', validationMiddleware(CategoryUpdateSchema), async (
     }
 });
 
-categoryRouter.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
+categoryRouter.delete('/:id', rateLimiter(RATE_CFG.default), authMiddleware, staff, async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
 

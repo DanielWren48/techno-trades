@@ -11,13 +11,12 @@ const f = createUploadthing();
 
 export const uploadRouter = {
   videoAndImage: f({
-    image: {
-      maxFileSize: "4MB",
-      maxFileCount: 4,
-    },
-    video: {
-      maxFileSize: "16MB",
-    },
+    image: { maxFileSize: "4MB", maxFileCount: 4, },
+  }).onUploadComplete((data) => {
+    console.log("upload completed", data);
+  }),
+  categories: f({
+    image: { maxFileSize: "4MB", maxFileCount: 6, },
   }).onUploadComplete((data) => {
     console.log("upload completed", data);
   }),
