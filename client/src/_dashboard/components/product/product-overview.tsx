@@ -11,13 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import useProductStore from '@/hooks/useProductStore';
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
+import { useGetCategoryById } from '@/api/queries/category';
 
 interface ProductOverviewProps {
   handleTabChange: (value: string) => void
@@ -28,6 +23,7 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
   const { user } = useUserContext();
   const { mutateAsync: createProduct, isPending: isLoadingCreate } = useCreateNewProduct();
   const { productData, resetStore } = useProductStore();
+  const { data } = useGetCategoryById(productData?.category || "")
 
   if (!productData) {
     return (
@@ -41,7 +37,7 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
     );
   }
 
-  const { name, model, brand, category, description, price, stock, discountedPrice, isDiscounted, image, specifications } = productData;
+  const { name, model, brand, description, price, stock, discountedPrice, isDiscounted, image, specifications } = productData;
 
   async function handleSubmit() {
     if (!productData) {
@@ -121,7 +117,7 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
               <div className="flex items-center space-x-2">
                 <span className="font-medium">Category:</span>
                 <Badge variant="secondary" className="capitalize">
-                  {category}
+                  {data?.data?.name}
                 </Badge>
               </div>
 

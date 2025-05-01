@@ -1,10 +1,10 @@
 import { isEmpty } from "lodash";
-import { Product, ProductCategory } from "@/types";
+import { Product, ICategory } from "@/types";
 import { Link } from "react-router-dom";
 import "@smastrom/react-rating/style.css";
 import { useGetSimimarProducts } from "@/api/queries/product";
 
-export default function SimilarProducts({ id, category }: { id: Product["_id"], category: ProductCategory["_id"] }) {
+export default function SimilarProducts({ id, category }: { id: Product["_id"], category: ICategory["_id"] }) {
     const { data, isLoading } = useGetSimimarProducts(
         {
             params: { limit: 4 },

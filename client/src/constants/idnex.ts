@@ -73,11 +73,6 @@ export const priceRanges: PriceRanges[] = [
     { min: 1000, max: 5000 },
 ];
 
-type Category = typeof categories[number];
-
-export const categoriesValues: Array<Category['value']> = categories.map(category => category.value);
-
-
 export const stripePaymentElementOptions: StripePaymentElementOptions = {
     fields: {
         billingDetails: {

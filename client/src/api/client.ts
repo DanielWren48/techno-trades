@@ -1,4 +1,4 @@
-import { IUser } from '@/types';
+import { ICategory, IUser } from '@/types';
 import Cookies from 'js-cookie';
 import { Order } from '@/types/order';
 import { INewProduct, INewReview, Product } from '@/types';
@@ -8,7 +8,7 @@ import { UpdateUserEmail, UpdateUserPassword, UpdateUserProfile } from './types/
 import { IOrderResponse, IOrdersResponse, UpdateShippingStatus } from './types/order';
 import { AllProductsResponse, ProductQueryParams, ProductFilterBody, UpdateProductDiscount, UpdateProduct, CreateReview, UpdateProductStock, DeleteReview } from './types/product';
 import { IUserResponse, LoginData, LoginResponse, RegisterData, RegisterResponse, VerifyAccountData, EmailData, SetNewPasswordData, SignInWithOtp, GoogleLoginData } from './types/auth';
-import { CreateCategory, ICategory, UpdateCategory } from './types/category';
+import { CreateCategory, UpdateCategory } from './types/category';
 
 // Generic response type
 export interface BaseResponse<T> {

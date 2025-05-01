@@ -13,7 +13,7 @@ import { mediaApiEndpoints } from '@/api/client';
 export default function DashboardAccount() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { activeTab, setActiveTab, productData, markdown, canProceedToStep, completedSteps } = useProductStore();
+  const { activeTab, setActiveTab, productData, markdown, canProceedToStep } = useProductStore();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -46,15 +46,7 @@ export default function DashboardAccount() {
           {
             id: "delete-file",
             loading: 'Removing file...',
-            success: ({ message, status, code }) => {
-              if (status === "success" && code === "201") {
-                return toast.info('message')
-              } else if (status === "failure" && code === "400") {
-                return toast.error('Error deleting file')
-              } else {
-                return toast.error(message)
-              }
-            },
+            success: (data) => data.message,
             error: () => 'Error deleting files.',
           }
         );
@@ -63,6 +55,21 @@ export default function DashboardAccount() {
       toast.info("Progress renewd")
       navigate("/dashboard/new-product?tab=details");
     }
+  }
+
+  const cantProceedToNextStep = (step: string) => {
+    return (
+      <div className="p-4 text-center">
+        <p>Please complete the product details first</p>
+        <Button
+          onClick={() => handleTabChange(step)}
+          variant="outline"
+          className="mt-2"
+        >
+          Go to <span className='capitalize'>{step}</span>
+        </Button>
+      </div>
+    )
   }
 
   return (
@@ -87,16 +94,7 @@ export default function DashboardAccount() {
                 {canProceedToStep('discount') ? (
                   <ProductDiscountForm handleTabChange={handleTabChange} />
                 ) : (
-                  <div className="p-4 text-center">
-                    <p>Please complete the product details first</p>
-                    <Button
-                      onClick={() => handleTabChange('details')}
-                      variant="outline"
-                      className="mt-2"
-                    >
-                      Go to Details
-                    </Button>
-                  </div>
+                  cantProceedToNextStep("details")
                 )}
               </AccordionContent>
             </AccordionItem>
@@ -117,16 +115,7 @@ export default function DashboardAccount() {
                     </TabsContent>
                   </Tabs>
                 ) : (
-                  <div className="p-4 text-center">
-                    <p>Please complete the previous steps first</p>
-                    <Button
-                      onClick={() => handleTabChange('discount')}
-                      variant="outline"
-                      className="mt-2"
-                    >
-                      Go to Discount
-                    </Button>
-                  </div>
+                  cantProceedToNextStep("discount")
                 )}
               </AccordionContent>
             </AccordionItem>
@@ -136,16 +125,7 @@ export default function DashboardAccount() {
                 {canProceedToStep('images') ? (
                   <ProductImageUpload handleTabChange={handleTabChange} />
                 ) : (
-                  <div className="p-4 text-center">
-                    <p>Please complete the product details first</p>
-                    <Button
-                      onClick={() => handleTabChange('details')}
-                      variant="outline"
-                      className="mt-2"
-                    >
-                      Go to Details
-                    </Button>
-                  </div>
+                  cantProceedToNextStep("description")
                 )}
               </AccordionContent>
             </AccordionItem>
@@ -155,16 +135,7 @@ export default function DashboardAccount() {
                 {canProceedToStep('overview') ? (
                   <ProductOverview handleTabChange={handleTabChange} />
                 ) : (
-                  <div className="p-4 text-center">
-                    <p>Please complete the product details first</p>
-                    <Button
-                      onClick={() => handleTabChange('details')}
-                      variant="outline"
-                      className="mt-2"
-                    >
-                      Go to Details
-                    </Button>
-                  </div>
+                  cantProceedToNextStep("images")
                 )}
               </AccordionContent>
             </AccordionItem>

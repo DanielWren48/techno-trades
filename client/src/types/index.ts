@@ -59,18 +59,28 @@ export type ProductImage = {
     url: string;
 };
 
-export type ProductCategory = {
+export type ICategory = {
     _id: string;
     name: string;
     slug: string;
     icon: string;
-    image: string | null;
-    parent?: ProductCategory["_id"] | ProductCategory | null;
+    desc: string;
+    image: string;
+    parent?: ICategory["_id"] | ICategory | null;
+    subcategories?: ICategory[]
+    productCount?: number
+    display: {
+        title: string,
+        subtitle: string,
+        image: string,
+        colour: string,
+    }
     createdAt: string;
+    updatedAt: string;
 }
 
 export type Product = {
-    _id?: string;
+    _id: string;
     user: IUser;
     name: string;
     model: string;
@@ -80,7 +90,7 @@ export type Product = {
     isDiscounted: boolean;
     discountedPrice?: number;
     discountPercentage?: number;
-    category: ProductCategory;
+    category: ICategory;
     brand: string;
     stock: number;
     image: ProductImage[];
@@ -100,7 +110,7 @@ export type FilterdProduct = {
     model: string;
     price: number;
     isDiscounted: boolean;
-    category: ProductCategory;
+    category: ICategory;
     brand: string;
     image: ProductImage[];
     specifications: Array<{
@@ -120,7 +130,7 @@ export type INewProduct = {
     model: string;
     image: ProductImage[];
     brand: string;
-    category: ProductCategory["_id"];
+    category: ICategory["_id"];
     description: string;
     price: number;
     stock: number;
@@ -135,7 +145,7 @@ export type IUpdateProduct = {
     model: string;
     image: ProductImage[];
     brand: string;
-    category: ProductCategory;
+    category: ICategory;
     description: string;
     price: number;
     stock: number;

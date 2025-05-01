@@ -1,4 +1,4 @@
-import { Product, ProductCategory, ProductImage } from "@/types";
+import { ICategory, Product,  ProductImage } from "@/types";
 import { SortCategory } from "@/constants/idnex";
 
 export interface ProductQueryParams {
@@ -53,7 +53,7 @@ export interface UpdateProduct {
     model?: string;
     image?: ProductImage[];
     brand?: string;
-    category?: ProductCategory["_id"];
+    category?: ICategory["_id"];
     description?: string;
     price?: number;
     stock?: number;

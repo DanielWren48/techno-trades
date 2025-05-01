@@ -10,7 +10,7 @@ const Deals = () => {
     }
   );
 
-  if (data && data.data && data.data.itemsCount < 0) {
+  if (data && data.data && data.data.itemsCount === 0) {
     return <div> No products found </div>;
   }
 

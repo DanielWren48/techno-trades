@@ -6,7 +6,8 @@ import {
 } from "@/hooks/store";
 import { Button } from "../ui/button";
 import { Star, X } from "lucide-react";
-import { categoriesValues, priceRanges } from "@/constants/idnex";
+import { priceRanges } from "@/constants/idnex";
+import { useGetCategories } from "@/api/queries/category";
 
 const AppliedFilters = () => {
   //-------------------------------BRANDS-----------------------------------------------------
@@ -17,6 +18,9 @@ const AppliedFilters = () => {
   const { selectedRatings, removeSelectedRating, removeAllRatings } = useRatingFilterStore();
   //-------------------------------CATEGORY-----------------------------------------------------
   const { selectedCategories, removeCategory, removeAllCategories } = useCategoryFilter();;
+
+  const { data } = useGetCategories();
+  const categories = data?.data
 
   function clearAllFilter() {
     selectedBrands.length !== 0 && removeAllBrands();
@@ -49,10 +53,10 @@ const AppliedFilters = () => {
             </span>
           </div>
           }
-          {selectedCategories.length !== categoriesValues.length ? selectedCategories.map((category, idx) => (
+          {selectedCategories.length !== categories?.length ? selectedCategories.map((category, idx) => (
             <div key={`category-${idx}`} className="flex items-center mb-2 mr-1">
               <span className="inline-flex items-center rounded-md capitalize bg-purple-50 px-2 py-1 text-base font-medium text-purple-800 ring-1 ring-inset ring-purple-600/20">
-                {category}
+                {categories?.find(c => c._id === category)?.name}
                 <X
                   className="cursor-pointer ml-1 text-black"
                   onClick={() => removeCategory(category)}

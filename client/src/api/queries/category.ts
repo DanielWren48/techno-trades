@@ -1,6 +1,7 @@
+import { ICategory } from '@/types';
 import { categoryApiEndpoints, BaseResponse, ErrorResponse } from '../client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CreateCategory, ICategory, UpdateCategory } from '../types/category';
+import { CreateCategory,  UpdateCategory } from '../types/category';
 
 enum QUERY_KEYS {
     GET_CATEGORIES = "getCategories",
@@ -24,7 +25,7 @@ export const useGetCategoryById = (id: string) => {
     });
 };
 
-export const useGetCategoyBySlug = (slug: string) => {
+export const useGetCategoryBySlug = (slug: string) => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_CATEGORY_BY_SLUG, slug],
         queryFn: () => categoryApiEndpoints.getCategoryBySlug(slug),

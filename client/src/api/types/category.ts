@@ -1,20 +1,10 @@
-export type ICategory = {
-    _id: string;
-    name: string;
-    slug: string;
-    icon: string;
-    image: string;
-    parent?: ICategory["_id"] | ICategory | null;
-    productCount?: number
-    createdAt: string;
-    updatedAt: string;
-}
+import { ICategory } from "@/types";
 
 export type CreateCategory = {
     name: string;
     icon: string;
     image: string;
-    parent?: ICategory["_id"] | ICategory;
+    parent?: ICategory["_id"] | null;
 }
 
 export type UpdateCategory = {
