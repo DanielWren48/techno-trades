@@ -1,5 +1,5 @@
 import { JSX } from 'react';
-import { Cart, CkeckoutSuccess, Deals, Explore, Home, NotFound, PopularBrands, ProductDetails, Checkout } from '@/_root/pages';
+import { Cart, CkeckoutSuccess, Deals, Explore, Home, NotFound, PopularBrands, ProductDetails, Checkout, Category } from '@/_root/pages';
 import { ProtectedRouteProps } from '@/components/root/ProtectedRoute';
 import { ACCOUNT_TYPE } from '@/types';
 
@@ -15,6 +15,14 @@ const publicRoutes: PublicRoute[] = [
   {
     path: '/',
     outlet: <Home />,
+  },
+  {
+    path: '/category/:parentSlug',
+    outlet: <Category />,
+  },
+  {
+    path: '/category/:parentSlug/:childSlug',
+    outlet: <Category />,
   },
   {
     path: '/explore',
