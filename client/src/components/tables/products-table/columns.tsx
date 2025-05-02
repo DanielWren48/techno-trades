@@ -1,3 +1,4 @@
+import React from "react"
 import { useRef } from "react"
 import { toast } from "sonner"
 import { X } from "lucide-react"
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { ProductType } from "@/lib/validation"
 import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
+import BulkActionsDropdown from "./data-table-bulk-actions"
 import { DataTableRowActions } from "./data-table-row-actions"
 import { TableCellViewer } from "./components/TableCellViewer"
 import { DataTableColumnHeader } from "../shared/data-table-column-header"
@@ -193,6 +195,33 @@ export const columns: ColumnDef<ProductType>[] = [
   },
   {
     id: "actions",
+    header: ({ table }) => {
+      const selectedRows = React.useMemo(() => {
+        return table.getFilteredSelectedRowModel().rows;
+      }, [table.getFilteredSelectedRowModel().rows]);
+
+      const handleBulkDelete = async () => {
+        if (selectedRows.length === 0) return;
+
+        try {
+          const productIds = selectedRows.flatMap(row => row.original._id);
+
+          console.log(productIds)
+          table.resetRowSelection();
+        } catch (error) {
+          toast.error("An error occurred while deleting products");
+          console.error("Bulk delete error:", error);
+        }
+      };
+
+      return (
+        <BulkActionsDropdown
+          selectedRows={selectedRows}
+          onArchiveSelected={handleBulkDelete}
+          onClearSelection={() => table.resetRowSelection()}
+        />
+      )
+    },
     cell: ({ row }) => <DataTableRowActions row={row} />
   },
 ]
