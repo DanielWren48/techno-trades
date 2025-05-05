@@ -23,7 +23,7 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
   const { user } = useUserContext();
   const { mutateAsync: createProduct, isPending: isLoadingCreate } = useCreateNewProduct();
   const { productData, resetStore } = useProductStore();
-  const { data } = useGetCategoryById(productData?.category || "")
+  const { data } = useGetCategoryById(productData?.sub_category || productData?.category || "")
 
   if (!productData) {
     return (
@@ -37,14 +37,14 @@ export default function ProductOverview({ handleTabChange }: ProductOverviewProp
     );
   }
 
-  const { name, model, brand, description, price, stock, discountedPrice, isDiscounted, image, specifications } = productData;
+  const { name, model, brand, category, sub_category, description, price, stock, discountedPrice, isDiscounted, image, specifications } = productData;
 
   async function handleSubmit() {
     if (!productData) {
       return navigate(-1)
     }
 
-    const response = await createProduct({ ...productData, userId: user._id });
+    const response = await createProduct({ ...productData, category: sub_category || category, userId: user._id });
 
     if (response && response.status === "success") {
       toast.success(response.message, {
