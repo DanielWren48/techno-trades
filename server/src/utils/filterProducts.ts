@@ -1,5 +1,6 @@
 import { PipelineStage, Types } from "mongoose";
 import { Product } from "../models/products";
+import { Category } from "../models/category";
 
 interface ProductFilterBody {
     hideOutOfStock?: boolean;
@@ -89,10 +90,28 @@ export const getFilteredProducts = async (filters: ProductFilterBody | undefined
             }
         } as PipelineStage.AddFields;
 
-        // Convert category string IDs to ObjectIds if categories filter is present
+        // Recursive function to get all nested subcategory IDs
+        const getAllSubcategoryIds = async (parentIds: Types.ObjectId[]): Promise<Types.ObjectId[]> => {
+            const children = await Category.find({ parent: { $in: parentIds } }).select('_id');
+            if (children.length === 0) return [];
+
+            const childIds = children.map(c => c._id);
+            const nested = await getAllSubcategoryIds(childIds); // recurse
+            return [...childIds, ...nested];
+        };
+
         let categoryIds: Types.ObjectId[] = [];
+
         if (filters?.categories && filters.categories.length > 0) {
-            categoryIds = filters.categories.map(id => new Types.ObjectId(id));
+            const inputIds = filters.categories.map(id => new Types.ObjectId(id));
+
+            // Include the provided IDs (parents or subs)
+            categoryIds = [...inputIds];
+
+            // Get all subcategory IDs under the provided IDs
+            const subcategoryIds = await getAllSubcategoryIds(inputIds);
+
+            categoryIds.push(...subcategoryIds);
         }
 
         // Then apply the filters
@@ -229,7 +248,7 @@ export const getFilteredProducts = async (filters: ProductFilterBody | undefined
 
                 'category.createdAt': 0,
                 'category.updatedAt': 0,
-                'category.parent': 0,
+                // 'category.parent': 0,
                 'category.__v': 0,
             }
         } as PipelineStage.Project;
