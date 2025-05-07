@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, formatPrice, isProductAddedWithinNDays, ratingStyle } from "@/lib/utils";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
+import RecommendedProducts from "../components/RecommendedProducts";
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
@@ -242,7 +243,8 @@ export default function ProductDetailPage() {
           </TabsContent>
         </Tabs>
       </div>
-      <SimilarProducts id={product._id} category={product.category._id} />
+      <SimilarProducts id={product._id} category={product.category.parent?.toString() || product.category._id} />
+      <RecommendedProducts productId={product._id} brand={product.brand} />
     </Shell >
   );
 };

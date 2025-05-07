@@ -39,7 +39,7 @@ export default function DashboardAccount() {
 
   const clearFormProgress = async () => {
     if (window.confirm("Are you sure you want to clear all progress?")) {
-      if (productData && productData.image.length > 0) {
+      if (productData && productData.image && productData.image.length > 0) {
         const fileKeys = productData.image.flatMap(i => i.key)
 
         toast.promise(mediaApiEndpoints.deleteFiles(fileKeys),

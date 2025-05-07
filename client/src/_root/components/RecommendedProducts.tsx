@@ -1,36 +1,40 @@
-import { isEmpty } from "lodash";
+import { isEmpty, indexOf, find } from "lodash";
 import { Product, ICategory } from "@/types";
 import { Link } from "react-router-dom";
 import "@smastrom/react-rating/style.css";
-import { useGetSimimarProducts } from "@/api/queries/product";
+import { useFilterProducts } from "@/api/queries/product";
 
-export default function SimilarProducts({ id, category }: { id: Product["_id"], category: ICategory["_id"] }) {
-    const { data, isLoading } = useGetSimimarProducts(
-        {
-            params: { limit: 3 },
-            filters: { categories: [category] },
-            currentProductId: id
-        }
-    )
-    const similarProducts = data?.data.items;
+interface RecommendedProductsType {
+    productId: Product["_id"]
+    brand: Product["brand"]
+}
+
+export default function RecommendedProducts({ productId, brand }: RecommendedProductsType) {
+    const { data, isLoading } = useFilterProducts({
+        filters: { brands: [brand] }
+    })
+
+    const products = data?.data?.items?.splice(data?.data?.items.findIndex(function (i) {
+        return i._id === productId;
+    }), 1);
 
     if (isLoading) {
         return <div>Loading...</div>
     }
 
-    if ((isEmpty(similarProducts) || !similarProducts)) {
+    if ((isEmpty(products) || !products)) {
         return null;
     }
 
     return (
         <section>
             <div className="flex flex-row justify-between items-center my-4 font-jost">
-                <h1 className="text-dark-3 dark:text-white/80 text-3xl">You might also like</h1>
+                <h1 className="text-dark-3 dark:text-white/80 text-3xl">Also from {brand}</h1>
             </div>
             <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8 bg-[#F3F3F3] dark:bg-dark-4 rounded-xl">
                 <div className="mx-auto max-w-2xl py-16 sm:py-24 lg:max-w-none lg:py-12 font-jost">
                     <div className="mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0">
-                        {similarProducts.map((product) => (
+                        {products.map((product) => (
                             <Link to={`/products/${product.slug}`} key={product._id}>
                                 <div className="group relative">
                                     <div className="transform group-hover:-translate-y-3 transition-transform duration-500 ease-out">

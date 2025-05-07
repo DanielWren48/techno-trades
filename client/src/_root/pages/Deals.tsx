@@ -34,6 +34,7 @@ export default function Deals() {
   const [markdown, setMarkdown] = React.useState('');
 
   React.useEffect(() => {
+    setPriceRange(0, 9999)
     fetch('/gifts-for-every-occasion.md')
       .then((res) => res.text())
       .then((text) => setMarkdown(text));

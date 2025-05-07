@@ -1,17 +1,19 @@
 import { cn, hexToRGBA } from '@/lib/utils';
-import { isEmpty, take } from 'lodash';
+import { isEmpty, last, take } from 'lodash';
 import { Fragment, useMemo } from 'react';
 import { ICategory, Product } from '@/types';
 import { Link, useParams } from 'react-router-dom';
 import { Shell } from '@/components/dashboard/shell';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useFilterProducts } from '@/api/queries/product';
 import { useGetCategoryBySlug } from '@/api/queries/category';
 import { MarkdownDisplay } from '@/_dashboard/components';
+import { useBrandFilter, useCategoryFilter } from '@/hooks/store';
 
 export default function CategoryPage() {
-    const { parentSlug, childSlug } = useParams();
+    const { parentSlug } = useParams();
+    const { toggleCategory, selectedCategories } = useCategoryFilter();
 
     const { data, isLoading } = useGetCategoryBySlug(parentSlug || '');
     const category = data?.data;
@@ -45,25 +47,26 @@ export default function CategoryPage() {
             </section>
 
             <section className='w-full'>
-                <h2 className="text-xl font-semibold mb-4 text-center">Shop cameras & camcorders</h2>
+                <h2 className="text-xl font-semibold mb-4 text-center">{category.display.title}</h2>
                 {category.subcategories && category.subcategories.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {category.subcategories.map(({ _id, name, slug, image }) => (
+                        {category.subcategories.map(({ _id, name, image }) => (
                             <div key={_id} className="p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors" >
-                                <Link
-                                    to={`/category/${category.slug}/${slug}`}
-                                    className={"flex flex-col items-center justify-evenly p-2 h-32 rounded-md text-center text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"}
+                                <Button
+                                    variant={"link"}
+                                    onClick={() => toggleCategory(_id)}
+                                    className={"flex flex-col w-full items-center justify-center p-2 h-32 rounded-md text-center text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"}
                                 >
                                     <img src={image} alt={name} className="h-24 w-24 object-contain" />
                                     <h5>{name}</h5>
-                                </Link>
+                                </Button>
                             </div>
                         ))}
                     </div>
                 )}
             </section>
 
-            <TopDealsOfCategory category={category} />
+            <TopDealsOfCategory categoryId={last(selectedCategories) || category._id} />
 
             <section
                 className="relative flex items-center rounded-3xl overflow-hidden w-full font-jost p-4 border-2"
@@ -75,9 +78,11 @@ export default function CategoryPage() {
     );
 }
 
-function TopDealsOfCategory({ category }: { category: ICategory }) {
+function TopDealsOfCategory({ categoryId }: { categoryId: ICategory["_id"] }) {
+    const { toggleBrand, removeAllBrands } = useBrandFilter();
+
     const { data: products, isLoading: loadingProducts } = useFilterProducts({
-        filters: { categories: [category._id], }
+        filters: { categories: [categoryId], }
     })
 
     const productsData = products?.data?.items;
@@ -90,16 +95,11 @@ function TopDealsOfCategory({ category }: { category: ICategory }) {
         return null;
     }
 
-    const brands = useMemo(() => {
-        if (loadingProducts) return
-        return Array.from(new Set(productsData?.map((product: Product) => product.brand)));
-    }, [loadingProducts]);
-
     return (
         <Fragment>
             <section className='w-full'>
                 <div className="flex flex-row justify-between items-center my-4 font-jost">
-                    <h1 className="text-dark-3 dark:text-white/80 text-3xl">Top <span className='capitalize'>{category.name}{" "}</span>Deals</h1>
+                    <h1 className="text-dark-3 dark:text-white/80 text-3xl">Top Deals</h1>
                 </div>
                 <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8 bg-[#F3F3F3] dark:bg-dark-4 rounded-xl">
                     <div className="mx-auto max-w-2xl py-16 sm:py-24 lg:max-w-none lg:py-12 font-jost">
@@ -129,11 +129,12 @@ function TopDealsOfCategory({ category }: { category: ICategory }) {
             </section>
 
             <section className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7 mt-5">
-                {brands?.map((brand, idx) => (
+                {Array.from(new Set(productsData?.map((product: Product) => product.brand))).map((brand, idx) => (
                     <Card key={idx}>
                         <CardContent className='flex flex-col items-center justify-center text-center py-10'>
                             <Link
                                 key={brand}
+                                onClick={() => { removeAllBrands(); toggleBrand(brand) }}
                                 className={cn(
                                     buttonVariants,
                                     "text-lg hover:underline"
