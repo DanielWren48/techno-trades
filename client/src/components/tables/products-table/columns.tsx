@@ -2,7 +2,7 @@ import React from "react"
 import { useRef } from "react"
 import { toast } from "sonner"
 import { X } from "lucide-react"
-import { ProductImage } from "@/types"
+import { ICategory, ProductImage } from "@/types"
 import { Icons } from "@/components/shared"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -36,15 +36,18 @@ export const columns: ColumnDef<ProductType>[] = [
     enableHiding: false,
   },
   {
+    accessorFn: (row) => {
+      //@ts-expect-error
+      return row.category?.parent?.slug || '';
+    },
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => {
-      return (
-        <div className="flex w-[130px] items-center pl-1 text-lg">
-          <span>{row.original.category.name}</span>
-        </div>
-      )
-    },
+    cell: ({ row }) => (
+      <div className="flex w-fit items-center pl-1 text-lg">
+        {/* @ts-expect-error */}
+        <span>{row.original.category.parent.name}</span>
+      </div>
+    ),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
@@ -57,14 +60,6 @@ export const columns: ColumnDef<ProductType>[] = [
     cell: ({ row }) => {
       return <TableCellViewer product={row.original} />
     },
-  },
-  {
-    accessorKey: "brand",
-    header: "Brand",
-  },
-  {
-    accessorKey: "model",
-    header: "Model",
   },
   {
     accessorKey: "discountPercentage",

@@ -2,18 +2,20 @@ import { Input } from "@/components/ui/input"
 import { Table } from "@tanstack/react-table"
 import { DataTableViewOptions } from "../shared/data-table-view-options"
 import { DataTableFacetedFilter } from "../shared/data-table-faceted-filter"
-import { categories } from "./filters"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/shared";
+import { useGetCategories } from "@/api/queries/category"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
 }
 
-export function DataTableToolbar<TData>({
-  table,
-}: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
+
+  const { data } = useGetCategories();
+  const categories = data?.data
+  const options = categories?.map(category => ({ value: category.slug, label: category.name })) || [];
 
   return (
     <div className="flex items-center justify-between">
@@ -30,7 +32,7 @@ export function DataTableToolbar<TData>({
           <DataTableFacetedFilter
             column={table.getColumn("category")}
             title="Category"
-            options={categories}
+            options={options}
           />
         )}
         {isFiltered && (
@@ -43,7 +45,6 @@ export function DataTableToolbar<TData>({
             <Icons.cancel className="ml-2 h-4 w-4" />
           </Button>
         )}
-
       </div>
       <DataTableViewOptions table={table} />
     </div>

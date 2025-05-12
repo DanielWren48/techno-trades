@@ -1,65 +1,47 @@
-"use client"
 import { z } from "zod";
 import { toast } from "sonner";
-import '@mdxeditor/editor/style.css';
-import { categories } from "../filters";
-import { useFieldArray, useForm } from "react-hook-form";
+import { ICategory } from "@/types";
+import { Plus, Trash2 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { ProductType } from "@/lib/validation";
+import { Button } from '@/components/ui/button';
 import { useIsMobile } from "@/hooks/use-mobile"
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useFieldArray, useForm } from "react-hook-form";
 import { useUpdateProduct } from "@/api/queries/product";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import { Plus, Trash2 } from 'lucide-react';
-import { useCallback } from "react";
+import SkeletonWrapper from "@/components/root/SkeletonWrapper";
 import CategoryPicker from "@/_dashboard/components/category/category-picker";
-import { Label } from "@/components/ui/label"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-
-const specificationSchema = z.object({
-    key: z.string().min(1, { message: 'Key is required' }),
-    value: z.string().min(1, { message: 'Value is required' }),
-});
+import SubCategoryPicker from "@/_dashboard/components/category/sub-category-picker";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const updateProductSchema = z.object({
     name: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     brand: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     model: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
-    category: z.object({
-        _id: z.string(),
-        name: z.string(),
-        slug: z.string(),
-        icon: z.string(),
-        image: z.string().nullable(),
-        createdAt: z.string(),
-        updatedAt: z.string(),
-    }),
+    category: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
+    sub_category: z.string().min(1, { message: "This field is required" }).max(1000, { message: "Maximum 1000 characters." }),
     price: z.coerce.number().min(0, { message: "Price must be a non-negative number" }),
     stock: z.coerce.number().min(0, { message: "Stock must be a non-negative number" }),
-    specifications: z.array(specificationSchema).nullable(),
+    specifications: z.array(z.object({
+        key: z.string().min(1, { message: 'Key is required' }),
+        value: z.string().min(1, { message: 'Value is required' }),
+    })).nullable(),
 });
-
-type UpdateProductSchemaType = z.infer<typeof updateProductSchema>
 
 export function ProductDetailsUpdateForm({ product }: { product: ProductType; }) {
     const isMobile = useIsMobile()
-
+    const parentCategory = product.category.parent as ICategory
     const { mutateAsync: updateProduct } = useUpdateProduct();
 
-    const form = useForm<UpdateProductSchemaType>({
+    const form = useForm<z.infer<typeof updateProductSchema>>({
         resolver: zodResolver(updateProductSchema),
         defaultValues: {
             name: product.name,
             model: product.model,
             brand: product.brand,
-            category: product.category,
+            category: parentCategory._id,
+            sub_category: product.category._id,
             price: product.price,
             stock: product.stock,
             specifications: product.specifications
@@ -71,16 +53,12 @@ export function ProductDetailsUpdateForm({ product }: { product: ProductType; })
         name: "specifications",
     });
 
-    const handleCategoryChange = useCallback((value: string) => {
-        form.setValue("category._id", value);
-    }, [form]);
-
-    const handleSubmit = async (value: UpdateProductSchemaType) => {
-        const { message, status } = await updateProduct({
-            id: product._id!,
+    const handleSubmit = async (value: z.infer<typeof updateProductSchema>) => {
+        const { data, message, status } = await updateProduct({
+            id: product._id,
             ...value,
             description: product.description,
-            category: value.category._id,
+            category: value.sub_category,
         })
         if (status === "success") {
             toast.success(message)
@@ -110,22 +88,20 @@ export function ProductDetailsUpdateForm({ product }: { product: ProductType; })
                 onSubmit={form.handleSubmit(handleSubmit)}
                 className="flex flex-col gap-6 w-full max-w-5xl"
             >
+                <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Name</FormLabel>
+                            <FormControl>
+                                <Input type="text" className="h-12" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-8">
-
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                    <Input type="text" className="h-12" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
                     <FormField
                         control={form.control}
                         name="model"
@@ -139,9 +115,6 @@ export function ProductDetailsUpdateForm({ product }: { product: ProductType; })
                             </FormItem>
                         )}
                     />
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-8">
                     <FormField
                         control={form.control}
                         name="brand"
@@ -155,14 +128,32 @@ export function ProductDetailsUpdateForm({ product }: { product: ProductType; })
                             </FormItem>
                         )}
                     />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-8">
                     <FormField
                         control={form.control}
                         name="category"
                         render={({ field }) => (
-                            <FormItem className="flex flex-col mt-2.5">
+                            <FormItem className="flex flex-col mt-1.5">
                                 <FormLabel className="shad-form_label">Category</FormLabel>
                                 <FormControl>
-                                    <CategoryPicker defValue={field.value._id} onChange={handleCategoryChange} />
+                                    <CategoryPicker defValue={field.value} onChange={field.onChange} />
+                                </FormControl>
+                                <FormMessage className="shad-form_message" />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="sub_category"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col mt-1.5">
+                                <FormLabel className="shad-form_label">Subcategory</FormLabel>
+                                <FormControl>
+                                    <SkeletonWrapper isLoading={!form.watch("category")}>
+                                        <SubCategoryPicker categoryId={form.watch("category")} subCategoryId={field.value} onChange={field.onChange} />
+                                    </SkeletonWrapper>
                                 </FormControl>
                                 <FormMessage className="shad-form_message" />
                             </FormItem>
